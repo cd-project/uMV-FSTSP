@@ -28,6 +28,22 @@ std::vector<std::pair<std::vector<int>, std::vector<int>>> generateSetsAndComple
 
     return result;
 }
+//std::vector<std::unordered_set<int>> generateAllSubsets(const std::vector<int>& originalSet) {
+//    int n = originalSet.size();
+//    int totalSubsets = 1 << n;
+//
+//    std::vector<std::unordered_set<int>> allSubsets;
+//
+//    for (int i = 0; i < totalSubsets; ++i) {
+//        std::unordered_set<int> subset;
+//        for (int j = 0; j < n; ++j) {
+//            if (i & (1 << j)) subset.insert(originalSet[j]);
+//        }
+//        allSubsets.push_back(subset);
+//    }
+//
+//    return allSubsets;
+//}
 void Solver::OriginalSolver(int n_thread) {
 //    try {
         auto tau = instance->tau;
@@ -130,7 +146,7 @@ void Solver::OriginalSolver(int n_thread) {
                     model.addConstr(theta[h] == 0);
                 }
             }
-            if (h == s){
+            if (h == s || h == t){
                 model.addConstr(theta[h] == 0);
             }
         }
@@ -199,8 +215,8 @@ void Solver::OriginalSolver(int n_thread) {
         for (int i:c_s) {
             rhs_1 += y[i][t];
         }
-        model.addConstr(lhs_1, GRB_EQUAL, 1);
-        model.addConstr(rhs_1, GRB_EQUAL, 1);
+        model.addConstr(lhs_1, GRB_EQUAL, 1, "C1_LHS");
+        model.addConstr(rhs_1, GRB_EQUAL, 1, "C1_RHS");
 
         // Constraint 2
         for (int i:C) {
@@ -212,9 +228,9 @@ void Solver::OriginalSolver(int n_thread) {
                 rhs_2 += y[j][i];
 
             }
-            model.addConstr(lhs_2, GRB_EQUAL, rhs_2);
-            model.addConstr(lhs_2, GRB_LESS_EQUAL, 1);
-            model.addConstr(rhs_2, GRB_LESS_EQUAL, 1);
+            model.addConstr(lhs_2, GRB_EQUAL, rhs_2, "C2_EQUAL");
+            model.addConstr(lhs_2, GRB_LESS_EQUAL, 1, "C2_LHS_LEQ_1");
+            model.addConstr(rhs_2, GRB_LESS_EQUAL, 1, "C2_RHS_LEQ_1");
         }
 //        for(int i:c_prime){
 //            GRBLinExpr sum;
@@ -223,17 +239,19 @@ void Solver::OriginalSolver(int n_thread) {
 //            }
 //        }
         // Constraint 3
-        auto setAndComps = generateSetsAndComplements(V);
+        auto setAndComps = generateSetsAndComplements(C);
         for (auto &set:setAndComps){
             auto S = set.first;
             if (S.size() < 2) {
                 continue;
             }
-//            if (S.size() == 2 && S[0] == s && S[1] == t) {
-//                continue;
-//            }
+            if (S.size() == 2 && S[0] == s && S[1] == t) {
+                continue;
+            }
             GRBLinExpr sum1, sum2;
+            std::string cname = "C3";
             for (auto i:S) {
+                cname += "_" + std::to_string(i);
                 if (i != t) {
                     for (auto j: S) {
                         if (j != s) {
@@ -244,32 +262,36 @@ void Solver::OriginalSolver(int n_thread) {
             }
 
             for (auto h:S) {
-                if (h != t){
+                if (h != t && h != s){
                     sum2 += 1 - theta[h];
                 }
             }
-            model.addConstr(sum1, GRB_LESS_EQUAL, sum2);
+            model.addConstr(sum1, GRB_LESS_EQUAL, sum2-1, cname);
         }
         // Constraint 4
         for (int h:C) {
             GRBLinExpr lhs_4;
+            std::string cname = "C4_h=" + std::to_string(h);
             for (int j:c_t) {
                 lhs_4 += gamma[h][s][j];
             }
-            model.addConstr(lhs_4, GRB_EQUAL, omega[h][s]);
+            model.addConstr(lhs_4, GRB_EQUAL, omega[h][s], cname);
         }
 
         // Constraint 5
         for (int h:C) {
             GRBLinExpr lhs_5;
+            std::string cname = "C5_h=" + std::to_string(h);
+
             for (int i:c_s) {
                 lhs_5 += gamma[h][i][t];
             }
-            model.addConstr(lhs_5, GRB_EQUAL, delta[h][t]);
+            model.addConstr(lhs_5, GRB_EQUAL, delta[h][t], cname);
         }
         // Constraint 6
         for (int i:C) {
             for (int h:C) {
+                std::string cname = "C6_i=" + std::to_string(i) + "_h=" + std::to_string(h);
                 GRBLinExpr sum1, sum2;
                 for (int j:c_t){
                     sum1 += gamma[h][i][j];
@@ -278,47 +300,53 @@ void Solver::OriginalSolver(int n_thread) {
                 for (int j:c_s){
                     sum2 += gamma[h][j][i];
                 }
-                model.addConstr(sum1-sum2, GRB_EQUAL, omega[h][i] - delta[h][i]);
+                model.addConstr(sum1-sum2, GRB_EQUAL, omega[h][i] - delta[h][i], cname);
             }
         }
         // Constraint 7
         for (int j:c_t) {
-            model.addConstr(y[s][j] + x[s][j], GRB_LESS_EQUAL, 1);
+            std::string cname = "C7_s_j=" + std::to_string(j);
+            model.addConstr(y[s][j] + x[s][j], GRB_LESS_EQUAL, 1, cname);
         }
         // Constraint 8
         for (int i:c_s) {
-            model.addConstr(y[i][t] + x[i][t], GRB_LESS_EQUAL, 1);
+            std::string cname = "C8_i=" + std::to_string(i) + "_t";
+            model.addConstr(y[i][t] + x[i][t], GRB_LESS_EQUAL, 1, cname);
         }
         // Constraint 9
         for (int i:C) {
             for (int j:C) {
-                model.addConstr(y[i][j] + x[i][j] + x[j][i], GRB_LESS_EQUAL, 1);
+                std::string cname = "C9_i=" + std::to_string(i) + "_j=" + std::to_string(j);
+                model.addConstr(y[i][j] + x[i][j] + x[j][i], GRB_LESS_EQUAL, 1, cname);
             }
         }
 
         // Constraint 10
         for (int h:C) {
             GRBLinExpr sum;
+            std::string cname = "C10_h=" + std::to_string(h);
             for (int j:c_t) {
                 sum += y[h][j];
             }
-            model.addConstr(sum + theta[h], GRB_EQUAL, 1);
+            model.addConstr(sum + theta[h], GRB_EQUAL, 1, cname);
         }
         //Constraint 11
         for (int i:c_s) {
             for (int j:c_t) {
+                std::string cname = "C11_i=" + std::to_string(i) + "_j=" + std::to_string(j);
                 GRBLinExpr sum;
                 for (int h:c_prime) {
                     sum += gamma[h][i][j];
                 }
-                model.addConstr(sum, GRB_LESS_EQUAL, y[i][j]);
+                model.addConstr(sum, GRB_LESS_EQUAL, y[i][j], cname);
             }
         }
 
 
         // Constraint 12
-        for (int h:c_prime) {
+        for (int h:C) {
             GRBLinExpr sum1, sum2;
+
             for (int i:V) {
                 if (i != h && i != t) {
                     sum1 += omega[h][i];
@@ -329,27 +357,30 @@ void Solver::OriginalSolver(int n_thread) {
                     sum2 += delta[h][j];
                 }
             }
-            model.addConstr(sum1, GRB_EQUAL, theta[h]);
-            model.addConstr(sum2, GRB_EQUAL, theta[h]);
-            model.addConstr(sum1 == sum2);
+            model.addConstr(sum1, GRB_EQUAL, theta[h], "C12_RHS_EQUAL_h=" + std::to_string(h));
+            model.addConstr(sum2, GRB_EQUAL, theta[h], "C12_LHS_EQUAL_h=" + std::to_string(h));
+            model.addConstr(sum1 == sum2, "C12_EQUAL_h=" + std::to_string(h));
         }
         // Constraint 13
         for (int i:c_s) {
             for (int j:c_t) {
-                model.addConstr(x[i][j],  GRB_LESS_EQUAL, theta[i] + theta[j]);
+                std::string cname = "C13_i=" + std::to_string(i) + "_j=" + std::to_string(j);
+                model.addConstr(x[i][j],  GRB_LESS_EQUAL, theta[i] + theta[j], cname);
             }
         }
 //        // Constraint 14
         for (int i:c_s) {
             for (int j:c_t) {
                 if (i != s && j != t) {
-                    model.addConstr(x[i][j], GRB_LESS_EQUAL, omega[j][i] + delta[i][j]);
+                    std::string cname = "C14_i=" + std::to_string(i) + "_j=" + std::to_string(j);
+                    model.addConstr(x[i][j], GRB_LESS_EQUAL, omega[j][i] + delta[i][j], cname);
                 }
             }
         }
         // Constraint 15
         for (int i:c_s) {
             GRBLinExpr sum1, sum2;
+            std::string cname = "C15_i=" + std::to_string(i);
             for (int j:c_t){
                 sum1 += x[i][j];
             }
@@ -357,9 +388,9 @@ void Solver::OriginalSolver(int n_thread) {
                 sum2 += omega[h][i];
             }
             sum2 += theta[i];
-            model.addConstr(sum1, GRB_EQUAL, sum2);
-            model.addConstr(sum1, GRB_LESS_EQUAL, 1);
-//            model.addConstr(sum2, GRB_LESS_EQUAL, 1);
+            model.addConstr(sum1, GRB_EQUAL, sum2, "C15_LHS_RHS_EQUAL_i=" + std::to_string(i));
+            model.addConstr(sum1, GRB_LESS_EQUAL, 1, "C15_LHS_LEQ_1_i="+ std::to_string(i));
+            model.addConstr(sum2, GRB_LESS_EQUAL, 1, "C15_RHS_LEQ_1_i="+ std::to_string(i));
         }
         // Constraint 16
         for (int j:c_t) {
@@ -372,25 +403,29 @@ void Solver::OriginalSolver(int n_thread) {
                 sum2 += delta[h][j];
             }
             sum2 += theta[j];
-            model.addConstr(sum1, GRB_EQUAL, sum2);
-            model.addConstr(sum1, GRB_LESS_EQUAL, 1);
-            model.addConstr(sum2, GRB_LESS_EQUAL, 1);
+            model.addConstr(sum1, GRB_EQUAL, sum2, "C16_LHS_RHS_EQUAL_j=" + std::to_string(j));
+            model.addConstr(sum1, GRB_LESS_EQUAL, 1, "C16_LHS_LEQ_1_i="+ std::to_string(j));
+            model.addConstr(sum2, GRB_LESS_EQUAL, 1, "C16_RHS_LEQ_1_i="+ std::to_string(j));
         }
 //        // Constraint 17
         for (int h:c_prime) {
             GRBLinExpr sum;
+            std::string cname = "C17_h=" + std::to_string(h);
             for (int i:c_s) {
                 for (int j:c_t){
                     sum += tau[i][j] * gamma[h][i][j];;
                 }
             }
-            model.addConstr(sum, GRB_LESS_EQUAL, (dtl - sr)*theta[h]);
+            model.addConstr(sum, GRB_LESS_EQUAL, (dtl - sr)*theta[h], cname);
         }
         // Constraint 18
         for(int h:c_prime) {
             GRBLinExpr sum1;
             GRBLinExpr sum2;
             GRBLinExpr sum3;
+            std::string c18_name = "C18_h=" + std::to_string(h);
+            std::string c19_name = "C19_h=" + std::to_string(h);
+
             for (int i:c_s){
                 sum1 += d[i][h] * omega[h][i];
             }
@@ -403,8 +438,8 @@ void Solver::OriginalSolver(int n_thread) {
                     sum3 += tau[i][j] * gamma[h][i][j];
                 }
             }
-            model.addConstr(sum1 + sum2, GRB_LESS_EQUAL, (dtl - sr)*theta[h]);
-            model.addConstr(sum1 + sum2 - sum3, GRB_LESS_EQUAL, sigma[h]);
+            model.addConstr(sum1 + sum2, GRB_LESS_EQUAL, (dtl - sr)*theta[h], c18_name);
+            model.addConstr(sum1 + sum2 - sum3, GRB_LESS_EQUAL, sigma[h], c19_name);
         }
 //        GRBLinExpr sum_theta;
 //        for (int h:c_prime) {
