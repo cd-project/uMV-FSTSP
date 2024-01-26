@@ -1,5 +1,5 @@
 #!/bin/bash
-folder_path="/home/cuong/CLionProjects/umv-fstsp/test"
+folder_path="/home/cuong/CLionProjects/umv-fstsp/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems"
 binary_file="/home/cuong/CLionProjects/umv-fstsp/cmake-build-release/uMV-FSTSP"
 
 # Use find to get a list of all directories in the specified folder
