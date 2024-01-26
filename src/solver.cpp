@@ -414,7 +414,7 @@ void Solver::OriginalSolver(int n_thread) {
     model.setObjective(objective, GRB_MINIMIZE);
         model.set(GRB_IntParam_Threads, n_thread);
     model.update();
-//    model.write("model.lp");
+    model.write("model.lp");
     model.optimize();
     std::cout << "Truck arcs: " << std::endl;
     for (int i:c_s) {
