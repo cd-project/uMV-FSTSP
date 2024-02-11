@@ -1,0 +1,40 @@
+Instance name: /mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123443v2
+
+drone speed: 0.2 miles/minute
+uav non-eligible customer: 4 8 
+Printing number of nodes: 11
+
+Set parameter Threads to value 20
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (linux64 - "Ubuntu 22.04.3 LTS")
+
+CPU model: 13th Gen Intel(R) Core(TM) i5-13500, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 20 logical processors, using up to 20 threads
+
+Optimize a model with 6346 rows, 1825 columns and 197322 nonzeros
+Model fingerprint: 0x4828cf27
+Variable types: 11 continuous, 1814 integer (1814 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+01]
+  Objective range  [1e+00, 3e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 8e+00]
+Found heuristic solution: objective 120.7791851
+Presolve removed 2001 rows and 1305 columns
+Presolve time: 0.29s
+Presolved: 4345 rows, 520 columns, 118255 nonzeros
+Variable types: 6 continuous, 514 integer (514 binary)
+
+Root relaxation: objective 7.214647e+01, 119 iterations, 0.02 seconds (0.04 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0      72.1464732   72.14647  0.00%     -    0s
+
+Explored 1 nodes (119 simplex iterations) in 0.33 seconds (0.61 work units)
+Thread count was 20 (of 20 available processors)
+
+Solution count 2: 72.1465 120.779 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 7.214647322300e+01, best bound 7.214647322300e+01, gap 0.0000%

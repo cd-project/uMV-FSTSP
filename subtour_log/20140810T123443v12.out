@@ -1,0 +1,92 @@
+Instance name: /mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123443v12
+
+drone speed: 0.6 miles/minute
+uav non-eligible customer: 4 8 
+Printing number of nodes: 11
+
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (linux64 - "Ubuntu 22.04.3 LTS")
+
+CPU model: 13th Gen Intel(R) Core(TM) i5-13500, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 20 logical processors, using up to 20 threads
+
+Optimize a model with 44651 rows, 1957 columns and 1837624 nonzeros
+Model fingerprint: 0xe33b2707
+Variable types: 11 continuous, 1946 integer (1814 binary)
+Coefficient statistics:
+  Matrix range     [5e-01, 3e+01]
+  Objective range  [1e+00, 3e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 9e+00]
+Found heuristic solution: objective 189.1021981
+Presolve removed 29363 rows and 1004 columns
+Presolve time: 2.77s
+Presolved: 15288 rows, 953 columns, 461742 nonzeros
+Variable types: 8 continuous, 945 integer (945 binary)
+Found heuristic solution: objective 179.0814782
+Root relaxation presolved: 15166 rows, 953 columns, 460031 nonzeros
+
+
+Root relaxation: objective 6.805087e+01, 2725 iterations, 1.29 seconds (2.73 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   68.05087    0   75  179.08148   68.05087  62.0%     -    4s
+H    0     0                     147.0685113   68.05087  53.7%     -    4s
+H    0     0                     145.0685113   68.05087  53.1%     -    4s
+H    0     0                      69.1950353   68.05087  1.65%     -    4s
+     0     0   68.81994    0  123   69.19504   68.81994  0.54%     -    4s
+
+Cutting planes:
+  Gomory: 2
+  Cover: 2
+
+Explored 1 nodes (3443 simplex iterations) in 5.03 seconds (7.18 work units)
+Thread count was 20 (of 20 available processors)
+
+Solution count 5: 69.195 145.069 147.069 ... 189.102
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 6.919503533548e+01, best bound 6.919503533548e+01, gap 0.0000%
+Truck arcs: 
+0 8 17.0796
+1 5 1.92825
+4 10 10.5327
+5 6 0.968346
+6 7 6.70095
+7 4 7.34864
+8 1 3.32128
+10 11 16.3153
+Theta:
+Theta_2 = 1
+Theta_3 = 1
+Theta_9 = 1
+Drone arcs:
+0 2
+2 8
+3 10
+7 3
+9 11
+10 9
+Gamma:
+gamma_2_0_8= 1
+gamma_3_4_10= 1
+gamma_3_7_4= 1
+gamma_9_10_11= 1
+Sigma:
+Sigma_1 = 0
+Sigma_2 = 0
+Sigma_3 = 0
+Sigma_4 = 0
+Sigma_5 = 0
+Sigma_6 = 0
+Sigma_7 = 0
+Sigma_8 = 0
+Sigma_9 = 0
+Sigma_10 = 0
+Sigma_11 = 0
+middle of 2 sortie are: 
+middle of 3 sortie are: 4 
+middle of 9 sortie are: 
+Objective: 69.195
+Number of sorties: 3

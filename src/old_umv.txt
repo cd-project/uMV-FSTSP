@@ -1,0 +1,517 @@
+//    auto tau = instance->tau;
+//    auto d = instance->tau_prime;
+//    auto dtl = instance->e;
+//    auto sl = 1, sr = 1;
+//    auto n = instance->num_node;
+//    auto s = 0, t = n;
+//    auto c_prime = instance->c_prime;
+//    std::vector<int> c_prime_0;
+//    c_prime_0.push_back(0);
+//    for (int i : c_prime) {
+//        c_prime_0.push_back(i);
+//    }
+//    c_prime_0.push_back(n);
+//    std::cout << "Printing number of nodes: " << n << std::endl;
+//    std::vector<int> C;
+//    std::vector<int> V;
+//    for (int i = 0; i < n+1; i++) {
+//        if (i == 0 || i == n) {
+//            V.push_back(i);
+//        } else {
+//            V.push_back(i);
+//            C.push_back(i);
+//        }
+//    }
+//    std::vector<int> c_s;
+//    std::vector<int> c_t;
+//    for (int i = 0; i < n+1; i++) {
+//        if (i == 0) {
+//            c_s.push_back(i);
+//        } else if (i == n){
+//            c_t.push_back(i);
+//        } else {
+//            c_s.push_back(i);
+//            c_t.push_back(i);
+//        }
+//    }
+//
+//    std::cout << std::endl;
+//    GRBEnv env;
+//    GRBModel model(env);
+//    // y: (i, j) in A, truck route
+//    auto** y = new GRBVar * [n+1];
+//    for (int i:c_s) {
+//        y[i] = reinterpret_cast<GRBVar *>(new GRBVar *[n+1]);
+//        for (int j:V) {
+//            y[i][j] = model.addVar(0, n, 0.0, GRB_INTEGER, "y_" + std::to_string(i) + "_" + std::to_string(j));
+//            if (i == j) {
+//                model.addConstr(y[i][j] == 0);
+//            }
+//        }
+//    }
+//    model.addConstr(y[s][t] == 0);
+//
+//
+//    auto** x = new GRBVar * [n+1];
+//    for (int i:c_s) {
+//        x[i] = reinterpret_cast<GRBVar *>(new GRBVar *[n+1]);
+//        for (int j:V) {
+//            x[i][j] = model.addVar(0, 1, 0.0, GRB_BINARY, "x_" + std::to_string(i) + "_" + std::to_string(j));
+//            if (i == j) {
+//                model.addConstr(x[i][j] == 0);
+//            }
+//        }
+//    }
+//
+//    model.addConstr(x[s][t] == 0);
+//
+//    // gamma_h_ij
+//    auto*** gamma = new GRBVar ** [n+1];
+//    for (int h:C){
+//        gamma[h] = reinterpret_cast<GRBVar **>(new GRBVar **[n+1]);
+//        for (int i:c_s) {
+//            gamma[h][i] = reinterpret_cast<GRBVar *>(new GRBVar *[n+1]);
+//            for (int j:V) {
+//                gamma[h][i][j] = model.addVar(0, 1, 0.0, GRB_BINARY, "gamma_" + std::to_string(h)+"_"+std::to_string(i)+"_"+std::to_string(j));
+//                for (int heavy : instance->heavy) {
+//                    if (h == heavy) {
+//                        model.addConstr(gamma[h][i][j] == 0);
+//                    }
+//                }
+//                if (i == j || h == i || h == j) {
+//                    model.addConstr(gamma[h][i][j] == 0);
+//                }
+//            }
+//        }
+//        model.addConstr(gamma[h][s][t] == 0);
+//    }
+//
+//    std::vector<GRBVar> theta(n+1);
+//    for (int h:V){
+//        theta[h] = model.addVar(0, 1, 0.0, GRB_BINARY, "theta_" + std::to_string(h));
+//        for (auto heavy : instance->heavy) {
+//            if (h == heavy) {
+//                model.addConstr(theta[h] == 0);
+//            }
+//        }
+//        if (h == s || h == t){
+//            model.addConstr(theta[h] == 0);
+//        }
+//    }
+//    auto** omega = new GRBVar * [n+1];
+//    for (int h:C) {
+//        omega[h] = reinterpret_cast<GRBVar *>(new GRBVar *[n+1]);
+//        for(int i:V) {
+//            omega[h][i] = model.addVar(0, 1, 0.0, GRB_BINARY, "omega_" + std::to_string(h) + "_" + std::to_string(i));
+//
+//            for (int heavy : instance->heavy) {
+//                if (h == heavy) {
+//                    model.addConstr(omega[h][i] == 0);
+//                }
+//            }
+//            if (h == i || i == t) {
+//                model.addConstr(omega[h][i] == 0);
+//            }
+//        }
+//    }
+//    auto** delta = new GRBVar * [n+1];
+//    for (int h:C) {
+//        delta[h] = reinterpret_cast<GRBVar *>(new GRBVar *[n+1]);
+//        for(int j:V) {
+//            delta[h][j] = model.addVar(0, 1, 0.0, GRB_BINARY, "delta_" + std::to_string(h) + "_" + std::to_string(j));
+//            for (int heavy : instance->heavy) {
+//                if (h == heavy) {
+//                    model.addConstr(delta[h][j] == 0);
+//                }
+//            }
+//            if (h == j) {
+//                model.addConstr(delta[h][j] == 0);
+//            }
+//        }
+//    }
+//
+//    std::vector<GRBVar> sigma(n+1);
+//    for (int h:c_t){
+//        sigma[h] = model.addVar(0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "sigma_" + std::to_string(h));
+//
+//        for (int heavy : instance->heavy) {
+//            if (h == heavy) {
+//                model.addConstr(sigma[h] == 0);
+//            }
+//        }
+//    }
+//    auto** phi = new GRBVar *[n+1];
+//    for (int h:C) {
+//        phi[h] = reinterpret_cast<GRBVar *>(new GRBVar* [n+1]);
+//        for (int i:c_s) {
+//            phi[h][i] = model.addVar(0, 1, 0.0, GRB_BINARY, "phi_" + std::to_string(h) + "_" + std::to_string(i));
+//            for (int heavy:instance->heavy) {
+//                if (heavy == h) {
+//                    model.addConstr(phi[h][i] == 0);
+//                }
+//            }
+//            if (h == i) {
+//                model.addConstr(phi[h][i] == 0);
+//            }
+//        }
+//    }
+//    GRBLinExpr objective;
+//    for (int i:c_s){
+//        for(int j:c_t){
+//            objective += tau[i][j]*y[i][j];
+//        }
+//    }
+//
+//    for(int h:C){
+//        objective += (sl+sr)*theta[h];
+//        objective -= sl*omega[h][s];
+//    }
+//    for(int h:c_t){
+//        objective += sigma[h];
+//    }
+//
+//    // Truck routing constraints
+//    GRBLinExpr lhs_1, rhs_1;
+//    for (int j:c_t) {
+//        lhs_1 += y[s][j];
+//    }
+//    for (int i:c_s) {
+//        rhs_1 += y[i][t];
+//    }
+//    model.addConstr(lhs_1 >= 1, "C1_LHS");
+//    model.addConstr(rhs_1, GRB_EQUAL, 1, "C1_RHS");
+//
+//    // Constraint 2
+//    for (int i:C) {
+//        GRBLinExpr lhs_2, rhs_2;
+//        for (int j:c_t) {
+//            lhs_2 += y[i][j];
+//        }
+//        for (int j:c_s) {
+//            rhs_2 += y[j][i];
+//
+//        }
+//        model.addConstr(lhs_2, GRB_EQUAL, rhs_2, "C2_EQUAL_i="+ std::to_string(i));
+////        model.addConstr(lhs_2, GRB_LESS_EQUAL, 1, "C2_LHS_LEQ_1_i="+ std::to_string(i));
+////        model.addConstr(rhs_2, GRB_LESS_EQUAL, 1, "C2_RHS_LEQ_1_i="+ std::to_string(i));
+//    }
+//    // Subtour elimination constraints
+//    auto setAndCompss = generateSetsAndComplements(C);
+//    for (auto &pair:setAndCompss) {
+//        auto S = pair.first;
+//        auto S_comp = pair.second;
+//        S_comp.push_back(s);
+//        S_comp.push_back(t);
+//        GRBLinExpr lhs, rhs;
+//        std::string cname = "C3";
+//        for (int i:S) {
+//            cname += "_" + std::to_string(i);
+//            for (int j:S_comp) {
+//                if (j != s && i != t) {
+//                    lhs += y[i][j];
+//                }
+//            }
+//        }
+//        for (int h:S) {
+//            rhs += theta[h];
+//        }
+//        cname += "_(";
+//        for (int j:S_comp) {
+//            cname += "_" + std::to_string(j);
+//        }
+//        cname += ")";
+//        model.addConstr(S.size() * lhs >= S.size() - rhs, cname);
+//    }
+//
+////    auto s_c_V = generateSetsAndComplements(V);
+////    for (auto &pair:s_c_V) {
+////        auto S = pair.first;
+////        if (S.size() < 2) {
+////            continue;
+////        } else {
+////            for (int h: C) {
+////                GRBLinExpr s1, s2;
+////                for (int i:S) {
+////                    if (i != t) {
+////                        s2 += omega[h][i];
+////                    }
+////                    if (i != s) {
+////                        s2 += delta[h][i];
+////                    }
+////                    if (i != s && i != t) {
+////                        s2 += phi[h][i];
+////                    }
+////                    for (int j: S) {
+////                        if (i != j && i != t && j != s) {
+////                            s1 += gamma[h][i][j];
+////                        }
+////                    }
+////                }
+////                model.addConstr(s1 <= s2); // render the model infeasible. what can be the fix?
+////            }
+////        }
+////    }
+////    // phi constraint
+////    for (int h:C) {
+////        for (int i:c_s) {
+////            GRBLinExpr sum;
+////            for (int j:c_t) {
+////                sum += gamma[h][i][j];
+////            }
+////            model.addConstr(sum == phi[h][i] + omega[h][i]);
+////            model.addConstr(phi[h][i] + omega[h][i] <= 1);
+////            model.addConstr(sum <= 1);
+////        }
+////    }
+//
+//    // Constraint 4
+//    for (int h:C) {
+//        GRBLinExpr c4;
+//        for (int j:V) {
+//            c4 += gamma[h][s][j];
+//        }
+//        model.addConstr(c4 == omega[h][s]);
+//    }
+//    // Constraint 5
+//    for (int h:C) {
+//        GRBLinExpr c5;
+//        for(int i:c_s) {
+//            c5 += gamma[h][i][t];
+//        }
+//        model.addConstr(c5 == delta[h][t]);
+//    }
+//    // Constraint 6
+//    for (int i:c_s) {
+//        for (int h:C) {
+//            GRBLinExpr s1, s2;
+//            for (int j:V) {
+//                s1 += gamma[h][i][j];
+//            }
+//            for (int j:c_s) {
+//                s2 += gamma[h][j][i];
+//            }
+//            model.addConstr(s1 - s2 == omega[h][i] - delta[h][i]);
+//        }
+//    }
+//
+//    // Constraint 8
+//    for (int i:c_s) {
+//        model.addConstr(y[i][t] + x[i][t] <= 1);
+//    }
+//    // Constraint 9
+//    for (int i:C) {
+//        for (int j:C) {
+//            model.addConstr(x[i][j] + x[j][i] <= 1);
+//        }
+//    }
+//    // Constraint 10
+//    for (int h:C) {
+//        GRBLinExpr sum;
+//        for (int j:V) {
+//            sum += y[h][j];
+//        }
+//        model.addConstr(sum + theta[h] >= 1);
+//    }
+//
+//    // Constraint 11
+//    for (int i:c_s) {
+//        for (int j:V) {
+//            GRBLinExpr sum;
+//            for (int h:C) {
+//                sum += gamma[h][i][j];
+//            }
+//            model.addConstr(sum <= y[i][j]);
+//        }
+//    }
+//
+//    // Constraint 12
+//    for (int h:C) {
+//        GRBLinExpr sum1, sum2;
+//        for (int i:V) {
+//            if (i != h && i != t) {
+//                sum1 += omega[h][i];
+//            }
+//        }
+//        for (int j:V) {
+//            if (j != h) {
+//                sum2 += delta[h][j];
+//            }
+//        }
+//        model.addConstr(sum1 == theta[h], "C12_RHS_EQUAL_h=" + std::to_string(h));
+//        model.addConstr(sum2 == theta[h], "C12_LHS_EQUAL_h=" + std::to_string(h));
+//        model.addConstr(sum1 == sum2, "C12_EQUAL_h=" + std::to_string(h));
+//    }
+//
+//    // Constraint 13
+//    for (int i:c_s) {
+//        for (int j:V) {
+//            std::string cname = "C13_i=" + std::to_string(i) + "_j=" + std::to_string(j);
+//            model.addConstr(x[i][j],  GRB_LESS_EQUAL, theta[i] + theta[j], cname);
+//        }
+//    }
+//
+//    // Constraint 14
+//    for (int i:c_s) {
+//        for (int j:V) {
+//            GRBLinExpr sum;
+//            if (i != s && i != t) {
+//                sum += delta[i][j];
+//            }
+//            if (j != t && j!= s) {
+//                sum += omega[j][i];
+//            }
+//            std::string cname = "C14_i=" + std::to_string(i) + "_j=" + std::to_string(j);
+//            if (i != t) {
+//                model.addConstr(x[i][j], GRB_LESS_EQUAL, sum, cname);
+//            }
+//        }
+//    }
+//    // Constraint 15
+//    for (int i:c_s) {
+//        GRBLinExpr s1, s2;
+//        for (int j:c_t) {
+//            s1 += x[i][j];
+//        }
+//        for (int h:c_prime) {
+//            if (h != i) {
+//                s2 += omega[h][i];
+//            }
+//        }
+//        s2 += theta[i];
+//        model.addConstr(s1 == s2);
+//    }
+//
+//    // Constraint 16
+//    for (int j:c_t) {
+//        GRBLinExpr s1, s2;
+//        for (int i:c_s) {
+//            s1 += x[i][j];
+//        }
+//        for (int h:c_prime) {
+//            if (h != j) {
+//                s2 += delta[h][j];
+//            }
+//        }
+//        s2 += theta[j];
+//        model.addConstr(s1 == s2);
+//        model.addConstr(s1 <= 1);
+//    }
+////    for (int j:c_t) {
+////        GRBLinExpr sum1, sum2;
+////        for (int i:c_s){
+////            sum1 += x[i][j];
+////        }
+////
+////        for (int h:c_prime) {
+////            sum2 += delta[h][j];
+////        }
+////        sum2 += theta[j];
+////        model.addConstr(sum1, GRB_EQUAL, sum2, "C16_LHS_RHS_EQUAL_j=" + std::to_string(j));
+////        model.addConstr(sum1, GRB_LESS_EQUAL, 1, "C16_LHS_LEQ_1_i="+ std::to_string(j));
+////        model.addConstr(sum2, GRB_LESS_EQUAL, 1, "C16_RHS_LEQ_1_i="+ std::to_string(j));
+////    }
+//    // Constraint 17
+//    for (int h:c_prime) {
+//        GRBLinExpr sum;
+//        std::string cname = "C17_h=" + std::to_string(h);
+//        for (int i:c_s) {
+//            for (int j:c_t){
+//                sum += tau[i][j] * gamma[h][i][j];
+//            }
+//        }
+//        model.addConstr(sum, GRB_LESS_EQUAL, (dtl - sr)*theta[h], cname);
+//    }
+//    // Constraint 18
+//    for(int h:c_prime) {
+//        GRBLinExpr sum1;
+//        GRBLinExpr sum2;
+//        GRBLinExpr sum3;
+//        std::string c18_name = "C18_h=" + std::to_string(h);
+//        std::string c19_name = "C19_h=" + std::to_string(h);
+//
+//        for (int i:c_s){
+//            sum1 += d[i][h] * omega[h][i];
+//        }
+//        for (int j:c_t){
+//            sum2 += d[h][j] * delta[h][j];
+//        }
+//
+//        for (int i:c_s) {
+//            for (int j:c_t){
+//                sum3 += tau[i][j] * gamma[h][i][j];
+//            }
+//        }
+//        model.addConstr(sum1 + sum2, GRB_LESS_EQUAL, (dtl - sr)*theta[h], c18_name);
+//        model.addConstr(sum1 + sum2 - sum3, GRB_LESS_EQUAL, sigma[h], c19_name);
+//    }
+//
+//    model.setObjective(objective, GRB_MINIMIZE);
+////    model.set(GRB_IntParam_Threads, n_thread);
+//    model.update();
+//    model.write("model.lp");
+//    model.optimize();
+//    std::cout << "Truck arcs: " << std::endl;
+//    for (int i:c_s) {
+//        for (int j:c_t) {
+//            if (y[i][j].get(GRB_DoubleAttr_X) == 1) {
+//                std::cout << i << " " << j << " " << tau[i][j] << std::endl;
+//            }
+//        }
+//    }
+//    int theta_cnt = 0;
+//    std::cout << "Theta:" << std::endl;
+//    for(int h:C) {
+//        if (theta[h].get(GRB_DoubleAttr_X) == 1) {
+//            theta_cnt++;
+//            std::cout << "Theta_" << h << " = " << theta[h].get(GRB_DoubleAttr_X) << std::endl;
+//        }
+//    }
+//    std::cout << "Drone arcs:" << std::endl;
+//    for (int i:c_s) {
+//        for (int j:c_t) {
+//            if (i != j && x[i][j].get(GRB_DoubleAttr_X) == 1) {
+//                std::cout << i << " " << j << std::endl;
+//            }
+//        }
+//    }
+//    std::cout << "Gamma:" << std::endl;
+//    for (int h:C) {
+//        for(int i:c_s) {
+//            for (int j:c_t) {
+//                if (gamma[h][i][j].get(GRB_DoubleAttr_X) == 1) {
+//                    std::cout << "gamma_" << h << "_" << i << "_" << j << "= 1" << std::endl;
+//                }
+//            }
+//        }
+//    }
+//    std::cout << "Sigma:" << std::endl;
+//    for (int h:c_t){
+//        std::cout << "Sigma_" << h << " = " << sigma[h].get(GRB_DoubleAttr_X) << std::endl;
+//    }
+//    std::cout << "Objective: " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
+//    std::cout << "Number of sorties: " << theta_cnt << std::endl;
+//    for (int h:C) {
+//        if (theta[h].get(GRB_DoubleAttr_X) == 1) {
+//            std::cout << "middle of " << h << " sortie are: ";
+//            for (int i:c_s) {
+//                if (phi[h][i].get(GRB_DoubleAttr_X) == 1) {
+//                    std::cout << i << " ";
+//                }
+//            }
+//            std::cout << std::endl;
+//        }
+//    }
+////    int i3 = 0, o3 = 0;
+////    for (int i:c_s) {
+////        if (y[i][3].get(GRB_DoubleAttr_X) == 1) {
+////            std::cout << "In 3: " << i << std::endl;
+////            i3++;
+////        }
+////    }
+////    for (int j:V) {
+////        if (y[3][j].get(GRB_DoubleAttr_X) == 1) {
+////            std::cout << "out 3: " << j << std::endl;
+////            o3++;
+////        }
+////    }
+////    std::cout << i3 << " " << o3;

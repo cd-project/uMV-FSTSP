@@ -1,11 +1,11 @@
-set(GUROBI_DIR /opt/gurobi1002/linux64)
+set(GUROBI_DIR /opt/gurobi1100/linux64)
 find_path(GUROBI_INCLUDE_DIRS
     NAMES gurobi_c.h
     HINTS ${GUROBI_DIR} $ENV{GUROBI_HOME}
     PATH_SUFFIXES include)
 
 find_library(GUROBI_LIBRARY
-    NAMES gurobi gurobi100
+    NAMES gurobi gurobi110
     HINTS ${GUROBI_DIR} $ENV{GUROBI_HOME}
     PATH_SUFFIXES lib)
 

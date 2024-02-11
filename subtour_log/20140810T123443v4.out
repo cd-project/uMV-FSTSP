@@ -1,0 +1,69 @@
+Instance name: /mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123443v4
+
+drone speed: 0.2 miles/minute
+uav non-eligible customer: 4 8 
+Printing number of nodes: 11
+
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (linux64 - "Ubuntu 22.04.3 LTS")
+
+CPU model: 13th Gen Intel(R) Core(TM) i5-13500, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 20 logical processors, using up to 20 threads
+
+Optimize a model with 44651 rows, 1957 columns and 1837624 nonzeros
+Model fingerprint: 0x5b71deaa
+Variable types: 11 continuous, 1946 integer (1814 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+01]
+  Objective range  [1e+00, 3e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 9e+00]
+Found heuristic solution: objective 189.1021981
+Presolve removed 42408 rows and 1523 columns
+Presolve time: 1.66s
+Presolved: 2243 rows, 434 columns, 47752 nonzeros
+Variable types: 6 continuous, 428 integer (428 binary)
+Found heuristic solution: objective 179.0814782
+
+Root relaxation: objective 9.014390e+01, 116 iterations, 0.01 seconds (0.02 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0      90.1439049   90.14390  0.00%     -    1s
+
+Explored 1 nodes (116 simplex iterations) in 1.71 seconds (3.12 work units)
+Thread count was 20 (of 20 available processors)
+
+Solution count 3: 90.1439 179.081 189.102 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 9.014390490788e+01, best bound 9.014390490788e+01, gap 0.0000%
+Truck arcs: 
+0 9 19.5667
+1 6 1.9199
+2 11 17.555
+3 10 10.0243
+4 7 7.34864
+5 2 8.42508
+6 5 0.968346
+7 8 5.29976
+8 1 3.32128
+9 3 5.1822
+10 4 10.5327
+Theta:
+Drone arcs:
+Gamma:
+Sigma:
+Sigma_1 = 0
+Sigma_2 = 0
+Sigma_3 = 0
+Sigma_4 = 0
+Sigma_5 = 0
+Sigma_6 = 0
+Sigma_7 = 0
+Sigma_8 = 0
+Sigma_9 = 0
+Sigma_10 = 0
+Sigma_11 = 0
+Objective: 90.1439
+Number of sorties: 0

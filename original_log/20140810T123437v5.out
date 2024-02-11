@@ -1,0 +1,76 @@
+Instance name: /mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123437v5
+
+drone speed: 0.4 miles/minute
+uav non-eligible customer: 10 
+Printing number of nodes: 11
+
+Set parameter Threads to value 20
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (linux64 - "Ubuntu 22.04.3 LTS")
+
+CPU model: 13th Gen Intel(R) Core(TM) i5-13500, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 20 logical processors, using up to 20 threads
+
+Optimize a model with 6191 rows, 1825 columns and 197592 nonzeros
+Model fingerprint: 0x8af3a3f8
+Variable types: 11 continuous, 1814 integer (1814 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 2e+01]
+  Objective range  [8e-01, 2e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 8e+00]
+Found heuristic solution: objective 107.0831389
+Presolve removed 480 rows and 703 columns
+Presolve time: 0.50s
+Presolved: 5711 rows, 1122 columns, 164486 nonzeros
+Variable types: 9 continuous, 1113 integer (1113 binary)
+
+Root relaxation: objective 4.066306e+01, 2820 iterations, 0.23 seconds (0.65 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   40.66306    0  112  107.08314   40.66306  62.0%     -    0s
+H    0     0                      86.3808784   40.66306  52.9%     -    0s
+H    0     0                      75.6595413   40.66306  46.3%     -    0s
+H    0     0                      67.0774388   40.66306  39.4%     -    0s
+H    0     0                      65.6563229   40.66306  38.1%     -    0s
+     0     0   40.89934    0  127   65.65632   40.89934  37.7%     -    1s
+     0     0   40.90935    0  125   65.65632   40.90935  37.7%     -    1s
+     0     0   41.04467    0  191   65.65632   41.04467  37.5%     -    1s
+H    0     0                      64.3567733   41.07036  36.2%     -    1s
+H    0     0                      60.1908932   41.16903  31.6%     -    1s
+     0     0   41.16903    0  215   60.19089   41.16903  31.6%     -    1s
+     0     0   41.17558    0  216   60.19089   41.17558  31.6%     -    1s
+H    0     0                      56.6161357   41.84936  26.1%     -    1s
+H    0     0                      55.3514641   41.84936  24.4%     -    1s
+     0     0   41.90670    0  225   55.35146   41.90670  24.3%     -    1s
+H    0     0                      52.5737478   41.90670  20.3%     -    1s
+     0     0   42.02064    0  223   52.57375   42.02064  20.1%     -    1s
+     0     0   42.37069    0  210   52.57375   42.37069  19.4%     -    2s
+     0     0   42.38172    0  206   52.57375   42.38172  19.4%     -    2s
+H    0     0                      52.4672458   42.62795  18.8%     -    2s
+     0     0   42.62795    0  217   52.46725   42.62795  18.8%     -    2s
+     0     0   42.77110    0  228   52.46725   42.77110  18.5%     -    2s
+     0     0   42.88304    0  228   52.46725   42.88304  18.3%     -    2s
+     0     0   42.88304    0  228   52.46725   42.88304  18.3%     -    2s
+     0     2   42.88304    0  226   52.46725   42.88304  18.3%     -    2s
+H   87    64                      52.2117049   43.38316  16.9%   155    4s
+H   91    73                      51.7791850   43.38316  16.2%   152    4s
+   223   122   51.36042   12   50   51.77919   43.38316  16.2%   121    5s
+
+Cutting planes:
+  Gomory: 3
+  Cover: 4
+  Clique: 13
+  MIR: 5
+  Zero half: 45
+  RLT: 12
+  BQP: 1
+
+Explored 1698 nodes (110418 simplex iterations) in 8.90 seconds (14.28 work units)
+Thread count was 20 (of 20 available processors)
+
+Solution count 10: 51.7792 52.2117 52.4672 ... 67.0774
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 5.177918503644e+01, best bound 5.177918503644e+01, gap 0.0000%

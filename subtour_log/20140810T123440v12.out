@@ -1,0 +1,88 @@
+Instance name: /mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123440v12
+
+drone speed: 0.6 miles/minute
+uav non-eligible customer: 4 5 
+Printing number of nodes: 11
+
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (linux64 - "Ubuntu 22.04.3 LTS")
+
+CPU model: 13th Gen Intel(R) Core(TM) i5-13500, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 20 logical processors, using up to 20 threads
+
+Optimize a model with 44651 rows, 1957 columns and 1837624 nonzeros
+Model fingerprint: 0xaa29a014
+Variable types: 11 continuous, 1946 integer (1814 binary)
+Coefficient statistics:
+  Matrix range     [9e-01, 3e+01]
+  Objective range  [1e+00, 3e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 9e+00]
+Found heuristic solution: objective 175.4501055
+Presolve removed 28142 rows and 883 columns
+Presolve time: 1.92s
+Presolved: 16509 rows, 1074 columns, 561461 nonzeros
+Variable types: 8 continuous, 1066 integer (1066 binary)
+Found heuristic solution: objective 152.7800034
+Root relaxation presolved: 16509 rows, 1074 columns, 561461 nonzeros
+
+
+Root relaxation: objective 6.200430e+01, 592 iterations, 0.24 seconds (0.50 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+H    0     0                      62.0042986   -7.00000   111%     -    2s
+     0     0          -    0        62.00430   62.00430  0.00%     -    2s
+
+Explored 1 nodes (2053 simplex iterations) in 2.67 seconds (4.29 work units)
+Thread count was 20 (of 20 available processors)
+
+Solution count 3: 62.0043 152.78 175.45 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 6.200429858482e+01, best bound 6.200429858482e+01, gap 0.0000%
+Truck arcs: 
+0 6 11.127
+1 8 2.95098
+2 11 12.3922
+4 10 4.31275
+5 2 5.76971
+6 1 3.41898
+8 4 5.54215
+10 5 11.4906
+Theta:
+Theta_3 = 1
+Theta_7 = 1
+Theta_9 = 1
+Drone arcs:
+0 7
+3 5
+4 3
+5 9
+7 8
+9 11
+Gamma:
+gamma_3_4_10= 1
+gamma_3_10_5= 1
+gamma_7_0_6= 1
+gamma_7_1_8= 1
+gamma_7_6_1= 1
+gamma_9_2_11= 1
+gamma_9_5_2= 1
+Sigma:
+Sigma_1 = 0
+Sigma_2 = 0
+Sigma_3 = 0
+Sigma_4 = 0
+Sigma_5 = 0
+Sigma_6 = 0
+Sigma_7 = 0
+Sigma_8 = 0
+Sigma_9 = 0
+Sigma_10 = 0
+Sigma_11 = 0
+middle of 3 sortie are: 10 
+middle of 7 sortie are: 1 6 
+middle of 9 sortie are: 2 
+Objective: 62.0043
+Number of sorties: 3

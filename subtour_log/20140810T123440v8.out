@@ -1,0 +1,116 @@
+Instance name: /mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123440v8
+
+drone speed: 0.4 miles/minute
+uav non-eligible customer: 4 5 
+Printing number of nodes: 11
+
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (linux64 - "Ubuntu 22.04.3 LTS")
+
+CPU model: 13th Gen Intel(R) Core(TM) i5-13500, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 20 logical processors, using up to 20 threads
+
+Optimize a model with 44651 rows, 1957 columns and 1837624 nonzeros
+Model fingerprint: 0x8173fda8
+Variable types: 11 continuous, 1946 integer (1814 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+01]
+  Objective range  [1e+00, 3e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 9e+00]
+Found heuristic solution: objective 175.4501055
+Presolve removed 29698 rows and 927 columns
+Presolve time: 2.24s
+Presolved: 14953 rows, 1030 columns, 489692 nonzeros
+Variable types: 8 continuous, 1022 integer (1022 binary)
+Found heuristic solution: objective 152.7800034
+Root relaxation presolved: 14953 rows, 1030 columns, 489692 nonzeros
+
+
+Root relaxation: objective 6.200430e+01, 648 iterations, 0.23 seconds (0.49 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   62.00430    0   69  152.78000   62.00430  59.4%     -    2s
+H    0     0                      98.3626886   62.00430  37.0%     -    2s
+H    0     0                      88.2469922   62.00430  29.7%     -    2s
+H    0     0                      71.1567717   62.00430  12.9%     -    2s
+H    0     0                      66.7560497   62.00430  7.12%     -    2s
+H    0     0                      63.7270874   62.00430  2.70%     -    3s
+     0     0   62.00430    0   65   63.72709   62.00430  2.70%     -    3s
+     0     0   62.00430    0   89   63.72709   62.00430  2.70%     -    3s
+     0     0   62.00430    0   52   63.72709   62.00430  2.70%     -    4s
+H    0     0                      63.5761280   62.00430  2.47%     -    4s
+H    0     0                      63.2217972   62.00430  1.93%     -    4s
+     0     0   62.00430    0   78   63.22180   62.00430  1.93%     -    4s
+     0     0   62.00430    0   73   63.22180   62.00430  1.93%     -    4s
+     0     0   62.15858    0   51   63.22180   62.15858  1.68%     -    4s
+     0     0   62.16568    0   66   63.22180   62.16568  1.67%     -    4s
+     0     0   62.26984    0   70   63.22180   62.26984  1.51%     -    4s
+H    0     0                      62.6998569   62.26984  0.69%     -    4s
+     0     0   62.37048    0   80   62.69986   62.37048  0.53%     -    4s
+     0     0   62.53042    0   90   62.69986   62.53042  0.27%     -    4s
+     0     0   62.53042    0   64   62.69986   62.53042  0.27%     -    4s
+     0     0   62.53042    0   51   62.69986   62.53042  0.27%     -    4s
+     0     0   62.53042    0   60   62.69986   62.53042  0.27%     -    4s
+     0     0   62.53042    0   65   62.69986   62.53042  0.27%     -    4s
+     0     0   62.69986    0    9   62.69986   62.69986  0.00%     -    5s
+
+Cutting planes:
+  Gomory: 3
+  Cover: 2
+  Clique: 2
+  MIR: 9
+  StrongCG: 3
+  GUB cover: 1
+  Zero half: 10
+  RLT: 13
+
+Explored 1 nodes (5128 simplex iterations) in 5.03 seconds (7.92 work units)
+Thread count was 20 (of 20 available processors)
+
+Solution count 10: 62.6999 63.2218 63.5761 ... 175.45
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 6.269985686544e+01, best bound 6.269985686544e+01, gap 0.0000%
+Truck arcs: 
+0 6 11.127
+1 8 2.95098
+2 11 12.3922
+4 10 4.31275
+5 7 1.61466
+6 1 3.41898
+7 2 6.42059
+8 4 5.54215
+10 5 11.4906
+Theta:
+Theta_3 = 1
+Theta_9 = 1
+Drone arcs:
+0 9
+3 7
+4 3
+9 8
+Gamma:
+gamma_3_4_10= 1
+gamma_3_5_7= 1
+gamma_3_10_5= 1
+gamma_9_0_6= 1
+gamma_9_1_8= 1
+gamma_9_6_1= 1
+Sigma:
+Sigma_1 = 0
+Sigma_2 = 0
+Sigma_3 = 0.430015
+Sigma_4 = 0
+Sigma_5 = 0
+Sigma_6 = 0
+Sigma_7 = 0
+Sigma_8 = 0
+Sigma_9 = 0
+Sigma_10 = 0
+Sigma_11 = 0
+middle of 3 sortie are: 5 10 
+middle of 9 sortie are: 1 6 
+Objective: 62.6999
+Number of sorties: 2
