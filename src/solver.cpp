@@ -1457,6 +1457,8 @@ Result Solver::mvdSolver(int n_thread, int e) {
         for (int k = 1; k <= node_max_stage; k++) {
             sum_k += X[h][k];
         }
+
+        // phuc vu h it nhat 1 lan.
         model.addConstr(phi[h] + sum_k >= 1, "C10_" + std::to_string(h));
     }
 
@@ -1504,6 +1506,7 @@ Result Solver::mvdSolver(int n_thread, int e) {
 
                 // o to phai den k_p tu k trong khoang thoi gian <= dtl.
                 model.addConstr(a[k_p] - d[k] <= z[k][k_p] * dtl + (1-z[k][k_p]) * M, "C15_" + std::to_string(k) + "_" + std::to_string(k_p));
+                
                 GRBLinExpr rhs;
                 for (int i = 0; i < D; i++) {
                     for (int j = 1; j <= D; j++) {
