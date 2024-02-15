@@ -1212,6 +1212,10 @@ Result Solver::mvdSolver(int n_thread, int e) {
             C.push_back(i);
         }
     }
+
+    // C_s : set C(customer) union s (source)
+    // C_t : set C(customer) union t (terminal)
+    // create.
     std::vector<int> c_s;
     std::vector<int> c_t;
     for (int i = 0; i < n+1; i++) {
@@ -1231,14 +1235,15 @@ Result Solver::mvdSolver(int n_thread, int e) {
     auto K = C, k_prime = V;
     auto O = 0;
     auto D = n;
-    auto max_stage = k_prime.size();
+    auto node_max_stage = k_prime.size();
+    auto arc_max_stage = node_max_stage - 1;
 
     // X^i_k: truck at node i\in{V} at stage k.
     // max(k) = n+1, as in there is no sortie.
     auto** X = new GRBVar* [n+1];
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i <= D; i++) {
         X[i] = reinterpret_cast<GRBVar*> (new GRBVar * [n+1]);
-        for (int k = 1; k <= max_stage; k++) {
+        for (int k = 1; k <= node_max_stage; k++) {
             X[i][k] = model.addVar(0, 1, 0.0, GRB_BINARY, "X_" + std::to_string(i) + "_" + std::to_string(k));
         }
     }
@@ -1246,11 +1251,11 @@ Result Solver::mvdSolver(int n_thread, int e) {
 
     // x^k_ij: truck from node i at stage k moves to node j.
     auto*** x = new GRBVar ** [n+1];
-    for (int k = 1; k <= max_stage; k++){
+    for (int k = 1; k <= arc_max_stage; k++) { // vi o node_max_stage thi khong di duoc nua.
         x[k] = reinterpret_cast<GRBVar **>(new GRBVar **[n+1]);
-        for (int i = 0; i <= D; i++) {
+        for (int i = 0; i < D; i++) {
             x[k][i] = reinterpret_cast<GRBVar *>(new GRBVar *[n+1]);
-            for (int j = 0; j <= D; j++) {
+            for (int j = 1; j <= D; j++) {
                 if (i != j) {
                     x[k][i][j] = model.addVar(0, 1, 0.0, GRB_BINARY, "x_" + std::to_string(k)+"_"+std::to_string(i)+"_"+std::to_string(j));
                 }
@@ -1266,14 +1271,14 @@ Result Solver::mvdSolver(int n_thread, int e) {
     }
 
     auto***** Z = new GRBVar ****[n+1];
-    for (int k = 1; k <= max_stage; k++) {
+    for (int k = 1; k <= node_max_stage-1; k++) {
         Z[k] = reinterpret_cast<GRBVar ****>(new GRBVar **** [n+1]);
-        for (int k_p = 1; k_p <= max_stage; k_p++) {
+        for (int k_p = k+1; k_p <= node_max_stage; k_p++) {
             if (k < k_p) {
                 Z[k][k_p] = reinterpret_cast<GRBVar ***>(new GRBVar *** [n+1]);
-                for (int i = O; i <= D; i++) {
+                for (int i = 0; i < D; i++) {
                     Z[k][k_p][i] = reinterpret_cast<GRBVar **>(new GRBVar **[n + 1]);
-                    for (int j = O; j <= D; j++) {
+                    for (int j = 1; j <= D; j++) {
                         if (i != j) {
                             Z[k][k_p][i][j] = reinterpret_cast<GRBVar *>(new GRBVar *[n + 1]);
                             for (int h:C) {
@@ -1291,9 +1296,9 @@ Result Solver::mvdSolver(int n_thread, int e) {
         }
     }
     auto** z = new GRBVar *[n+1];
-    for (int k = 1; k <= max_stage; k++) {
+    for (int k = 1; k <= node_max_stage-1; k++) {
         z[k] = reinterpret_cast<GRBVar *>(new GRBVar *[n+1]);
-        for (int k_p = 1; k_p <= max_stage; k_p++) {
+        for (int k_p = k+1; k_p <= node_max_stage; k_p++) {
             if (k < k_p) {
                 z[k][k_p] = model.addVar(0, 1, 0.0, GRB_BINARY, "z_" + std::to_string(k) + "_" +std::to_string(k_p));
             }
@@ -1303,7 +1308,7 @@ Result Solver::mvdSolver(int n_thread, int e) {
     // arrival\departure variables a and d.
     std::vector<GRBVar> a(n+1);
     std::vector<GRBVar> d(n+1);
-    for (int k = 1; k <= max_stage; k++) {
+    for (int k = 1; k <= node_max_stage; k++) {
         a[k] = model.addVar(0, GRB_INFINITY, 0.0, GRB_CONTINUOUS,"t_" + std::to_string(k));
         d[k] = model.addVar(0, GRB_INFINITY, 0.0, GRB_CONTINUOUS,"t_" + std::to_string(k));
         model.addConstr(d[k] >= a[k], "C13_" + std::to_string(k));
@@ -1326,40 +1331,41 @@ Result Solver::mvdSolver(int n_thread, int e) {
     }
     model.addConstr(C2 == 1, "C2");
 
-    ///////////// C3
+    ///////////// C3: arc_stage
     GRBLinExpr C3;
-    for (int k = 1; k <= max_stage; k++) {
+    for (int k = 1; k <= arc_max_stage; k++) {
         for (int i = 0; i < D; i++) {
             C3 += x[k][i][D];
         }
     }
     model.addConstr(C3 == 1, "C3");
 
-    ///////////// C4
-    for (int k = 1; k <= max_stage-1; k++) {
+    ///////////// C4: arc_stage
+    for (int k = 1; k <= arc_max_stage-1; k++) {
         for (int i = 0; i < D; i++) {
             GRBLinExpr lhs, rhs;
-            for (int j = 0; j <= D; j++) {
+            for (int j = 1; j <= D; j++) {
                 if (i != j) {
-                    lhs += x[k][i][j];
+                    lhs += x[k+1][i][j]; // từ i ra j là cạnh k+1.
                 }
             }
             for (int j = 0; j < D; j++) {
                 if (i != j) {
-                    rhs += x[k+1][j][i];
+                    rhs += x[k][j][i]; // từ j vao i la canh k.
                 }
             }
+            // enter i tai stage k thi leave i tai stage k+1.
             model.addConstr(lhs == rhs, "C4_" + std::to_string(k) + "_" + std::to_string(i));
         }
     }
 
-    ////////////// C6
-    for (int k = 1; k <= max_stage; k++) {
-        for (int k_p = 1; k_p <= max_stage; k_p++) {
-            if (k < k_p) {
+    ////////////// C6: node_stage
+    for (int k = 1; k <= node_max_stage; k++) {
+        for (int k_p = k+1; k_p <= node_max_stage; k_p++) {
+            if (k < k_p) { // cho chac luon.
                 GRBLinExpr rhs;
                 for (int i = 0; i < D; i++) { // start can't include D.
-                    for (int j = 0; j <= D; j++) { // end can include D.
+                    for (int j = 1; j <= D; j++) { // end can include D.
                         if (i != j) {
                             for (int h:C) {
                                 if (h != i && h != j) {
@@ -1369,18 +1375,21 @@ Result Solver::mvdSolver(int n_thread, int e) {
                         }
                     }
                 }
+                // z_(k,k') bool: co sortie di tu launch = k, end = k'. bang tong Z(k, k')_(i, j, h).
                 model.addConstr(z[k][k_p] == rhs, "C6_" + std::to_string(k) + "_to_" + std::to_string(k_p));
             }
         }
     }
 
-    ////////// C7
-    for (int k = 1; k <= max_stage; k++) {
-        for (int k_p = 1; k_p <= max_stage; k_p++) {
+
+    ////////// C7: node_stage
+    for (int k = 1; k <= node_max_stage-1; k++) {
+        for (int k_p = k+1; k_p <= node_max_stage; k_p++) {
             if (k < k_p) {
-                for (int l = 1; l <= max_stage; l++) {
-                    for (int l_p = 1; l_p <= max_stage; l_p++) {
-                        if (k <= l && l < k_p) {
+                for (int l = 1; l <= node_max_stage; l++) {
+                    for (int l_p = 1; l_p <= node_max_stage; l_p++) {
+                        if (k <= l && l < k_p && l < l_p) {
+                            // tranh drone bay cac doan giao nhau.
                             model.addConstr(z[k][k_p] + z[l][l_p] <= 1, "C7_" + std::to_string(k) + "_" + std::to_string(k_p) + "_" + std::to_string(l) + "_" + std::to_string(l_p));
                         }
                     }
@@ -1389,12 +1398,12 @@ Result Solver::mvdSolver(int n_thread, int e) {
         }
     }
 
-    /////////// C8
+    /////////// C8: node_stage
     for (int i = 0; i < D; i++) {
-        for (int k = 1; k <= max_stage; k++) {
-            for (int k_p = 1; k_p <= max_stage; k_p++) {
+        for (int k = 1; k <= node_max_stage-1; k++) {
+            for (int k_p = k+1; k_p <= node_max_stage; k_p++) {
                 if (k < k_p) {
-                    for (int j = 0; j <= D; j++) {
+                    for (int j = 1; j <= D; j++) {
                         if (i != j) {
                             for (int h:C) {
                                 if (i != h && h != j) {
@@ -1409,14 +1418,14 @@ Result Solver::mvdSolver(int n_thread, int e) {
         }
     }
 
-    //////// C9
+    //////// C9: node_stage
     for (int h:C) {
         GRBLinExpr rhs;
         for (int i = 0; i < D; i++) {
-            for (int j = 0; j <= D; j++) {
+            for (int j = 1; j <= D; j++) {
                 if (i != j && i != h && j != h) {
-                    for (int k = 1; k <= max_stage; k++) {
-                        for (int k_p = 1; k_p <= max_stage; k_p++) {
+                    for (int k = 1; k <= node_max_stage-1; k++) {
+                        for (int k_p = k+1; k_p <= node_max_stage; k_p++) {
                             if (k < k_p) {
                                 rhs += Z[k][k_p][i][j][h];
                             }
@@ -1426,27 +1435,30 @@ Result Solver::mvdSolver(int n_thread, int e) {
 
             }
         }
+
+        // consistency constraint cho sortie phuc vu h.
         model.addConstr(phi[h] == rhs, "C9_" + std::to_string(h));
+        model.addConstr(rhs <= 1);
     }
 
-    //////////// C10
+    //////////// C10: node_stage
     for (int h:C) {
         GRBLinExpr sum_k;
-        for (int k = 1; k <= max_stage; k++) {
+        for (int k = 1; k <= node_max_stage; k++) {
             sum_k += X[h][k];
         }
         model.addConstr(phi[h] + sum_k >= 1, "C10_" + std::to_string(h));
     }
 
-    //////////////// C11
+    //////////////// C11: node_stage
     for (int h:C) {
         GRBLinExpr sum;
-        for (int k = 1; k <= max_stage; k++) {
-            for (int k_p = 1; k_p <= max_stage; k_p++) {
+        for (int k = 1; k <= node_max_stage-1; k++) {
+            for (int k_p = k+1; k_p <= node_max_stage; k_p++) {
                 if (k < k_p) {
                     for (int i = 0; i < D; i++) {
-                        for (int j = 0; j <= D; j++) {
-                            if (i != j &&i != h && j != h) {
+                        for (int j = 1; j <= D; j++) {
+                            if (i != j && i != h && j != h) {
                                 sum += Z[k][k_p][i][j][h] * (tau_prime[i][h] + tau_prime[h][j]);
                             }
                         }
@@ -1454,31 +1466,37 @@ Result Solver::mvdSolver(int n_thread, int e) {
                 }
             }
         }
+
+        // drone time constraint (i -> h, h -> j) <= dtl. trong giong tien xu ly.
         model.addConstr(sum <= dtl, "C11_" + std::to_string(h));
     }
 
-    /////////// C14
-    for (int k = 1; k <= max_stage; k++) {
+    /////////// C14: node_stage
+    for (int k = 1; k <= node_max_stage; k++) {
         GRBLinExpr sum;
         for (int i = 0; i < D; i++) {
-            for (int j = 0; j <= D; j++) {
+            for (int j = 1; j <= D; j++) {
                 if (i != j) {
                     sum += x[k][i][j] * tau[i][j];
                 }
             }
         }
+
+        // o to toi k+1 >= o to den k + thoi gian di chuyen tu k->k+1 (tau_(ij)).
         model.addConstr(a[k+1] >= d[k] + sum, "C14_" + std::to_string(k) + "_" + std::to_string(k+1));
     }
 
-    ////////// C15
+    ////////// C15: node_stage
     auto M = 100000;
-    for (int k = 1; k <= max_stage; k++) {
-        for (int k_p = 1; k_p <= max_stage; k_p++) {
+    for (int k = 1; k <= node_max_stage-1; k++) {
+        for (int k_p = k+1; k_p <= node_max_stage; k_p++) {
             if (k < k_p) {
+
+                // o to phai den k_p tu k trong khoang thoi gian <= dtl.
                 model.addConstr(a[k_p] - d[k] <= z[k][k_p] * dtl + (1-z[k][k_p]) * M, "C15_" + std::to_string(k) + "_" + std::to_string(k_p));
                 GRBLinExpr rhs;
                 for (int i = 0; i < D; i++) {
-                    for (int j = 0; j <= D; j++) {
+                    for (int j = 1; j <= D; j++) {
                         if (i != j) {
                             for (int h:C) {
                                 if (h != i && h != j) {
@@ -1488,6 +1506,8 @@ Result Solver::mvdSolver(int n_thread, int e) {
                         }
                     }
                 }
+
+                // vehicle phai doi drone truoc khi di chuyen.
                 model.addConstr(d[k_p]- d[k] >= rhs, "C16_" + std::to_string(k) + "_" + std::to_string(k_p));
             }
         }
@@ -1496,7 +1516,7 @@ Result Solver::mvdSolver(int n_thread, int e) {
     GRBVar max = model.addVar(0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "objective");
 //    model.addConstr(max > 1);
     GRBLinExpr objective;
-    for (int k = 1; k <= max_stage; k++) {
+    for (int k = 1; k <= node_max_stage; k++) {
         model.addConstr(max >= a[k], "C_objective>=arrival_of_" + std::to_string(k));
     }
     objective += max;
@@ -1507,128 +1527,324 @@ Result Solver::mvdSolver(int n_thread, int e) {
 //    return Result(0, std::vector());
 }
 
-Result Solver::mvdSolverCPLEX(int n_thread, int e) {
-    auto tau = instance->tau;
-    auto tau_p = instance->tau_prime;
-    auto dtl = e;
-    auto sl = 1, sr = 1;
-    auto n = instance->num_node;
-    auto c_prime = instance->c_prime;
-    std::vector<int> c_prime_0;
-    c_prime_0.push_back(0);
-    for (int i : c_prime) {
-        c_prime_0.push_back(i);
-    }
-    c_prime_0.push_back(n);
-    std::cout << "Printing number of nodes: " << n << std::endl;
-    std::vector<int> C;
-    std::vector<int> V;
-    for (int i = 0; i < n+1; i++) {
-        if (i == 0 || i == n) {
-            V.push_back(i);
-        } else {
-            V.push_back(i);
-            C.push_back(i);
-        }
-    }
-    std::vector<int> c_s;
-    std::vector<int> c_t;
-    for (int i = 0; i < n+1; i++) {
-        if (i == 0) {
-            c_s.push_back(i);
-        } else if (i == n){
-            c_t.push_back(i);
-        } else {
-            c_s.push_back(i);
-            c_t.push_back(i);
-        }
-    }
-
-    std::cout << std::endl;
-
-    auto K = C, k_prime = V;
-    auto O = 0;
-    auto D = n;
-    auto max_stage = n+1;
-    IloEnv env;
-    IloModel model(env);
-
-    // X^i_k
-    // (binary variable) và nhận giá trị một tương ứng với đỉnh thứ k của
-    // đường đi của vehicle là i; k \in {1..n}
-    // đỉnh thứ k của truck tour là node i.
-    // k max = n+1: toàn bộ đi boi oto.
-    IloArray<IloBoolVarArray> X(env, n+1);
-    for (int i = 0; i < D; i++) {
-        X[i] = IloBoolVarArray(env, n+1);
-        for (int k = 1; k <= max_stage; k++) {
-            X[i][k] = IloBoolVar(env);
-        }
-    }
-
-    IloArray<IloArray<IloBoolVarArray>> x(env, n+1);
-    for (int k = 1; k <= max_stage; k++) {
-        x[k] = IloArray<IloBoolVarArray>(env, n+1);
-        for (int i:V) {
-            x[k][i] = IloBoolVarArray(env, n+1);
-            for (int j:V) {
-                if (j != i) {
-                    x[k][i][j] = IloBoolVar(env);
-                }
-            }
-        }
-    }
-    IloNumVarArray phi(env, n);
-    for (int h = 1; h < n; h++) {
-        phi[h] = IloNumVar(env, 0, IloInfinity, ILOFLOAT);
-    }
-    IloArray<IloArray<IloArray<IloArray<IloBoolVarArray>>>> Z(env, n+1);
-    for (int k = 1; k <= max_stage; k++) {
-        Z[k] = IloArray<IloArray<IloArray<IloBoolVarArray>>>(env, n+1);
-        for (int k_p:V) {
-            if (k < k_p) {
-                Z[k][k_p] = IloArray<IloArray<IloBoolVarArray>>(env, n+1);
-                for (int i:V) {
-                    Z[k][k_p][i] = IloArray<IloBoolVarArray>(env, n+1);
-                    for (int j:V) {
-                        if (i != j) {
-                            Z[k][k_p][i][j] = IloBoolVarArray(env, n+1);
-                            for (int h:C) {
-                                Z[k][k_p][i][j][h] = IloBoolVar(env);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    IloArray<IloBoolVarArray> z(env, n+1);
-    for (int k = 1; k <= max_stage; k++) {
-        z[k] = IloBoolVarArray(env, n+1);
-        for (int k_p:V) {
-            if (k < k_p) {
-                z[k][k_p] = IloBoolVar(env);
-            }
-        }
-    }
-    IloNumVarArray a(env, n+1);
-    IloNumVarArray d(env, n+1);
-    IloExpr objective(env);
-    for (int k = 1; k <= max_stage; k++) {
-        a[k] = IloNumVar(env, 0, IloInfinity, ILOFLOAT);
-        d[k] = IloNumVar(env, 0, IloInfinity, ILOFLOAT);
-        model.add(d[k] >= a[k]);
-        if (k == 0) {
-            model.add(a[k] == 0);
-            model.add(d[k] == 0);
-        }
-        model.add(objective >= a[k]);
-    }
-    model.add(IloMinimize(env, objective));
-    IloCplex cplex(model);
-    cplex.solve();
-}
-
-
-
-
+//Result Solver::mvdSolverCPLEX(int n_thread, int e) {
+//    auto tau = instance->tau;
+//    auto tau_prime = instance->tau_prime;
+//    auto dtl = e;
+//    auto sl = 1, sr = 1;
+//    auto n = instance->num_node;
+//    auto c_prime = instance->c_prime;
+//    std::vector<int> c_prime_0;
+//    c_prime_0.push_back(0);
+//    for (int i : c_prime) {
+//        c_prime_0.push_back(i);
+//    }
+//    c_prime_0.push_back(n);
+//    std::cout << "Printing number of nodes: " << n << std::endl;
+//    std::vector<int> C;
+//    std::vector<int> V;
+//    for (int i = 0; i < n+1; i++) {
+//        if (i == 0 || i == n) {
+//            V.push_back(i);
+//        } else {
+//            V.push_back(i);
+//            C.push_back(i);
+//        }
+//    }
+//    std::vector<int> c_s;
+//    std::vector<int> c_t;
+//    for (int i = 0; i < n+1; i++) {
+//        if (i == 0) {
+//            c_s.push_back(i);
+//        } else if (i == n){
+//            c_t.push_back(i);
+//        } else {
+//            c_s.push_back(i);
+//            c_t.push_back(i);
+//        }
+//    }
+//
+//    std::cout << std::endl;
+//
+//    auto K = C, k_prime = V;
+//    auto O = 0;
+//    auto D = n;
+//    auto node_max_stage = n+1;
+//    IloEnv env;
+//    IloModel model(env);
+//
+//    // X^i_k: truck at node i\in{V} at stage k.
+//    // max(k) = n+1, as in there is no sortie.
+//
+//    IloArray<IloBoolVarArray> X(env, node_max_stage+1);
+//    for (int i = 0; i <= D; i++) {
+//        X[i] = IloBoolVarArray(env, node_max_stage+1);
+//        for (int k = 1; k <= node_max_stage; k++) {
+//            X[i][k] = IloBoolVar(env);
+//        }
+//    }
+//
+//    IloArray<IloArray<IloBoolVarArray>> x(env, n+1);
+//    // x^k_ij: truck from node i at stage k moves to node j.
+//
+//
+//
+//    // phi^h equals to 1 if customer h is served by the drone
+//    std::vector<GRBVar> phi(n);
+//    for (int h:C) {
+//        phi[h] = model.addVar(0, 1, 0.0, GRB_BINARY, "phi_" + std::to_string(h));
+//    }
+//
+//    auto***** Z = new GRBVar ****[n+1];
+//    for (int k = 1; k <= node_max_stage; k++) {
+//        Z[k] = reinterpret_cast<GRBVar ****>(new GRBVar **** [n+1]);
+//        for (int k_p = 1; k_p <= node_max_stage; k_p++) {
+//            if (k < k_p) {
+//                Z[k][k_p] = reinterpret_cast<GRBVar ***>(new GRBVar *** [n+1]);
+//                for (int i = 0; i <= D; i++) {
+//                    Z[k][k_p][i] = reinterpret_cast<GRBVar **>(new GRBVar **[n + 1]);
+//                    for (int j = 1; j < D; j++) {
+//                        if (i != j) {
+//                            Z[k][k_p][i][j] = reinterpret_cast<GRBVar *>(new GRBVar *[n + 1]);
+//                            for (int h:C) {
+//                                if (h != i && h != j) {
+//                                    Z[k][k_p][i][j][h] = model.addVar(0, 1, 0.0, GRB_BINARY,
+//                                                                      "Z_" + std::to_string(k) + "_" + std::to_string(k_p) +
+//                                                                      "_" + std::to_string(i) + "_" + std::to_string(j) + "_" +
+//                                                                      std::to_string(h));
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    // aux var z
+//    auto** z = new GRBVar *[n+1];
+//    for (int k = 1; k <= node_max_stage; k++) {
+//        z[k] = reinterpret_cast<GRBVar *>(new GRBVar *[n+1]);
+//        for (int k_p = 1; k_p <= node_max_stage; k_p++) {
+//            if (k < k_p) {
+//                z[k][k_p] = model.addVar(0, 1, 0.0, GRB_BINARY, "z_" + std::to_string(k) + "_" +std::to_string(k_p));
+//            }
+//        }
+//    }
+//
+//    // arrival\departure variables a and d.
+//    std::vector<GRBVar> a(n+1);
+//    std::vector<GRBVar> d(n+1);
+//    for (int k = 1; k <= node_max_stage; k++) {
+//        a[k] = model.addVar(0, GRB_INFINITY, 0.0, GRB_CONTINUOUS,"t_" + std::to_string(k));
+//        d[k] = model.addVar(0, GRB_INFINITY, 0.0, GRB_CONTINUOUS,"t_" + std::to_string(k));
+//        model.addConstr(d[k] >= a[k], "C13_" + std::to_string(k));
+//    }
+//    model.addConstr(a[O] == 0);
+//    model.addConstr(d[0] == 0);
+//
+//    ////////// Constraint C1
+//    for (int k = 1; k <= node_max_stage; k++) {
+//        for (int i = 0; i <= D; i++) {
+//            if (i != D) { // i == D => khong co i -> j.
+//                GRBLinExpr sum;
+//                for (int j = 0; j <= D; j++) {
+//                    if (i != j) {
+//                        sum += x[k][i][j];
+//                    }
+//                }
+//                model.addConstr(X[i][k] == sum, "C1_" + std::to_string(k) + "_" + std::to_string(i));
+//            }
+//        }
+//    }
+//
+//    //////////// C2
+//    GRBLinExpr C2;
+//    for (int i = 1; i <= D; i++) {
+//        C2 += x[1][O][i];
+//    }
+//    model.addConstr(C2 == 1, "C2");
+//
+//    ///////////// C3
+//    GRBLinExpr C3;
+//    for (int k = 1; k <= node_max_stage; k++) {
+//        for (int i = 0; i < D; i++) {
+//            C3 += x[k][i][D];
+//        }
+//    }
+//    model.addConstr(C3 == 1, "C3");
+//
+//    ///////////// C4
+//    for (int k = 1; k <= node_max_stage-1; k++) {
+//        for (int i = 0; i < D; i++) {
+//            GRBLinExpr lhs, rhs;
+//            for (int j = 0; j <= D; j++) {
+//                if (i != j) {
+//                    lhs += x[k][i][j];
+//                }
+//            }
+//            for (int j = 0; j < D; j++) {
+//                if (i != j) {
+//                    rhs += x[k+1][j][i];
+//                }
+//            }
+//            model.addConstr(lhs == rhs, "C4_" + std::to_string(k) + "_" + std::to_string(i));
+//        }
+//    }
+//
+//    ////////////// C6
+//    for (int k = 1; k <= node_max_stage; k++) {
+//        for (int k_p = 1; k_p <= node_max_stage; k_p++) {
+//            if (k < k_p) {
+//                GRBLinExpr rhs;
+//                for (int i = 0; i < D; i++) { // start can't include D.
+//                    for (int j = 0; j <= D; j++) { // end can include D.
+//                        if (i != j) {
+//                            for (int h:C) {
+//                                if (h != i && h != j) {
+//                                    rhs += Z[k][k_p][i][j][h];
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//                model.addConstr(z[k][k_p] == rhs, "C6_" + std::to_string(k) + "_to_" + std::to_string(k_p));
+//            }
+//        }
+//    }
+//
+//    ////////// C7
+//    for (int k = 1; k <= node_max_stage; k++) {
+//        for (int k_p = 1; k_p <= node_max_stage; k_p++) {
+//            if (k < k_p) {
+//                for (int l = 1; l <= node_max_stage; l++) {
+//                    for (int l_p = 1; l_p <= node_max_stage; l_p++) {
+//                        if (k <= l && l < k_p) {
+//                            model.addConstr(z[k][k_p] + z[l][l_p] <= 1, "C7_" + std::to_string(k) + "_" + std::to_string(k_p) + "_" + std::to_string(l) + "_" + std::to_string(l_p));
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    /////////// C8
+//    for (int i = 0; i < D; i++) {
+//        for (int k = 1; k <= node_max_stage; k++) {
+//            for (int k_p = 1; k_p <= node_max_stage; k_p++) {
+//                if (k < k_p) {
+//                    for (int j = 0; j <= D; j++) {
+//                        if (i != j) {
+//                            for (int h:C) {
+//                                if (i != h && h != j) {
+//                                    model.addConstr(Z[k][k_p][i][j][h] <= X[i][k], "C8_launch_NEED_REVIEW_COMBINE" + std::to_string(i) + "_" + std::to_string(k));
+//                                    model.addConstr(Z[k][k_p][i][j][h] <= X[j][k_p], "C8_rendezvous_NEED_REVIEW_COMBINE" + std::to_string(j)+ "_" + std::to_string(k_p));
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    //////// C9
+//    for (int h:C) {
+//        GRBLinExpr rhs;
+//        for (int i = 0; i < D; i++) {
+//            for (int j = 0; j <= D; j++) {
+//                if (i != j && i != h && j != h) {
+//                    for (int k = 1; k <= node_max_stage; k++) {
+//                        for (int k_p = 1; k_p <= node_max_stage; k_p++) {
+//                            if (k < k_p) {
+//                                rhs += Z[k][k_p][i][j][h];
+//                            }
+//                        }
+//                    }
+//                }
+//
+//            }
+//        }
+//        model.addConstr(phi[h] == rhs, "C9_" + std::to_string(h));
+//    }
+//
+//    //////////// C10
+//    for (int h:C) {
+//        GRBLinExpr sum_k;
+//        for (int k = 1; k <= node_max_stage; k++) {
+//            sum_k += X[h][k];
+//        }
+//        model.addConstr(phi[h] + sum_k >= 1, "C10_" + std::to_string(h));
+//    }
+//
+//    //////////////// C11
+//    for (int h:C) {
+//        GRBLinExpr sum;
+//        for (int k = 1; k <= node_max_stage; k++) {
+//            for (int k_p = 1; k_p <= node_max_stage; k_p++) {
+//                if (k < k_p) {
+//                    for (int i = 0; i < D; i++) {
+//                        for (int j = 0; j <= D; j++) {
+//                            if (i != j &&i != h && j != h) {
+//                                sum += Z[k][k_p][i][j][h] * (tau_prime[i][h] + tau_prime[h][j]);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        model.addConstr(sum <= dtl, "C11_" + std::to_string(h));
+//    }
+//
+//    /////////// C14
+//    for (int k = 1; k <= node_max_stage; k++) {
+//        GRBLinExpr sum;
+//        for (int i = 0; i < D; i++) {
+//            for (int j = 0; j <= D; j++) {
+//                if (i != j) {
+//                    sum += x[k][i][j] * tau[i][j];
+//                }
+//            }
+//        }
+//        model.addConstr(a[k+1] >= d[k] + sum, "C14_" + std::to_string(k) + "_" + std::to_string(k+1));
+//    }
+//
+//    ////////// C15
+//    auto M = 100000;
+//    for (int k = 1; k <= node_max_stage; k++) {
+//        for (int k_p = 1; k_p <= node_max_stage; k_p++) {
+//            if (k < k_p) {
+//                model.addConstr(a[k_p] - d[k] <= z[k][k_p] * dtl + (1-z[k][k_p]) * M, "C15_" + std::to_string(k) + "_" + std::to_string(k_p));
+//                GRBLinExpr rhs;
+//                for (int i = 0; i < D; i++) {
+//                    for (int j = 0; j <= D; j++) {
+//                        if (i != j) {
+//                            for (int h:C) {
+//                                if (h != i && h != j) {
+//                                    rhs += Z[k][k_p][i][j][h] * (tau_prime[i][h] + tau_prime[h][j]);
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//                model.addConstr(d[k_p]- d[k] >= rhs, "C16_" + std::to_string(k) + "_" + std::to_string(k_p));
+//            }
+//        }
+//    }
+//
+//    GRBVar max = model.addVar(0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "objective");
+////    model.addConstr(max > 1);
+//    GRBLinExpr objective;
+//    for (int k = 1; k <= node_max_stage; k++) {
+//        model.addConstr(max >= a[k], "C_objective>=arrival_of_" + std::to_string(k));
+//    }
+//    objective += max;
+//    model.setObjective(objective, GRB_MINIMIZE);
+//    model.update();
+//    model.write("model.lp");
+//    model.optimize();
+//}
+//
+//
+//
+//
