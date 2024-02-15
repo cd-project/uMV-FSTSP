@@ -1295,6 +1295,8 @@ Result Solver::mvdSolver(int n_thread, int e) {
             }
         }
     }
+
+    // aux var z_{k, k_p}: sortie launch from k and rendezvous at k_p.
     auto** z = new GRBVar *[n+1];
     for (int k = 1; k <= node_max_stage-1; k++) {
         z[k] = reinterpret_cast<GRBVar *>(new GRBVar *[n+1]);
@@ -1313,13 +1315,21 @@ Result Solver::mvdSolver(int n_thread, int e) {
         d[k] = model.addVar(0, GRB_INFINITY, 0.0, GRB_CONTINUOUS,"t_" + std::to_string(k));
         model.addConstr(d[k] >= a[k], "C13_" + std::to_string(k));
     }
+    model.addConstr(a[O] == 0);
+    model.addConstr(d[0] == 0);
 
-
-    for (int k:V) {
-        for (int i:V) {
-            GRBLinExpr sum;
-            for (int j:V) {
-                sum += x[k][i][j];
+    ////////// Constraint C1: k la node stage, cap (i, k)
+    for (int k = 1; k <= node_max_stage; k++) {
+        for (int i = 0; i < D; i++) {
+            if (i != D) { // i == D => khong co i -> j.
+                GRBLinExpr sum;
+                for (int j = 1; j <= D; j++) {
+                    if (i != j) {
+                        sum += x[k][i][j];
+                    }
+                }
+                // neu node i la node_stage k thi canh (i, j) la arc_stage k.
+                model.addConstr(X[i][k] == sum, "C1_" + std::to_string(k) + "_" + std::to_string(i));
             }
         }
     }

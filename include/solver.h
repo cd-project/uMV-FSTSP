@@ -8,6 +8,7 @@
 #include <memory>
 #include "instance.h"
 #include <gurobi_c++.h>
+        #include<ilcplex/ilocplex.h>
 class Sortie {
 public:
     int target;
