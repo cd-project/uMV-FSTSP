@@ -30,7 +30,7 @@ int main(int argc, char**argv) {
 
     auto instance = std::make_shared<Instance>(folder_path);
     auto solver = std::make_shared<Solver>(instance);
-                    auto result = solver->mvdSolver(
+                    auto result = solver->mvdSolverCPLEX(
             20, 20);
     if (write) {
         auto i_name_split = SplitStringWithDelimiter(folder_path, "/");
