@@ -33,5 +33,6 @@ public:
     Result OriginalSolver(int n_thread, int e);
     Result uMVFSTSPSolver(int n_thread, int dtl);
     Result mvdSolver(int n_thread, int e);
+    Result mvdSolverCPLEX(int n_thread, int e);
 };
 #endif //UMV_FSTSP_SOLVER_H
