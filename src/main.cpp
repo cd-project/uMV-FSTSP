@@ -28,7 +28,7 @@ int main(int argc, char**argv) {
     }
     std::cout << "Instance name: " << folder_path << std::endl;
 
-    auto instance = std::make_shared<Instance>(folder_path);
+    auto instance = std::make_shared<Instance>(folder_path, true);
     auto solver = std::make_shared<Solver>(instance);
                     auto result = solver->mvdSolverCPLEX(
             20, 20);

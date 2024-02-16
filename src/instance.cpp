@@ -1,6 +1,7 @@
 //
 // Created by cuong on 18/01/2024.
 //
+#include <cmath>
 #include "../include/instance.h"
 
 static std::vector <std::string> SplitStringWithDelimiter(const std::string& s, const std::string& delimiter) {
@@ -18,7 +19,7 @@ static std::vector <std::string> SplitStringWithDelimiter(const std::string& s, 
     return returnValue;
 }
 
-Instance::Instance(const std::string file_path) {
+Instance::Instance(const std::string file_path, bool roundDist) {
     std::string c_prime_path = file_path + "/Cprime.csv";
     std::string nodes_path = file_path + "/nodes.csv";
     std::string tau_path = file_path + "/tau.csv";
@@ -74,7 +75,11 @@ Instance::Instance(const std::string file_path) {
         std::istringstream iss(str);
         for (int j = 0; j < n+1; j++) {
             iss >> d >> c;
-            tau_prime[i][j] = d;
+            if (roundDist) {
+                tau_prime[i][j] = round(d);
+            } else {
+                tau_prime[i][j] = d;
+            }
         }
     }
 
@@ -84,7 +89,12 @@ Instance::Instance(const std::string file_path) {
         std::istringstream iss(str);
         for (int j = 0; j < n+1; j++) {
             iss >> d >> c;
-            tau[i][j] = d;
+            if (roundDist) {
+                tau[i][j] = round(d);
+            } else {
+                tau[i][j] = d;
+
+            }
         }
     }
 

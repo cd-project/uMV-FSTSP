@@ -21,7 +21,7 @@ public:
     std::vector<int> c_prime;
     std::vector<int> heavy;
 
-    explicit Instance(const std::string folder_path);
+    Instance(const std::string folder_path, bool roundDist);
 //    static std::vector<std::string> SplitStringWithDelimiter(const std::string& s, const std::string& delimiter);
 };
 #endif //UMV_FSTSP_INSTANCE_H
