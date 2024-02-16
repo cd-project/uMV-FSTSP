@@ -59,6 +59,7 @@ Instance::Instance(const std::string file_path) {
     std::cout << std::endl;
     getline(n_ifs, str);
     n-=1;
+    n= 5;
     num_node = n;
     tau.resize(num_node+1);
     tau_prime.resize(num_node+1);

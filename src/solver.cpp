@@ -1684,7 +1684,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
         v_name = "d_" + std::to_string(k);
         d[k].setName(v_name.c_str());
         // , "C13_" + std::to_string(k)
-        model.add(d[k] >= a[k]);
+        model.add(d[k] >= a[k]).setName(("C13_" + std::to_string(k)).c_str());
     }
 
     model.add(a[O] == 0);
@@ -1704,7 +1704,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
 
                 // neu node i la node_stage k, i khac D thi kieu gi cung co canh i, j.
                 // , "C1_" + std::to_string(k) + "_" + std::to_string(i)
-                model.add(X[i][k] == sum);
+                model.add(X[i][k] == sum).setName(("C1_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
             }
         }
     }
@@ -1715,7 +1715,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
         C2 += x[1][O][i];
     }
     // , "C2"
-    model.add(C2 == 1);
+    model.add(C2 == 1).setName("C2");
 
     ///////////// C3: arc_stage
     IloExpr C3(env);
@@ -1725,7 +1725,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
         }
     }
     // , "C3"
-    model.add(C3 == 1);
+    model.add(C3 == 1).setName("C3");
     ///////////// C4: arc_stage
     for (int k = 1; k <= arc_max_stage-1; k++) {
         for (int i = 1; i < D; i++) {
@@ -1743,7 +1743,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
             }
             // enter i tai stage k thi leave i tai stage k+1.
             // , "C4_" + std::to_string(k) + "_" + std::to_string(i)
-            model.add(lhs == rhs);
+            model.add(lhs == rhs).setName(("C4_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
         }
     }
 
@@ -1765,7 +1765,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
                 }
                 // z_(k,k') bool: co sortie di tu launch = k, end = k'. bang tong Z(k, k')_(i, j, h).
                 // , "C6_" + std::to_string(k) + "_to_" + std::to_string(k_p)
-                model.add(z[k][k_p] == rhs);
+                model.add(z[k][k_p] == rhs).setName(("C6_" + std::to_string(k) + "_to_" + std::to_string(k_p)).c_str());
             }
         }
     }
@@ -1780,7 +1780,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
                         if (k <= l && l < k_p && l < l_p) {
                             // tranh drone bay cac doan giao nhau.
                             // , "C7_" + std::to_string(k) + "_" + std::to_string(k_p) + "_" + std::to_string(l) + "_" + std::to_string(l_p)
-                            model.add(z[k][k_p] + z[l][l_p] <= 1);
+                            model.add(z[k][k_p] + z[l][l_p] <= 1).setName(("C7_" + std::to_string(k) + "_" + std::to_string(k_p) + "_" + std::to_string(l) + "_" + std::to_string(l_p)).c_str());
                         }
                     }
                 }
@@ -1797,10 +1797,10 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
                         if (i != j) {
                             for (int h:C) {
                                 if (i != h && h != j) {
-                                    // , "C8_launch_NEED_REVIEW_COMBINE" + std::to_string(i) + "_" + std::to_string(k)
-                                    model.add(Z[k][k_p][i][j][h] <= X[i][k]);
+                                    // , "C8_launch_" + std::to_string(i) + "_" + std::to_string(k)
+                                    model.add(Z[k][k_p][i][j][h] <= X[i][k]).setName(("C8_launch_" + std::to_string(i) + "_" + std::to_string(k)).c_str());
                                     // , "C8_rendezvous_NEED_REVIEW_COMBINE" + std::to_string(j)+ "_" + std::to_string(k_p)
-                                    model.add(Z[k][k_p][i][j][h] <= X[j][k_p]);
+                                    model.add(Z[k][k_p][i][j][h] <= X[j][k_p]).setName(("C8_rendezvous_" + std::to_string(j)+ "_" + std::to_string(k_p)).c_str());
                                 }
                             }
                         }
@@ -1829,8 +1829,8 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
         }
 
         // consistency constraint cho sortie phuc vu h.
-        model.add(phi[h] == rhs);
-        model.add(rhs <= 1);
+        model.add(phi[h] == rhs).setName(("C9_" + std::to_string(h)).c_str());
+        model.add(rhs <= 1).setName(("C9_both_side_" + std::to_string(h) + "_<=1").c_str());
     }
 
     //////////// C10: node_stage
@@ -1842,7 +1842,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
 
         // phuc vu h it nhat 1 lan.
         // , "C10_" + std::to_string(h)
-        model.add(phi[h] + sum_k >= 1);
+        model.add(phi[h] + sum_k >= 1).setName(("C10_" + std::to_string(h)).c_str());
     }
 
     //////////////// C11: node_stage
@@ -1864,7 +1864,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
 
         // drone time constraint (i -> h, h -> j) <= dtl. trong giong tien xu ly.
         // , "C11_" + std::to_string(h)
-        model.add(sum <= dtl);
+        model.add(sum <= dtl).setName(("C11_" + std::to_string(h)).c_str());
     }
 
     /////////// C14: node_stage
@@ -1880,7 +1880,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
 
         // o to toi k+1 >= o to den k + thoi gian di chuyen tu k->k+1 (tau_(ij)).
         // , "C14_" + std::to_string(k) + "_" + std::to_string(k+1)
-        model.add(a[k+1] >= d[k] + sum);
+        model.add(a[k+1] >= d[k] + sum).setName(("C14_" + std::to_string(k) + "_" + std::to_string(k+1)).c_str());
     }
 
     ////////// C15: node_stage
@@ -1891,7 +1891,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
 
                 // o to phai den k_p tu k trong khoang thoi gian <= dtl.
                 // , "C15_" + std::to_string(k) + "_" + std::to_string(k_p)
-                model.add(a[k_p] - d[k] <= z[k][k_p] * dtl + (1-z[k][k_p]) * M);
+                model.add(a[k_p] - d[k] <= z[k][k_p] * dtl + (1-z[k][k_p]) * M).setName(("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
 
                 IloExpr rhs(env);
                 for (int i = 0; i < D; i++) {
@@ -1908,7 +1908,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
 
                 // vehicle phai doi drone truoc khi di chuyen.
                 // , "C16_" + std::to_string(k) + "_" + std::to_string(k_p)
-                model.add(d[k_p]- d[k] >= rhs);
+                model.add(d[k_p]- d[k] >= rhs).setName(( "C16_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
             }
         }
     }
