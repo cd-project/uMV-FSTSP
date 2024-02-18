@@ -24,13 +24,13 @@ int main(int argc, char**argv) {
         folder_path = "/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/" + std::string(argv[1]);
         write = true;
     } else {
-        folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123437v5";
+        folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/PDSTSP/PDSTSP_20_customer_problems/20140813T124847";
     }
     std::cout << "Instance name: " << folder_path << std::endl;
 
-    auto instance = std::make_shared<Instance>(folder_path, true);
+    auto instance = std::make_shared<Instance>(folder_path, false);
     auto solver = std::make_shared<Solver>(instance);
-                    auto result = solver->mvdSolverCPLEX(
+                    auto result = solver->mvdSolverCPLEXFewerVariables(
             20, 20);
     if (write) {
         auto i_name_split = SplitStringWithDelimiter(folder_path, "/");

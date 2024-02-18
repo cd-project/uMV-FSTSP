@@ -8,7 +8,7 @@
 #include <memory>
 #include "instance.h"
 #include <gurobi_c++.h>
-        #include<ilcplex/ilocplex.h>
+#include<ilcplex/ilocplex.h>
 class Sortie {
 public:
     int target;
@@ -23,17 +23,20 @@ class Result {
 public:
     double cost;
     std::vector<Sortie> sortie;
-    Result(double c, std::vector<Sortie> &st);
+    Result() {}
+    Result(double c, std::vector<Sortie>& st);
 };
 class Solver {
 public:
     std::shared_ptr<Instance> instance;
-    explicit Solver(std::shared_ptr<Instance> &inst) {
+    explicit Solver(std::shared_ptr<Instance>& inst) {
         instance = inst;
     }
     Result OriginalSolver(int n_thread, int e);
     Result uMVFSTSPSolver(int n_thread, int dtl);
     Result mvdSolver(int n_thread, int e);
     Result mvdSolverCPLEX(int n_thread, int e);
+    Result mvdSolverCPLEXFewerVariables(int n_thread, int e);
+
 };
 #endif //UMV_FSTSP_SOLVER_H
