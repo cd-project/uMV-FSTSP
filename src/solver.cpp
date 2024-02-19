@@ -70,502 +70,502 @@ void setPrint(std::vector<int>& set) {
 //    return allSubsets;
 //}
 // Paper: https://drive.google.com/file/d/1CpYCse--JWmrnBY566Obe8IMpcClTpnI/view?usp=sharing
-Result Solver::OriginalSolver(int n_thread, int e) {
-    //    try {
-    auto tau = instance->tau;
-    auto d = instance->tau_prime;
-    auto dtl = e;
-    auto sl = 1, sr = 1;
-    auto n = instance->num_node;
-    auto s = 0, t = n;
-    auto c_prime = instance->c_prime;
-    std::vector<int> c_prime_0;
-    c_prime_0.push_back(0);
-    for (int i : c_prime) {
-        c_prime_0.push_back(i);
-    }
-    c_prime_0.push_back(n);
-    std::cout << "Printing number of nodes: " << n << std::endl;
-    std::vector<int> C;
-    std::vector<int> V;
-    for (int i = 0; i < n + 1; i++) {
-        if (i == 0 || i == n) {
-            V.push_back(i);
-        }
-        else {
-            V.push_back(i);
-            C.push_back(i);
-        }
-    }
-    std::vector<int> c_s;
-    std::vector<int> c_t;
-    for (int i = 0; i < n + 1; i++) {
-        if (i == 0) {
-            c_s.push_back(i);
-        }
-        else if (i == n) {
-            c_t.push_back(i);
-        }
-        else {
-            c_s.push_back(i);
-            c_t.push_back(i);
-        }
-    }
-
-    std::cout << std::endl;
-    GRBEnv env;
-    GRBModel model(env);
-    // y: (i, j) in A, truck route
-    auto** y = new GRBVar * [n + 1];
-    for (int i : c_s) {
-        y[i] = reinterpret_cast<GRBVar*>(new GRBVar * [n + 1]);
-        for (int j : c_t) {
-            y[i][j] = model.addVar(0, 1, 0.0, GRB_BINARY, "y_" + std::to_string(i) + "_" + std::to_string(j));
-            if (i == j) {
-                model.addConstr(y[i][j] == 0);
-            }
-        }
-    }
-    model.addConstr(y[s][t] == 0);
-
-
-    auto** x = new GRBVar * [n + 1];
-    for (int i : c_s) {
-        x[i] = reinterpret_cast<GRBVar*>(new GRBVar * [n + 1]);
-        for (int j : c_t) {
-            x[i][j] = model.addVar(0, 1, 0.0, GRB_BINARY, "x_" + std::to_string(i) + "_" + std::to_string(j));
-            if (i == j) {
-                model.addConstr(x[i][j] == 0);
-            }
-
-        }
-    }
-
-    model.addConstr(x[s][t] == 0);
-
-    // gamma_h_ij
-    auto*** gamma = new GRBVar * *[n + 1];
-    for (int h : C) {
-        gamma[h] = reinterpret_cast<GRBVar**>(new GRBVar * *[n + 1]);
-        for (int i : c_s) {
-            gamma[h][i] = reinterpret_cast<GRBVar*>(new GRBVar * [n + 1]);
-            for (int j : c_t) {
-                gamma[h][i][j] = model.addVar(0, 1, 0.0, GRB_BINARY, "gamma_" + std::to_string(h) + "_" + std::to_string(i) + "_" + std::to_string(j));
-                for (int heavy : instance->heavy) {
-                    if (h == heavy) {
-                        model.addConstr(gamma[h][i][j] == 0);
-                    }
-                }
-                if (i == j) {
-                    model.addConstr(gamma[h][i][j] == 0);
-                }
-            }
-        }
-        model.addConstr(gamma[h][s][t] == 0);
-    }
-
-    std::vector<GRBVar> theta(n + 1);
-    for (int h : V) {
-        theta[h] = model.addVar(0, 1, 0.0, GRB_BINARY, "theta_" + std::to_string(h));
-        for (auto heavy : instance->heavy) {
-            if (h == heavy) {
-                model.addConstr(theta[h] == 0);
-            }
-        }
-        if (h == s || h == t) {
-            model.addConstr(theta[h] == 0);
-        }
-    }
-    auto** omega = new GRBVar * [n + 1];
-    for (int h : C) {
-        omega[h] = reinterpret_cast<GRBVar*>(new GRBVar * [n + 1]);
-        for (int i : V) {
-            omega[h][i] = model.addVar(0, 1, 0.0, GRB_BINARY, "omega_" + std::to_string(h) + "_" + std::to_string(i));
-
-            for (int heavy : instance->heavy) {
-                if (h == heavy) {
-                    model.addConstr(omega[h][i] == 0);
-                }
-            }
-            if (h == i || i == t) {
-                model.addConstr(omega[h][i] == 0);
-            }
-        }
-    }
-    auto** delta = new GRBVar * [n + 1];
-    for (int h : C) {
-        delta[h] = reinterpret_cast<GRBVar*>(new GRBVar * [n + 1]);
-        for (int j : V) {
-            delta[h][j] = model.addVar(0, 1, 0.0, GRB_BINARY, "delta_" + std::to_string(h) + "_" + std::to_string(j));
-            for (int heavy : instance->heavy) {
-                if (h == heavy) {
-                    model.addConstr(delta[h][j] == 0);
-                }
-            }
-            if (h == j || j == s) {
-                model.addConstr(delta[h][j] == 0);
-            }
-        }
-    }
-
-    std::vector<GRBVar> sigma(n + 1);
-    for (int h : c_t) {
-        sigma[h] = model.addVar(0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "sigma_" + std::to_string(h));
-
-        for (int heavy : instance->heavy) {
-            if (h == heavy) {
-                model.addConstr(sigma[h] == 0);
-            }
-        }
-    }
-    auto** phi = new GRBVar * [n + 1];
-    for (int h : C) {
-        phi[h] = reinterpret_cast<GRBVar*>(new GRBVar * [n + 1]);
-        for (int i : c_s) {
-            phi[h][i] = model.addVar(0, 1, 0.0, GRB_BINARY, "phi_" + std::to_string(h) + "_" + std::to_string(i));
-            for (int heavy : instance->heavy) {
-                if (heavy == h) {
-                    model.addConstr(phi[h][i] == 0);
-                }
-            }
-            if (h == i) {
-                model.addConstr(phi[h][i] == 0);
-            }
-        }
-    }
-    GRBLinExpr objective;
-    for (int i : c_s) {
-        for (int j : c_t) {
-            objective += tau[i][j] * y[i][j];
-        }
-    }
-
-    for (int h : C) {
-        objective += (sl + sr) * theta[h];
-        objective -= sl * omega[h][s];
-    }
-    for (int h : c_t) {
-        objective += sigma[h];
-    }
-    GRBLinExpr sum_theta;
-    // Constraint 1
-    GRBLinExpr lhs_1, rhs_1;
-    for (int j : c_t) {
-        lhs_1 += y[s][j];
-    }
-    for (int i : c_s) {
-        rhs_1 += y[i][t];
-    }
-    model.addConstr(lhs_1, GRB_EQUAL, 1, "C1_LHS");
-    model.addConstr(rhs_1, GRB_EQUAL, 1, "C1_RHS");
-
-    // Constraint 2
-    for (int i : C) {
-        GRBLinExpr lhs_2, rhs_2;
-        for (int j : c_t) {
-            lhs_2 += y[i][j];
-        }
-        for (int j : c_s) {
-            rhs_2 += y[j][i];
-
-        }
-        model.addConstr(lhs_2, GRB_EQUAL, rhs_2, "C2_EQUAL_i=" + std::to_string(i));
-        model.addConstr(lhs_2, GRB_LESS_EQUAL, 1, "C2_LHS_LEQ_1_i=" + std::to_string(i));
-        model.addConstr(rhs_2, GRB_LESS_EQUAL, 1, "C2_RHS_LEQ_1_i=" + std::to_string(i));
-    }
-    //    auto setAndCompss = generateSetsAndComplements(C);
-    //    for (auto &pair:setAndCompss) {
-    //        auto S = pair.first;
-    //        auto S_comp = pair.second;
-    //        S_comp.push_back(s);
-    //        S_comp.push_back(t);
-    //        GRBLinExpr lhs, rhs;
-    //        std::string cname = "C3";
-    //        for (int i:S) {
-    //            cname += "_" + std::to_string(i);
-    //            for (int j:S_comp) {
-    //                if (j != s && i != t) {
-    //                    lhs += y[i][j];
-    //                }
-    //            }
-    //        }
-    //        for (int h:S) {
-    //            rhs += theta[h];
-    //        }
-    //        cname += "_(";
-    //        for (int j:S_comp) {
-    //            cname += "_" + std::to_string(j);
-    //        }
-    //        cname += ")";
-    //        model.addConstr(S.size() * lhs >= S.size() - rhs, cname);
-    //    }
-            // Constraint 3
-    auto setAndComps = generateSetsAndComplements(C);
-    for (auto& set : setAndComps) {
-        auto S = set.first;
-        if (S.size() < 2) {
-            continue;
-        }
-        if (S.size() == 2 && S[0] == s && S[1] == t) {
-            continue;
-        }
-        GRBLinExpr sum1, sum2;
-        std::string cname = "C3";
-        for (auto i : S) {
-            cname += "_" + std::to_string(i);
-            if (i != t) {
-                for (auto j : S) {
-                    if (j != s) {
-                        sum1 += y[i][j];
-                    }
-                }
-            }
-        }
-
-        for (auto h : S) {
-            GRBLinExpr sum3;
-            for (auto k : S) {
-                if (h == k || h == s || h == t) {
-                    continue;
-                }
-                else {
-                    sum3 += 1 - theta[k];
-                }
-            }
-
-            model.addConstr(sum1, GRB_LESS_EQUAL, sum3);
-        }
-    }
-    // Constraint 4
-    for (int h : C) {
-        GRBLinExpr lhs_4;
-        std::string cname = "C4_h=" + std::to_string(h);
-        for (int j : c_t) {
-            lhs_4 += gamma[h][s][j];
-        }
-        model.addConstr(lhs_4, GRB_EQUAL, omega[h][s], cname);
-    }
-
-    // Constraint 5
-    for (int h : C) {
-        GRBLinExpr lhs_5;
-        std::string cname = "C5_h=" + std::to_string(h);
-
-        for (int i : c_s) {
-            lhs_5 += gamma[h][i][t];
-        }
-        model.addConstr(lhs_5, GRB_EQUAL, delta[h][t], cname);
-    }
-    // Constraint 6
-    for (int i : C) {
-        for (int h : C) {
-            std::string cname = "C6_i=" + std::to_string(i) + "_h=" + std::to_string(h);
-            GRBLinExpr sum1, sum2;
-            for (int j : c_t) {
-                sum1 += gamma[h][i][j];
-            }
-
-            for (int j : c_s) {
-                sum2 += gamma[h][j][i];
-            }
-            model.addConstr(sum1 - sum2, GRB_EQUAL, omega[h][i] - delta[h][i], cname);
-        }
-    }
-    // Constraint 7
-    for (int j : c_t) {
-        std::string cname = "C7_s_j=" + std::to_string(j);
-        model.addConstr(y[s][j] + x[s][j], GRB_LESS_EQUAL, 1, cname);
-    }
-    // Constraint 8
-    for (int i : c_s) {
-        std::string cname = "C8_i=" + std::to_string(i) + "_t";
-        model.addConstr(y[i][t] + x[i][t], GRB_LESS_EQUAL, 1, cname);
-    }
-    // Constraint 9
-    for (int i : C) {
-        for (int j : C) {
-            std::string cname = "C9_i=" + std::to_string(i) + "_j=" + std::to_string(j);
-            model.addConstr(y[i][j] + x[i][j] + x[j][i], GRB_LESS_EQUAL, 1, cname);
-        }
-    }
-
-    // Constraint 10
-    for (int h : C) {
-        GRBLinExpr sum;
-        std::string cname = "C10_h=" + std::to_string(h);
-        for (int j : c_t) {
-            sum += y[h][j];
-        }
-        model.addConstr(sum + theta[h], GRB_EQUAL, 1, cname);
-    }
-    // Constraint 11
-    for (int i : c_s) {
-        for (int j : c_t) {
-            std::string cname = "C11_i=" + std::to_string(i) + "_j=" + std::to_string(j);
-            GRBLinExpr sum;
-            for (int h : c_prime) {
-                sum += gamma[h][i][j];
-            }
-            model.addConstr(sum, GRB_LESS_EQUAL, y[i][j], cname);
-        }
-    }
-
-
-    // Constraint 12
-    for (int h : C) {
-        GRBLinExpr sum1, sum2;
-
-        for (int i : V) {
-            if (i != h && i != t) {
-                sum1 += omega[h][i];
-            }
-        }
-        for (int j : V) {
-            if (j != s && j != h) {
-                sum2 += delta[h][j];
-            }
-        }
-        model.addConstr(sum1, GRB_EQUAL, theta[h], "C12_RHS_EQUAL_h=" + std::to_string(h));
-        model.addConstr(sum2, GRB_EQUAL, theta[h], "C12_LHS_EQUAL_h=" + std::to_string(h));
-        model.addConstr(sum1 == sum2, "C12_EQUAL_h=" + std::to_string(h));
-    }
-    // Constraint 13
-    for (int i : c_s) {
-        for (int j : c_t) {
-            std::string cname = "C13_i=" + std::to_string(i) + "_j=" + std::to_string(j);
-            model.addConstr(x[i][j], GRB_LESS_EQUAL, theta[i] + theta[j], cname);
-        }
-    }
-    //        // Constraint 14
-    for (int i : c_s) {
-        for (int j : c_t) {
-            if (i != s && j != t) {
-                std::string cname = "C14_i=" + std::to_string(i) + "_j=" + std::to_string(j);
-                model.addConstr(x[i][j], GRB_LESS_EQUAL, omega[j][i] + delta[i][j], cname);
-            }
-        }
-    }
-    // Constraint 15
-    for (int i : c_s) {
-        GRBLinExpr sum1, sum2;
-        std::string cname = "C15_i=" + std::to_string(i);
-        for (int j : c_t) {
-            sum1 += x[i][j];
-        }
-        for (int h : c_prime) {
-            sum2 += omega[h][i];
-        }
-        sum2 += theta[i];
-        model.addConstr(sum1, GRB_EQUAL, sum2, "C15_LHS_RHS_EQUAL_i=" + std::to_string(i));
-        model.addConstr(sum1, GRB_LESS_EQUAL, 1, "C15_LHS_LEQ_1_i=" + std::to_string(i));
-        model.addConstr(sum2, GRB_LESS_EQUAL, 1, "C15_RHS_LEQ_1_i=" + std::to_string(i));
-    }
-    // Constraint 16
-    for (int j : c_t) {
-        GRBLinExpr sum1, sum2;
-        for (int i : c_s) {
-            sum1 += x[i][j];
-        }
-
-        for (int h : c_prime) {
-            sum2 += delta[h][j];
-        }
-        sum2 += theta[j];
-        model.addConstr(sum1, GRB_EQUAL, sum2, "C16_LHS_RHS_EQUAL_j=" + std::to_string(j));
-        model.addConstr(sum1, GRB_LESS_EQUAL, 1, "C16_LHS_LEQ_1_i=" + std::to_string(j));
-        model.addConstr(sum2, GRB_LESS_EQUAL, 1, "C16_RHS_LEQ_1_i=" + std::to_string(j));
-    }
-    // Constraint 17
-    for (int h : c_prime) {
-        GRBLinExpr sum;
-        std::string cname = "C17_h=" + std::to_string(h);
-        for (int i : c_s) {
-            for (int j : c_t) {
-                sum += tau[i][j] * gamma[h][i][j];;
-            }
-        }
-        model.addConstr(sum, GRB_LESS_EQUAL, (dtl - sr) * theta[h], cname);
-    }
-    // Constraint 18
-    for (int h : c_prime) {
-        GRBLinExpr sum1;
-        GRBLinExpr sum2;
-        GRBLinExpr sum3;
-        std::string c18_name = "C18_h=" + std::to_string(h);
-        std::string c19_name = "C19_h=" + std::to_string(h);
-
-        for (int i : c_s) {
-            sum1 += d[i][h] * omega[h][i];
-        }
-        for (int j : c_t) {
-            sum2 += d[h][j] * delta[h][j];
-        }
-
-        for (int i : c_s) {
-            for (int j : c_t) {
-                sum3 += tau[i][j] * gamma[h][i][j];
-            }
-        }
-        model.addConstr(sum1 + sum2, GRB_LESS_EQUAL, (dtl - sr) * theta[h], c18_name);
-        model.addConstr(sum1 + sum2 - sum3, GRB_LESS_EQUAL, sigma[h], c19_name);
-    }
-    //    auto s_c_V = generateSetsAndComplements(V);
-    //    for (auto &pair:s_c_V) {
-    //        auto S = pair.first;
-    //        if (S.size() < 2) {
-    //            continue;
-    //        } else {
-    //            for (int h: C) {
-    //                GRBLinExpr s1, s2;
-    //                for (int i:S) {
-    //                    if (i != t) {
-    //                        s2 += omega[h][i];
-    //                    }
-    //                    if (i != s) {
-    //                        s2 += delta[h][i];
-    //                    }
-    //                    if (i != s && i != t) {
-    //                        s2 += phi[h][i];
-    //                    }
-    //                    for (int j: S) {
-    //                        if (i != j && i != t && j != s) {
-    //                            s1 += gamma[h][i][j];
-    //                        }
-    //                    }
-    //                }
-    ////                model.addConstr(s1 == 1);
-    ////                model.addConstr(s2 == 1);
-    //                model.addConstr(s1 <= s2); // render the model infeasible. what can be the fix?
-    //            }
-    //        }
-    //    }
-    //    // phi constraint
-    //    for (int h:C) {
-    //        for (int i:c_s) {
-    //            GRBLinExpr sum;
-    //            for (int j:c_t) {
-    //                sum += gamma[h][i][j];
-    //            }
-    //            model.addConstr(sum == phi[h][i] + omega[h][i]);
-    //            model.addConstr(phi[h][i] + omega[h][i] <= 1);
-    //            model.addConstr(sum <= 1);
-    //        }
-    //    }
-
-    model.setObjective(objective, GRB_MINIMIZE);
-    model.set(GRB_IntParam_Threads, n_thread);
-    model.update();
-    model.write("model.lp");
-    model.optimize();
-    std::vector<Sortie> st;
-    for (int h : C) {
-        if (theta[h].get(GRB_DoubleAttr_X) == 1) {
-            //            auto trip = Sortie(h, _, _, _);
-            //            st.push_back(trip);
-        }
-    }
-    return Result{ model.get(GRB_DoubleAttr_ObjVal), st };
-}
+//Result Solver::OriginalSolver(int n_thread, int e) {
+//    //    try {
+//    auto tau = instance->tau;
+//    auto d = instance->tau_prime;
+//    auto dtl = e;
+//    auto sl = 1, sr = 1;
+//    auto n = instance->num_node;
+//    auto s = 0, t = n;
+//    auto c_prime = instance->c_prime;
+//    std::vector<int> c_prime_0;
+//    c_prime_0.push_back(0);
+//    for (int i : c_prime) {
+//        c_prime_0.push_back(i);
+//    }
+//    c_prime_0.push_back(n);
+//    std::cout << "Printing number of nodes: " << n << std::endl;
+//    std::vector<int> C;
+//    std::vector<int> V;
+//    for (int i = 0; i < n + 1; i++) {
+//        if (i == 0 || i == n) {
+//            V.push_back(i);
+//        }
+//        else {
+//            V.push_back(i);
+//            C.push_back(i);
+//        }
+//    }
+//    std::vector<int> c_s;
+//    std::vector<int> c_t;
+//    for (int i = 0; i < n + 1; i++) {
+//        if (i == 0) {
+//            c_s.push_back(i);
+//        }
+//        else if (i == n) {
+//            c_t.push_back(i);
+//        }
+//        else {
+//            c_s.push_back(i);
+//            c_t.push_back(i);
+//        }
+//    }
+//
+//    std::cout << std::endl;
+//    GRBEnv env;
+//    GRBModel model(env);
+//    // y: (i, j) in A, truck route
+//    auto** y = new GRBVar * [n + 1];
+//    for (int i : c_s) {
+//        y[i] = reinterpret_cast<GRBVar*>(new GRBVar * [n + 1]);
+//        for (int j : c_t) {
+//            y[i][j] = model.addVar(0, 1, 0.0, GRB_BINARY, "y_" + std::to_string(i) + "_" + std::to_string(j));
+//            if (i == j) {
+//                model.addConstr(y[i][j] == 0);
+//            }
+//        }
+//    }
+//    model.addConstr(y[s][t] == 0);
+//
+//
+//    auto** x = new GRBVar * [n + 1];
+//    for (int i : c_s) {
+//        x[i] = reinterpret_cast<GRBVar*>(new GRBVar * [n + 1]);
+//        for (int j : c_t) {
+//            x[i][j] = model.addVar(0, 1, 0.0, GRB_BINARY, "x_" + std::to_string(i) + "_" + std::to_string(j));
+//            if (i == j) {
+//                model.addConstr(x[i][j] == 0);
+//            }
+//
+//        }
+//    }
+//
+//    model.addConstr(x[s][t] == 0);
+//
+//    // gamma_h_ij
+//    auto*** gamma = new GRBVar * *[n + 1];
+//    for (int h : C) {
+//        gamma[h] = reinterpret_cast<GRBVar**>(new GRBVar * *[n + 1]);
+//        for (int i : c_s) {
+//            gamma[h][i] = reinterpret_cast<GRBVar*>(new GRBVar * [n + 1]);
+//            for (int j : c_t) {
+//                gamma[h][i][j] = model.addVar(0, 1, 0.0, GRB_BINARY, "gamma_" + std::to_string(h) + "_" + std::to_string(i) + "_" + std::to_string(j));
+//                for (int heavy : instance->heavy) {
+//                    if (h == heavy) {
+//                        model.addConstr(gamma[h][i][j] == 0);
+//                    }
+//                }
+//                if (i == j) {
+//                    model.addConstr(gamma[h][i][j] == 0);
+//                }
+//            }
+//        }
+//        model.addConstr(gamma[h][s][t] == 0);
+//    }
+//
+//    std::vector<GRBVar> theta(n + 1);
+//    for (int h : V) {
+//        theta[h] = model.addVar(0, 1, 0.0, GRB_BINARY, "theta_" + std::to_string(h));
+//        for (auto heavy : instance->heavy) {
+//            if (h == heavy) {
+//                model.addConstr(theta[h] == 0);
+//            }
+//        }
+//        if (h == s || h == t) {
+//            model.addConstr(theta[h] == 0);
+//        }
+//    }
+//    auto** omega = new GRBVar * [n + 1];
+//    for (int h : C) {
+//        omega[h] = reinterpret_cast<GRBVar*>(new GRBVar * [n + 1]);
+//        for (int i : V) {
+//            omega[h][i] = model.addVar(0, 1, 0.0, GRB_BINARY, "omega_" + std::to_string(h) + "_" + std::to_string(i));
+//
+//            for (int heavy : instance->heavy) {
+//                if (h == heavy) {
+//                    model.addConstr(omega[h][i] == 0);
+//                }
+//            }
+//            if (h == i || i == t) {
+//                model.addConstr(omega[h][i] == 0);
+//            }
+//        }
+//    }
+//    auto** delta = new GRBVar * [n + 1];
+//    for (int h : C) {
+//        delta[h] = reinterpret_cast<GRBVar*>(new GRBVar * [n + 1]);
+//        for (int j : V) {
+//            delta[h][j] = model.addVar(0, 1, 0.0, GRB_BINARY, "delta_" + std::to_string(h) + "_" + std::to_string(j));
+//            for (int heavy : instance->heavy) {
+//                if (h == heavy) {
+//                    model.addConstr(delta[h][j] == 0);
+//                }
+//            }
+//            if (h == j || j == s) {
+//                model.addConstr(delta[h][j] == 0);
+//            }
+//        }
+//    }
+//
+//    std::vector<GRBVar> sigma(n + 1);
+//    for (int h : c_t) {
+//        sigma[h] = model.addVar(0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "sigma_" + std::to_string(h));
+//
+//        for (int heavy : instance->heavy) {
+//            if (h == heavy) {
+//                model.addConstr(sigma[h] == 0);
+//            }
+//        }
+//    }
+//    auto** phi = new GRBVar * [n + 1];
+//    for (int h : C) {
+//        phi[h] = reinterpret_cast<GRBVar*>(new GRBVar * [n + 1]);
+//        for (int i : c_s) {
+//            phi[h][i] = model.addVar(0, 1, 0.0, GRB_BINARY, "phi_" + std::to_string(h) + "_" + std::to_string(i));
+//            for (int heavy : instance->heavy) {
+//                if (heavy == h) {
+//                    model.addConstr(phi[h][i] == 0);
+//                }
+//            }
+//            if (h == i) {
+//                model.addConstr(phi[h][i] == 0);
+//            }
+//        }
+//    }
+//    GRBLinExpr objective;
+//    for (int i : c_s) {
+//        for (int j : c_t) {
+//            objective += tau[i][j] * y[i][j];
+//        }
+//    }
+//
+//    for (int h : C) {
+//        objective += (sl + sr) * theta[h];
+//        objective -= sl * omega[h][s];
+//    }
+//    for (int h : c_t) {
+//        objective += sigma[h];
+//    }
+//    GRBLinExpr sum_theta;
+//    // Constraint 1
+//    GRBLinExpr lhs_1, rhs_1;
+//    for (int j : c_t) {
+//        lhs_1 += y[s][j];
+//    }
+//    for (int i : c_s) {
+//        rhs_1 += y[i][t];
+//    }
+//    model.addConstr(lhs_1, GRB_EQUAL, 1, "C1_LHS");
+//    model.addConstr(rhs_1, GRB_EQUAL, 1, "C1_RHS");
+//
+//    // Constraint 2
+//    for (int i : C) {
+//        GRBLinExpr lhs_2, rhs_2;
+//        for (int j : c_t) {
+//            lhs_2 += y[i][j];
+//        }
+//        for (int j : c_s) {
+//            rhs_2 += y[j][i];
+//
+//        }
+//        model.addConstr(lhs_2, GRB_EQUAL, rhs_2, "C2_EQUAL_i=" + std::to_string(i));
+//        model.addConstr(lhs_2, GRB_LESS_EQUAL, 1, "C2_LHS_LEQ_1_i=" + std::to_string(i));
+//        model.addConstr(rhs_2, GRB_LESS_EQUAL, 1, "C2_RHS_LEQ_1_i=" + std::to_string(i));
+//    }
+//    //    auto setAndCompss = generateSetsAndComplements(C);
+//    //    for (auto &pair:setAndCompss) {
+//    //        auto S = pair.first;
+//    //        auto S_comp = pair.second;
+//    //        S_comp.push_back(s);
+//    //        S_comp.push_back(t);
+//    //        GRBLinExpr lhs, rhs;
+//    //        std::string cname = "C3";
+//    //        for (int i:S) {
+//    //            cname += "_" + std::to_string(i);
+//    //            for (int j:S_comp) {
+//    //                if (j != s && i != t) {
+//    //                    lhs += y[i][j];
+//    //                }
+//    //            }
+//    //        }
+//    //        for (int h:S) {
+//    //            rhs += theta[h];
+//    //        }
+//    //        cname += "_(";
+//    //        for (int j:S_comp) {
+//    //            cname += "_" + std::to_string(j);
+//    //        }
+//    //        cname += ")";
+//    //        model.addConstr(S.size() * lhs >= S.size() - rhs, cname);
+//    //    }
+//            // Constraint 3
+//    auto setAndComps = generateSetsAndComplements(C);
+//    for (auto& set : setAndComps) {
+//        auto S = set.first;
+//        if (S.size() < 2) {
+//            continue;
+//        }
+//        if (S.size() == 2 && S[0] == s && S[1] == t) {
+//            continue;
+//        }
+//        GRBLinExpr sum1, sum2;
+//        std::string cname = "C3";
+//        for (auto i : S) {
+//            cname += "_" + std::to_string(i);
+//            if (i != t) {
+//                for (auto j : S) {
+//                    if (j != s) {
+//                        sum1 += y[i][j];
+//                    }
+//                }
+//            }
+//        }
+//
+//        for (auto h : S) {
+//            GRBLinExpr sum3;
+//            for (auto k : S) {
+//                if (h == k || h == s || h == t) {
+//                    continue;
+//                }
+//                else {
+//                    sum3 += 1 - theta[k];
+//                }
+//            }
+//
+//            model.addConstr(sum1, GRB_LESS_EQUAL, sum3);
+//        }
+//    }
+//    // Constraint 4
+//    for (int h : C) {
+//        GRBLinExpr lhs_4;
+//        std::string cname = "C4_h=" + std::to_string(h);
+//        for (int j : c_t) {
+//            lhs_4 += gamma[h][s][j];
+//        }
+//        model.addConstr(lhs_4, GRB_EQUAL, omega[h][s], cname);
+//    }
+//
+//    // Constraint 5
+//    for (int h : C) {
+//        GRBLinExpr lhs_5;
+//        std::string cname = "C5_h=" + std::to_string(h);
+//
+//        for (int i : c_s) {
+//            lhs_5 += gamma[h][i][t];
+//        }
+//        model.addConstr(lhs_5, GRB_EQUAL, delta[h][t], cname);
+//    }
+//    // Constraint 6
+//    for (int i : C) {
+//        for (int h : C) {
+//            std::string cname = "C6_i=" + std::to_string(i) + "_h=" + std::to_string(h);
+//            GRBLinExpr sum1, sum2;
+//            for (int j : c_t) {
+//                sum1 += gamma[h][i][j];
+//            }
+//
+//            for (int j : c_s) {
+//                sum2 += gamma[h][j][i];
+//            }
+//            model.addConstr(sum1 - sum2, GRB_EQUAL, omega[h][i] - delta[h][i], cname);
+//        }
+//    }
+//    // Constraint 7
+//    for (int j : c_t) {
+//        std::string cname = "C7_s_j=" + std::to_string(j);
+//        model.addConstr(y[s][j] + x[s][j], GRB_LESS_EQUAL, 1, cname);
+//    }
+//    // Constraint 8
+//    for (int i : c_s) {
+//        std::string cname = "C8_i=" + std::to_string(i) + "_t";
+//        model.addConstr(y[i][t] + x[i][t], GRB_LESS_EQUAL, 1, cname);
+//    }
+//    // Constraint 9
+//    for (int i : C) {
+//        for (int j : C) {
+//            std::string cname = "C9_i=" + std::to_string(i) + "_j=" + std::to_string(j);
+//            model.addConstr(y[i][j] + x[i][j] + x[j][i], GRB_LESS_EQUAL, 1, cname);
+//        }
+//    }
+//
+//    // Constraint 10
+//    for (int h : C) {
+//        GRBLinExpr sum;
+//        std::string cname = "C10_h=" + std::to_string(h);
+//        for (int j : c_t) {
+//            sum += y[h][j];
+//        }
+//        model.addConstr(sum + theta[h], GRB_EQUAL, 1, cname);
+//    }
+//    // Constraint 11
+//    for (int i : c_s) {
+//        for (int j : c_t) {
+//            std::string cname = "C11_i=" + std::to_string(i) + "_j=" + std::to_string(j);
+//            GRBLinExpr sum;
+//            for (int h : c_prime) {
+//                sum += gamma[h][i][j];
+//            }
+//            model.addConstr(sum, GRB_LESS_EQUAL, y[i][j], cname);
+//        }
+//    }
+//
+//
+//    // Constraint 12
+//    for (int h : C) {
+//        GRBLinExpr sum1, sum2;
+//
+//        for (int i : V) {
+//            if (i != h && i != t) {
+//                sum1 += omega[h][i];
+//            }
+//        }
+//        for (int j : V) {
+//            if (j != s && j != h) {
+//                sum2 += delta[h][j];
+//            }
+//        }
+//        model.addConstr(sum1, GRB_EQUAL, theta[h], "C12_RHS_EQUAL_h=" + std::to_string(h));
+//        model.addConstr(sum2, GRB_EQUAL, theta[h], "C12_LHS_EQUAL_h=" + std::to_string(h));
+//        model.addConstr(sum1 == sum2, "C12_EQUAL_h=" + std::to_string(h));
+//    }
+//    // Constraint 13
+//    for (int i : c_s) {
+//        for (int j : c_t) {
+//            std::string cname = "C13_i=" + std::to_string(i) + "_j=" + std::to_string(j);
+//            model.addConstr(x[i][j], GRB_LESS_EQUAL, theta[i] + theta[j], cname);
+//        }
+//    }
+//    //        // Constraint 14
+//    for (int i : c_s) {
+//        for (int j : c_t) {
+//            if (i != s && j != t) {
+//                std::string cname = "C14_i=" + std::to_string(i) + "_j=" + std::to_string(j);
+//                model.addConstr(x[i][j], GRB_LESS_EQUAL, omega[j][i] + delta[i][j], cname);
+//            }
+//        }
+//    }
+//    // Constraint 15
+//    for (int i : c_s) {
+//        GRBLinExpr sum1, sum2;
+//        std::string cname = "C15_i=" + std::to_string(i);
+//        for (int j : c_t) {
+//            sum1 += x[i][j];
+//        }
+//        for (int h : c_prime) {
+//            sum2 += omega[h][i];
+//        }
+//        sum2 += theta[i];
+//        model.addConstr(sum1, GRB_EQUAL, sum2, "C15_LHS_RHS_EQUAL_i=" + std::to_string(i));
+//        model.addConstr(sum1, GRB_LESS_EQUAL, 1, "C15_LHS_LEQ_1_i=" + std::to_string(i));
+//        model.addConstr(sum2, GRB_LESS_EQUAL, 1, "C15_RHS_LEQ_1_i=" + std::to_string(i));
+//    }
+//    // Constraint 16
+//    for (int j : c_t) {
+//        GRBLinExpr sum1, sum2;
+//        for (int i : c_s) {
+//            sum1 += x[i][j];
+//        }
+//
+//        for (int h : c_prime) {
+//            sum2 += delta[h][j];
+//        }
+//        sum2 += theta[j];
+//        model.addConstr(sum1, GRB_EQUAL, sum2, "C16_LHS_RHS_EQUAL_j=" + std::to_string(j));
+//        model.addConstr(sum1, GRB_LESS_EQUAL, 1, "C16_LHS_LEQ_1_i=" + std::to_string(j));
+//        model.addConstr(sum2, GRB_LESS_EQUAL, 1, "C16_RHS_LEQ_1_i=" + std::to_string(j));
+//    }
+//    // Constraint 17
+//    for (int h : c_prime) {
+//        GRBLinExpr sum;
+//        std::string cname = "C17_h=" + std::to_string(h);
+//        for (int i : c_s) {
+//            for (int j : c_t) {
+//                sum += tau[i][j] * gamma[h][i][j];;
+//            }
+//        }
+//        model.addConstr(sum, GRB_LESS_EQUAL, (dtl - sr) * theta[h], cname);
+//    }
+//    // Constraint 18
+//    for (int h : c_prime) {
+//        GRBLinExpr sum1;
+//        GRBLinExpr sum2;
+//        GRBLinExpr sum3;
+//        std::string c18_name = "C18_h=" + std::to_string(h);
+//        std::string c19_name = "C19_h=" + std::to_string(h);
+//
+//        for (int i : c_s) {
+//            sum1 += d[i][h] * omega[h][i];
+//        }
+//        for (int j : c_t) {
+//            sum2 += d[h][j] * delta[h][j];
+//        }
+//
+//        for (int i : c_s) {
+//            for (int j : c_t) {
+//                sum3 += tau[i][j] * gamma[h][i][j];
+//            }
+//        }
+//        model.addConstr(sum1 + sum2, GRB_LESS_EQUAL, (dtl - sr) * theta[h], c18_name);
+//        model.addConstr(sum1 + sum2 - sum3, GRB_LESS_EQUAL, sigma[h], c19_name);
+//    }
+//    //    auto s_c_V = generateSetsAndComplements(V);
+//    //    for (auto &pair:s_c_V) {
+//    //        auto S = pair.first;
+//    //        if (S.size() < 2) {
+//    //            continue;
+//    //        } else {
+//    //            for (int h: C) {
+//    //                GRBLinExpr s1, s2;
+//    //                for (int i:S) {
+//    //                    if (i != t) {
+//    //                        s2 += omega[h][i];
+//    //                    }
+//    //                    if (i != s) {
+//    //                        s2 += delta[h][i];
+//    //                    }
+//    //                    if (i != s && i != t) {
+//    //                        s2 += phi[h][i];
+//    //                    }
+//    //                    for (int j: S) {
+//    //                        if (i != j && i != t && j != s) {
+//    //                            s1 += gamma[h][i][j];
+//    //                        }
+//    //                    }
+//    //                }
+//    ////                model.addConstr(s1 == 1);
+//    ////                model.addConstr(s2 == 1);
+//    //                model.addConstr(s1 <= s2); // render the model infeasible. what can be the fix?
+//    //            }
+//    //        }
+//    //    }
+//    //    // phi constraint
+//    //    for (int h:C) {
+//    //        for (int i:c_s) {
+//    //            GRBLinExpr sum;
+//    //            for (int j:c_t) {
+//    //                sum += gamma[h][i][j];
+//    //            }
+//    //            model.addConstr(sum == phi[h][i] + omega[h][i]);
+//    //            model.addConstr(phi[h][i] + omega[h][i] <= 1);
+//    //            model.addConstr(sum <= 1);
+//    //        }
+//    //    }
+//
+//    model.setObjective(objective, GRB_MINIMIZE);
+//    model.set(GRB_IntParam_Threads, n_thread);
+//    model.update();
+//    model.write("model.lp");
+//    model.optimize();
+//    std::vector<Sortie> st;
+//    for (int h : C) {
+//        if (theta[h].get(GRB_DoubleAttr_X) == 1) {
+//            //            auto trip = Sortie(h, _, _, _);
+//            //            st.push_back(trip);
+//        }
+//    }
+//    return Result{ model.get(GRB_DoubleAttr_ObjVal), st };
+//}
 //
 //Result Solver::uMVFSTSPSolver(int n_thread, int e) {
 //    try {
@@ -1678,6 +1678,9 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
         auto v_name = "phi_" + std::to_string(h);
         phi[h].setName(v_name.c_str());
     }
+    for (auto heavy:instance->heavy) {
+        model.add(phi[heavy] == 0);
+    }
 
     IloArray<IloArray<IloArray<IloArray<IloBoolVarArray>>>> Z(env, node_max_stage);
     for (int k = 1; k <= node_max_stage - 1; k++) {
@@ -1765,7 +1768,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
                 IloExpr sum(env);
                 for (int j = 0; j < D; j++) {
                     if (i != j) {
-                        sum += x[k-1][j][i];
+                        sum += x[k - 1][j][i];
                     }
                 }
                 // arcs entering i at stage k.
@@ -1913,7 +1916,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
     }
 
     for (int j = 1; j <= D; j++) {
-        for (int k_p = 2; k_p <= node_max_stage; k_p ++)
+        for (int k_p = 2; k_p <= node_max_stage; k_p++)
         {
             IloExpr lhs(env);
 
@@ -2069,7 +2072,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
                 auto X_val = cplex.getValue(X[k][i]);
                 //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
 
-                if (abs(X_val - 1)<1e-6) {
+                if (abs(X_val - 1) < 1e-6) {
                     std::cout << "Stage " << k << " at customer " << i << std::endl;
                     break;
                 }
@@ -2078,12 +2081,12 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
         std::cout << "Truck arcs:" << std::endl;
         for (int k = 1; k <= arc_max_stage; k++) {
             for (int i = 0; i < D; i++)
-                for (int j = 1; j <= D;j++)
+                for (int j = 1; j <= D; j++)
                     if (i != j) {
                         auto X_val = cplex.getValue(x[k][i][j]);
                         //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
 
-                        if (abs(X_val - 1)<1e-6) {
+                        if (abs(X_val - 1) < 1e-6) {
                             std::cout << "Arc " << k << " connecting " << i << " and " << j
                                       << " with cost " << tau[i][j] << " " << std::endl;
                             break;
@@ -2099,15 +2102,15 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
         for (int h : C) {
             if (cplex.getValue(phi[h]) == 1) {
                 std::cout << "Customer " << h << " served by drone." << std::endl;
-                for(int k = 1; k < node_max_stage; k++)
-                    for(int k_p = k+1; k_p <= node_max_stage; k_p++)
-                        if (abs(cplex.getValue(z[k][k_p]) - 1)<1e-6) {
+                for (int k = 1; k < node_max_stage; k++)
+                    for (int k_p = k + 1; k_p <= node_max_stage; k_p++)
+                        if (abs(cplex.getValue(z[k][k_p]) - 1) < 1e-6) {
                             for (int i = 0; i < D; i++)
                                 if (i != h)
                                     for (int j = 1; j <= D; j++)
                                         if (j != h && j != i) {
                                             auto Z_val = cplex.getValue(Z[k][k_p][i][j][h]);
-                                            if (abs(Z_val - 1)<1e-6) {
+                                            if (abs(Z_val - 1) < 1e-6) {
                                                 std::cout << "Drone fly from " << i << " at stage " << k <<
                                                           " to serve " << h << " and then fly back to " << j
                                                           << " at stage " << k_p << std::endl;
@@ -2253,6 +2256,9 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
         phi[h].setName(v_name.c_str());
     }
 
+    for (int heavy:instance->heavy) {
+        model.add(phi[heavy] == 0);
+    }
     IloArray<IloArray<IloBoolVarArray>> Y(env, node_max_stage + 1), W(env, node_max_stage + 1);
     for (int k = 1; k <= node_max_stage; k++) {
 
@@ -2275,6 +2281,8 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
 
                         if (i == 0 && k > 1) Y[k][i][h].setBounds(0, 0);
                         if (i == D && k == 1) W[k][i][h].setBounds(0, 0);
+                        if (tau_prime[i][h] > dtl) Y[k][i][h].setBounds(0, 0);
+                        if (tau_prime[h][i] > dtl) W[k][i][h].setBounds(0, 0);
                     }
             }
         }
@@ -2289,7 +2297,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
             IloExpr expr(env);
             for (int h : C)
                 if (h != i)
-                    if (tau_prime[i][h] < dtl) {
+                    if (tau_prime[i][h] <= dtl) {
                         expr += Y[k][i][h];
                     }
             model.add(expr <= X[k][i]).setName(("C17_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
@@ -2302,7 +2310,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
             IloExpr expr(env);
             for (int h : C)
                 if (h != i)
-                    if (tau_prime[h][i] < dtl) {
+                    if (tau_prime[h][i] <= dtl) {
                         expr += W[k][i][h];
                     }
             model.add(expr <= X[k][i]).setName(("C17p_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
@@ -2318,14 +2326,14 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
 
             for (int i = 0; i <= D; i++) {
                 if (i != h && i != D && tau_prime[i][h] <= dtl)
-                    expr += Y[k][i][h]*tau_prime[i][h];
+                    expr += Y[k][i][h] * tau_prime[i][h];
 
                 if (i != h && i != 0 && tau_prime[h][i] <= dtl)
-                    expr += W[k][i][h]*tau_prime[h][i];
+                    expr += W[k][i][h] * tau_prime[h][i];
             }
         }
 
-        model.add(expr <= dtl*phi[h]).setName(("C19_" + std::to_string(h)).c_str());
+        model.add(expr <= dtl * phi[h]).setName(("C19_" + std::to_string(h)).c_str());
 
     }
     //exit(0);
@@ -2361,7 +2369,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
     }
 
     // $Z_{kk'} = \sum_{h}Z^h_{kk'}$: mỗi cặp (k,k') chỉ phục vụ tối đa một khách hàng (C22)
-    for(int k = 1;k < node_max_stage; k++)
+    for (int k = 1; k < node_max_stage; k++)
         for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
             IloExpr expr(env);
             for (int h : C) {
@@ -2504,33 +2512,41 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
 
 
     //////// C7: node_stage
-    for (int k = 1; k <= node_max_stage - 1; k++) {
-        for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
-            for (int l = k; l < k_p; l++) {
-                for (int l_p = l + 1; l_p <= node_max_stage; l_p++) {
-                    //if ((k != l) || (k_p != l_p))
-                    if ((k != l) || (k==l && k_p < l_p))
-                    {
-
-                        // tranh drone bay cac doan giao nhau.
-                        model.add(z[k][k_p] + z[l][l_p] <= 1).setName(("C7_" + std::to_string(k) + "_" + std::to_string(k_p) + "_" + std::to_string(l) + "_" + std::to_string(l_p)).c_str());
-                    }
-                }
-            }
-        }
-    }
-
-    //// modified C7
     //for (int k = 1; k <= node_max_stage - 1; k++) {
     //    for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
     //        for (int l = k; l < k_p; l++) {
-    //            {
-    //                // tranh drone bay cac doan giao nhau.
-    //                model.add(z[k][k_p] + R[l] <= 1).setName(("C7m_" + std::to_string(k) + "_" + std::to_string(k_p) + "_" + std::to_string(l)).c_str());
+    //            for (int l_p = l + 1; l_p <= node_max_stage; l_p++) {
+    //                //if ((k != l) || (k_p != l_p))
+    //                if ((k != l) || (k == l && k_p < l_p))
+    //                {
+
+    //                    // tranh drone bay cac doan giao nhau.
+    //                    model.add(z[k][k_p] + z[l][l_p] <= 1).setName(("C7_" + std::to_string(k) + "_" + std::to_string(k_p) + "_" + std::to_string(l) + "_" + std::to_string(l_p)).c_str());
+    //                }
     //            }
     //        }
     //    }
     //}
+
+    // modified C7
+    for (int k = 1; k <= node_max_stage - 1; k++) {
+        for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
+            for (int l = k + 1; l < k_p; l++) {
+                {
+                    // tranh drone bay cac doan giao nhau.
+                    if (k < l) {
+                        model.add(z[k][k_p] + R[l] <= 1).setName(("C7m_" + std::to_string(k)
+                                                                  + "_" + std::to_string(k_p) + "_" + std::to_string(l)).c_str());
+                    }
+                    else {
+                        //model.add(R[k] <= 1).setName(("C7k_" + std::to_string(k)
+                        //    + "_" + std::to_string(k_p) + "_" + std::to_string(l)).c_str());
+                    }
+
+                }
+            }
+        }
+    }
 
 
 
@@ -2569,13 +2585,13 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
     }
 
 
-    // $\phi_h = \sum_{k,i}X^k_{ih} = \sum_{k,i}Y^k_{ih}$ 
-    // - chỉ có duy nhất một điểm xuất phát và môt điểm đích cho 
+    // $\phi_h = \sum_{k,i}X^k_{ih} = \sum_{k,i}Y^k_{ih}$
+    // - chỉ có duy nhất một điểm xuất phát và môt điểm đích cho
     //mỗi khách hàng $h$ được phục vụ bởi drone (C18)
     for (int h : C) {
         IloExpr rhs(env);
         for (int i = 0; i < D; i++) {
-            if (  i != h  )
+            if (i != h && tau_prime[i][h] <= dtl)
                 for (int k = 1; k <= node_max_stage - 1; k++) {
                     rhs += Y[k][i][h];
                 }
@@ -2588,7 +2604,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
     for (int h : C) {
         IloExpr rhs(env);
         for (int i = 1; i <= D; i++) {
-            if (i != h)
+            if (i != h && tau_prime[h][i] <= dtl)
                 for (int k = 2; k <= node_max_stage; k++) {
                     rhs += W[k][i][h];
                 }
@@ -2681,7 +2697,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
             }
         }
         else {
-
+            double obj = 0;
             std::cout << "Feasible solution found!" << std::endl;
             std::cout << "Truck nodes:" << std::endl;
             for (int k = 1; k <= node_max_stage; k++) {
@@ -2690,10 +2706,12 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
                     //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
 
                     if (abs(X_val - 1) < 1e-6) {
-                        std::cout << "Stage " << k << " at customer " << i << std::endl;
+                        auto d_k = cplex.getValue(d[k]);
+                        std::cout << "Stage " << k << " at customer " << i << " with departure time is: " << d_k << std::endl;
                         break;
                     }
                 }
+
             }
             std::cout << "Truck arcs:" << std::endl;
             for (int k = 1; k <= arc_max_stage; k++) {
@@ -2715,18 +2733,27 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
             //IloNumArray phi_val(env);
             //cplex.getValues(phi_val, phi);
 
-            for(int k = 1;k < node_max_stage; k++)
+
+            for (int k = 1; k < node_max_stage; k++)
                 for (int kp = k + 1; kp <= node_max_stage; kp++) {
                     //std::cout << k << " " << kp << std::endl;
                     if (abs(cplex.getValue(z[k][kp]) - 1) < 1e-6) {
                         std::cout << "Drone flies from stage " << k << " to stage " << kp << std::endl;
                     }
                 }
+            for(int h:C)
+                for (int k = 1; k < node_max_stage; k++)
+                    for (int kp = k + 1; kp <= node_max_stage; kp++) {
+                        //std::cout << k << " " << kp << std::endl;
+                        if (abs(cplex.getValue(Z[h][k][kp]) - 1) < 1e-6) {
+                            std::cout << "Drone flies from stage " << k << " to stage " << kp << " to serve customer " << h << std::endl;
+                        }
+                    }
 
             for (int h : C) {
                 //std::cout << "AAAAAAAAAAA Customer " << h << " served by drone." << std::endl;
 
-                if (abs(cplex.getValue(phi[h]) - 1)<1e-6) {
+                if (abs(cplex.getValue(phi[h]) - 1) < 1e-6) {
                     std::cout << "Customer " << h << " served by drone." << std::endl;
                     int sv_i = -1, sv_j = -1, sv_k = -1, sv_kp = -1;
                     for (int k = 1; k <= node_max_stage; k++) {
@@ -2752,7 +2779,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
 
 
                                 }
-                                catch(...) {
+                                catch (...) {
 
                                 }
                             }
@@ -2762,14 +2789,17 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
 
                     std::cout << "Drone fly from " << sv_i << " at stage " << sv_k <<
                               " to serve " << h << " and then fly back to " << sv_j
-                              << " at stage " << sv_kp << std::endl;
+                              << " at stage " << sv_kp << ". " << std::endl;
+                    double travel_time = 0;
+                    travel_time += tau_prime[sv_i][h] + tau_prime[h][sv_j];
+                    std::cout << "Start arc cost: " << tau_prime[sv_i][h] << ", end arc cost: " << tau_prime[h][sv_j] << ". Total drone travel time: " << travel_time << std::endl;
                 }
             }
 
             std::cout << "Done!" << std::endl;
+
             exit(0);
         }
     }
     return Result();
 }
-
