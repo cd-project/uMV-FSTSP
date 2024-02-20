@@ -19,11 +19,92 @@ static std::vector <std::string> SplitStringWithDelimiter(const std::string& s, 
     return returnValue;
 }
 
-Instance::Instance(const std::string file_path, bool roundDist) {
-    std::string c_prime_path = file_path + "/Cprime.csv";
-    std::string nodes_path = file_path + "/nodes.csv";
-    std::string tau_path = file_path + "/tau.csv";
-    std::string tau_prime_path = file_path + "/tauprime.csv";
+
+//Instance::Instance(const std::string &folder_path, std::string &dist_type) {
+//    std::string c_prime_path = folder_path + "/Cprime.csv";
+//    std::string nodes_path = folder_path + "/nodes.csv";
+//    std::string tau_path = folder_path + "/tau.csv";
+//    std::string tau_prime_path = folder_path + "/tauprime.csv";
+//
+//    std::ifstream c_ifs(c_prime_path);
+//    std::ifstream n_ifs(nodes_path);
+//    std::ifstream t_ifs(tau_path);
+//    std::ifstream t_prime_ifs(tau_prime_path);
+//
+//    std::string str;
+//    getline(c_ifs, str);
+//    auto c_split_str = SplitStringWithDelimiter(str, ",");
+//    for (auto& s : c_split_str) {
+//        c_prime.push_back(stoi(s));
+//    }
+//    std::vector<std::pair<double, double>> coord;
+//    std::cout << std::endl;
+//    int n = 0;
+//    while (getline(n_ifs, str)) {
+//        if (n == 0) {
+//            auto n_split_str = SplitStringWithDelimiter(str, ",");
+//            drone_speed = stod(n_split_str[n_split_str.size() - 1]);
+//            std::cout << "drone speed: " << drone_speed << " miles/minute" << std::endl;
+//            coord.emplace_back(stod(n_split_str[1]), stod(n_split_str[2]));
+//        }
+//        else {
+//            auto n_split_str = SplitStringWithDelimiter(str, ",");
+//            int x = stoi(n_split_str[n_split_str.size() - 1]);
+//            if (x == 1) {
+//                heavy.emplace_back(stoi(n_split_str[0]));
+//            }
+//            coord.emplace_back(stod(n_split_str[1]), stod(n_split_str[2]));
+//        }
+//        n++;
+//    }
+//    std::cout << "uav non-eligible customer: ";
+//    for (auto x : heavy) {
+//        std::cout << x << " ";
+//    }
+//    std::cout << std::endl;
+//    getline(n_ifs, str);
+//    n -= 1;
+//    //n = 20;
+//
+//    num_node = n;
+//    tau.resize(num_node + 1);
+//    tau_prime.resize(num_node + 1);
+//    for (int i = 0; i < tau.size(); i++) {
+//        tau[i].resize(num_node + 1);
+//        tau_prime[i].resize(num_node + 1);
+//    }
+//    double d;
+//    char c;
+////    roundDist = false;
+//    if (dist_type == "original") {
+//        for (int i = 0; i < n + 1; i++) {
+//            getline(t_prime_ifs, str);
+//            std::istringstream iss(str);
+//            for (int j = 0; j < n + 1; j++) {
+//                iss >> d >> c;
+//                tau_prime[i][j] = d;
+//            }
+//        }
+//
+//
+//        for (int i = 0; i < n + 1; i++) {
+//            getline(t_ifs, str);
+//            std::istringstream iss(str);
+//            for (int j = 0; j < n + 1; j++) {
+//                iss >> d >> c;
+//                tau[i][j] = d;
+//            }
+//        }
+//    } else if (dist_type == "geo") {
+//        double PI = 3.141592, RRR = 6378.388;
+//    }
+//
+//}
+Instance::Instance(const std::string folder_path, bool roundDist) {
+    std::string c_prime_path = folder_path + "/Cprime.csv";
+    std::string nodes_path = folder_path + "/nodes.csv";
+    std::string tau_path = folder_path + "/tau.csv";
+    std::string tau_prime_path = folder_path + "/tauprime.csv";
 
     std::ifstream c_ifs(c_prime_path);
     std::ifstream n_ifs(nodes_path);

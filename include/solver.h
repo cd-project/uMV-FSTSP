@@ -9,6 +9,7 @@
 #include "instance.h"
 #include <gurobi_c++.h>
 #include<ilcplex/ilocplex.h>
+#include <utility>
 class Sortie {
 public:
     int target;
@@ -17,7 +18,8 @@ public:
     int r;
     std::vector<int> phi;
     std::vector<std::string> routes;
-    explicit Sortie(int target, int l, int r, std::vector<int>& phi);
+    Sortie(int target, int l, int r, std::vector<int>& phi);
+    explicit Sortie(int target);
 };
 class Result {
 public:
@@ -25,6 +27,7 @@ public:
     std::vector<Sortie> sortie;
     Result() {}
     Result(double c, std::vector<Sortie>& st);
+//    Result
 };
 class Solver {
 public:
@@ -32,11 +35,15 @@ public:
     explicit Solver(std::shared_ptr<Instance>& inst) {
         instance = inst;
     }
+    double sl = {1};
+    double sr = {1};
+    double dtl = {40};
     Result OriginalSolver(int n_thread, int e);
-    Result uMVFSTSPSolver(int n_thread, int dtl);
-    Result mvdSolver(int n_thread, int e);
+//    Result uMVFSTSPSolver(int n_thread, int dtl);
+//    Result mvdSolver(int n_thread, int e);
     Result mvdSolverCPLEX(int n_thread, int e);
     Result mvdSolverCPLEXFewerVariables(int n_thread, int e);
+    Result mvdSolverWithLR(int n_thread, int e);
 
 };
 #endif //UMV_FSTSP_SOLVER_H
