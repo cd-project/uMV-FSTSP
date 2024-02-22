@@ -25,14 +25,14 @@ int main(int argc, char**argv) {
         folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/" + std::string(argv[1]);
         write = true;
     } else {
-        folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/PDSTSP/PDSTSP_20_customer_problems/20140813T124847";
+        folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/test/random_instances";
     }
 
     std::cout << "Instance name: " << folder_path << std::endl;
     std::cout << "Write arg val: " << write << std::endl;
     auto instance = std::make_shared<Instance>(folder_path, false);
     auto solver = std::make_shared<Solver>(instance);
-                    auto result = solver->mvdSolverWithLR(
+                    auto result = solver->OriginalSolverCPLEX(
             20, 20);
     if (write) {
         std::cout << "In write mode" << std::endl;
@@ -42,7 +42,7 @@ int main(int argc, char**argv) {
         if(!out.is_open()) {
             std::cout << "Error opening file!" << std::endl;
         }
-        out << i_name <<"," << result.cost << "," << result.sortie.size() << "\n";
+        out << i_name <<"," << result.cost << "," << result.recalculated_cost << "," << result.sortie.size() << "\n";
     }
     return 0;
 }
