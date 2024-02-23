@@ -7,7 +7,6 @@
 
 #include <memory>
 #include "instance.h"
-#include <gurobi_c++.h>
 #include<ilcplex/ilocplex.h>
 #include <utility>
 class MyCutCallback : public IloCplex::UserCutCallbackI {
@@ -90,10 +89,8 @@ public:
     }
     double sl = {1};
     double sr = {1};
-    double dtl = {40};
-    Result OriginalSolver(int n_thread, int e);
+    double dtl = {20};
     Result OriginalSolverCPLEX(int n_thread, int e);
-//    Result uMVFSTSPSolver(int n_thread, int dtl);
 //    Result mvdSolver(int n_thread, int e);
     Result mvdSolverCPLEX(int n_thread, int e);
     Result mvdSolverCPLEXFewerVariables(int n_thread, int e);
