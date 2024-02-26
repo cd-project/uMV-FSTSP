@@ -4455,7 +4455,7 @@ Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
     for (int k = 1; k <= n_random_stage; k++) {
         auto i = truck_node[k-1];
         model.add(X[k+1][i] == 1);
-        std::cout << "Stage " << k << " assigned with node " << i << std::endl;
+        std::cout << "Stage " << k+1 << " assigned with node " << i << std::endl;
     }
     for (int k = 1; k <= node_max_stage; k++) {
         IloExpr sum(env);
