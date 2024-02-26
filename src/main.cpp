@@ -38,7 +38,7 @@ int main(int argc, char**argv) {
         folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/" + std::string(argv[1]);
         write = true;
     } else {
-        folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123437v1";
+        folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/v1";
     }
 
     std::cout << "Instance name: " << folder_path << std::endl;
