@@ -96,5 +96,6 @@ public:
     Result mvdSolverCPLEXFewerVariables(int n_thread, int e);
     Result mvdSolverWithLR(int n_thread, int e);
     Result HeuristicFixCallback(int n_thread, int e);
+    Result SolverWithRandomTruckStageFixed(int n_thread, int e);
 };
 #endif //UMV_FSTSP_SOLVER_H

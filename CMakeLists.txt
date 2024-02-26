@@ -30,7 +30,8 @@ link_directories(${CPLEX_DIR}/concert/lib/x86-64_linux/static_pic)
 # Set source files
 # Might change to use separate header/source folders.
 set (HEADER_FILES
-        include/instance.h include/solver.h)
+        include/instance.h include/solver.h
+        include/gen_instance.h)
 
 set (SOURCE_FILES
         src/main.cpp src/instance.cpp src/solver.cpp)

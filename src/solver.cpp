@@ -4,6 +4,7 @@
 #include "../include/solver.h"
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 Sortie::Sortie(int t, int la, int re, std::vector<int>& middle) {
     target = t;
     l = la;
@@ -1634,6 +1635,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
 
 #include<cassert>
 #include <map>
+#include <random>
 
 Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
     //    try {
@@ -2477,7 +2479,6 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                 if (k > 1 && i == 0) X[k][0].setBounds(0, 0);
             }
         }
-
     }
 
 
@@ -2778,24 +2779,6 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
         model.add(R[k] == expr).setName(("C23_" + std::to_string(k)).c_str());
     }
 
-
-    //////// C7: node_stage
-    //for (int k = 1; k <= node_max_stage - 1; k++) {
-    //    for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
-    //        for (int l = k; l < k_p; l++) {
-    //            for (int l_p = l + 1; l_p <= node_max_stage; l_p++) {
-    //                //if ((k != l) || (k_p != l_p))
-    //                if ((k != l) || (k == l && k_p < l_p))
-    //                {
-
-    //                    // tranh drone bay cac doan giao nhau.
-    //                    model.add(z[k][k_p] + z[l][l_p] <= 1).setName(("C7_" + std::to_string(k) + "_" + std::to_string(k_p) + "_" + std::to_string(l) + "_" + std::to_string(l_p)).c_str());
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
-
     // modified C7
     for (int k = 1; k <= node_max_stage - 1; k++) {
         for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
@@ -2807,7 +2790,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                                                                   + "_" + std::to_string(k_p) + "_" + std::to_string(l)).c_str());
                     }
                     else {
-                        //model.add(R[k] <= 1).setName(("C7k_" + std::to_string(k)
+//                        model.add(R[k] <= 1).setName(("C7k_" + std::to_string(k);
                         //    + "_" + std::to_string(k_p) + "_" + std::to_string(l)).c_str());
                     }
 
@@ -2916,7 +2899,6 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
     for (int k = 1; k <= node_max_stage - 1; k++) {
         for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
             if (k < k_p) {
-
                 // o to phai den k_p tu k trong khoang thoi gian <= dtl.
                 // , "C15_" + std::to_string(k) + "_" + std::to_string(k_p)
                 model.add(a[k_p] - d[k] <= z[k][k_p] * (dtl-sr) + (1 - z[k][k_p]) * M).setName(("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
@@ -2940,7 +2922,8 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                 }
                 // vehicle phai doi drone truoc khi di chuyen.
 //                model.add(d[k_p] - d[k] + (1 - z[k][k_p]) * 2 * (dtl-sr) >= rhs).setName(("C21_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
-                model.add(d[k_p] - d[k] >= z[k][k_p] * sr - (1-z[k][k_p]) * 100000 + rhs);
+//                model.add(d[k_p] - d[k] >= z[k][k_p] * sr - (1-z[k][k_p]) * 100000 + rhs);
+
             }
         }
     }
@@ -3016,7 +2999,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                     }
                 }
             }
-            model.add(sum - M * (1 - z[k][k_p]) <= dtl-sr);
+//            model.add(sum - M * (1 - z[k][k_p]) <= dtl-sr);
         }
     }
     model.add(IloMinimize(env, d[node_max_stage]));
@@ -4343,49 +4326,6 @@ Result Solver::OriginalSolverCPLEX(int n_thread, int e) {
             model.add(sum1 + sum2 <= (dtl - sr) * theta[h]);
             model.add(sum1 + sum2 - sum3 <= sigma[h]);
         }
-        //    auto s_c_V = generateSetsAndComplements(V);
-        //    for (auto &pair:s_c_V) {
-        //        auto S = pair.first;
-        //        if (S.size() < 2) {
-        //            continue;
-        //        } else {
-        //            for (int h: C) {
-        //                GRBLinExpr s1, s2;
-        //                for (int i:S) {
-        //                    if (i != t) {
-        //                        s2 += omega[h][i];
-        //                    }
-        //                    if (i != s) {
-        //                        s2 += delta[h][i];
-        //                    }
-        //                    if (i != s && i != t) {
-        //                        s2 += phi[h][i];
-        //                    }
-        //                    for (int j: S) {
-        //                        if (i != j && i != t && j != s) {
-        //                            s1 += gamma[h][i][j];
-        //                        }
-        //                    }
-        //                }
-        ////                model.addConstr(s1 == 1);
-        ////                model.addConstr(s2 == 1);
-        //                model.addConstr(s1 <= s2); // render the model infeasible. what can be the fix?
-        //            }
-        //        }
-        //    }
-        //    // phi constraint
-        //    for (int h:C) {
-        //        for (int i:c_s) {
-        //            GRBLinExpr sum;
-        //            for (int j:c_t) {
-        //                sum += gamma[h][i][j];
-        //            }
-        //            model.addConstr(sum == phi[h][i] + omega[h][i]);
-        //            model.addConstr(phi[h][i] + omega[h][i] <= 1);
-        //            model.addConstr(sum <= 1);
-        //        }
-        //    }
-
         model.add(IloMinimize(env, objective));
         cplex.solve();
         std::cout << cplex.getObjValue() << std::endl;
@@ -4393,4 +4333,800 @@ Result Solver::OriginalSolverCPLEX(int n_thread, int e) {
         return Result{cplex.getObjValue(), 0, st};
 
     }
+
+Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
+    //    try {
+    auto tau = instance->tau;
+    auto tau_prime = instance->tau_prime;
+    auto dtl = e;
+    //dtl = 5;
+    auto sl = 1, sr = 1;
+    auto n = instance->num_node;
+
+    auto c_prime = instance->c_prime;
+    std::vector<int> c_prime_0;
+    c_prime_0.push_back(0);
+    for (int i : c_prime) {
+        c_prime_0.push_back(i);
+    }
+    c_prime_0.push_back(n);
+
+    std::cout << "Printing number of nodes: " << n << std::endl;
+    std::vector<int> C;
+    std::vector<int> V;
+    for (int i = 0; i < n + 1; i++) {
+        if (i == 0 || i == n) {
+            V.push_back(i);
+        }
+        else {
+            V.push_back(i);
+            C.push_back(i);
+        }
+    }
+
+    // C_s : set C(customer) union s (source) ; source  = 0
+    // C_t : set C(customer) union t (terminal); terminal = n
+    // create.
+    std::vector<int> c_s;
+    std::vector<int> c_t;
+    for (int i = 0; i < n + 1; i++) {
+        if (i == 0) {
+            c_s.push_back(i);
+        }
+        else if (i == n) {
+            c_t.push_back(i);
+        }
+        else {
+            c_s.push_back(i);
+            c_t.push_back(i);
+        }
+    }
+
+    std::cout << std::endl;
+    IloEnv env;
+    IloModel model(env);
+    IloCplex cplex(model);
+    auto K = C, k_prime = V;
+    auto O = 0;
+    auto D = n;
+    auto node_max_stage = n + 1;
+    auto arc_max_stage = node_max_stage - 1;
+
+    // Khai bao bien
+    //
+    // X^i_k (binary variable) và nhận giá trị một tương ứng với đỉnh thứ k của
+    //đường đi của vehicle là i; k \in 1..n;
+    //
+    IloArray<IloBoolVarArray> X(env, node_max_stage + 1);
+    for (int k = 1; k <= node_max_stage; k++) {
+
+        X[k] = IloBoolVarArray(env, D + 1);
+
+        for (int i = 0; i <= D; i++) {
+            {
+                X[k][i] = IloBoolVar(env);
+                auto v_name = "X_" + std::to_string(k) + "_" + std::to_string(i);
+                //std::cout << v_name << std::endl;
+                X[k][i].setName(v_name.c_str());
+
+                if (k > 1 && i == 0) X[k][0].setBounds(0, 0);
+            }
+        }
+    }
+
+
+    model.add(X[1][0] == 1).setName("start depot is the first node");
+    model.add(X[1][D] == 0).setName("ending depot cannot be the first node");
+
+
+    /*
+     * Fix random truck route.
+     * */
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dis_3(3, n / 2);
+
+    auto n_random_stage = dis_3(gen);
+
+
+    // Generate the random truck stage
+    std::uniform_int_distribution<int> dis_truck(1, 10);
+
+    // Generate the random matrix
+    std::unordered_set<int> seen;
+    std::vector<int> truck_node;
+    truck_node.reserve(n);
+
+    for (int i = 0; i < n_random_stage; ++i) {
+        int randomElement;
+        do {
+            randomElement = dis_truck(gen);
+        } while (seen.count(randomElement) > 0);
+
+        seen.insert(randomElement);
+        truck_node.push_back(randomElement);
+    }
+    std::cout << "Chosen random node: ";
+    for (int i:truck_node) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "Number of randomized stage: " << n_random_stage << std::endl;
+    for (int k = 1; k <= n_random_stage; k++) {
+        auto i = truck_node[k-1];
+        model.add(X[k+1][i] == 1);
+        std::cout << "Stage " << k << " assigned with node " << i << std::endl;
+    }
+    for (int k = 1; k <= node_max_stage; k++) {
+        IloExpr sum(env);
+        for (int i = 0; i <= D; i++)
+            sum += X[k][i];
+        model.add(sum <= 1).setName(("C20_at_most_one_customer_at_stage_" + std::to_string(k)).c_str());
+    }
+
+    IloExpr arrival_depot(env);
+    for (int k = 1; k <= node_max_stage; k++) {
+        arrival_depot += X[k][D];
+    }
+    model.add(arrival_depot == 1).setName("C21_arrival_depot_once");
+
+    // x^k_(ij) (binary variable) và nhận giá trị một nếu Xk
+    // mô ta cạnh nối 2 đỉnh liên tiếp trên đường đi.
+    IloArray<IloArray<IloBoolVarArray>> x(env, arc_max_stage + 1);
+    for (int k = 1; k <= arc_max_stage; k++) {
+        x[k] = IloArray<IloBoolVarArray>(env, D);
+        for (int i = 0; i < D; i++) {
+            x[k][i] = IloBoolVarArray(env, D + 1);
+
+            for (int j = 1; j <= D; j++)
+                if (i != j)
+                {
+                    x[k][i][j] = IloBoolVar(env);
+                    auto v_name = "x_" + std::to_string(k) + "_" + std::to_string(i) + "_" + std::to_string(j);
+                    x[k][i][j].setName(v_name.c_str());
+                }
+        }
+    }
+
+
+    //// phi^h equals to 1 if customer h is served by the drone
+    IloBoolVarArray phi(env, n);
+    for (int h : C) {
+        phi[h] = IloBoolVar(env);
+        auto v_name = "phi_" + std::to_string(h);
+        phi[h].setName(v_name.c_str());
+    }
+
+    for (int heavy:instance->heavy) {
+        model.add(phi[heavy] == 0);
+    }
+    IloArray<IloArray<IloBoolVarArray>> Y(env, node_max_stage + 1), W(env, node_max_stage + 1);
+    for (int k = 1; k <= node_max_stage; k++) {
+
+        Y[k] = IloArray<IloBoolVarArray>(env, D + 1);
+        W[k] = IloArray<IloBoolVarArray>(env, D + 1);
+
+        for (int i = 0; i <= D; i++) {
+            {
+                Y[k][i] = IloBoolVarArray(env, C.size() + 1);
+                W[k][i] = IloBoolVarArray(env, C.size() + 1);
+                for (int h : C)
+                    if (i != h) {
+                        Y[k][i][h] = IloBoolVar(env);
+                        Y[k][i][h].setName(("Y_" + std::to_string(k) + "_"
+                                            + std::to_string(i) + "_" + std::to_string(h)).c_str());
+
+                        W[k][i][h] = IloBoolVar(env);
+                        W[k][i][h].setName(("W_" + std::to_string(k) + "_"
+                                            + std::to_string(i) + "_" + std::to_string(h)).c_str());
+
+                        if (i == 0 && k > 1) Y[k][i][h].setBounds(0, 0);
+                        if (i == D && k == 1) W[k][i][h].setBounds(0, 0);
+                        if (tau_prime[i][h] > dtl-sr) Y[k][i][h].setBounds(0, 0);
+                        if (tau_prime[h][i] > dtl-sr) W[k][i][h].setBounds(0, 0);
+                    }
+            }
+        }
+
+    }
+
+
+    //// C17 - $X^k_i \geq \sum_h X^k_{ih}$ (C17) - chỉ bay drone ở nơi mà xe ở đó
+    for (int k = 1; k <= node_max_stage; k++) {
+        for (int i = 0; i <= D; i++) {
+
+            IloExpr expr(env);
+            for (int h : C)
+                if (h != i)
+                    if (tau_prime[i][h] <= dtl-sr) {
+                        expr += Y[k][i][h];
+                    }
+            model.add(expr <= X[k][i]).setName(("C17_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
+        }
+    }
+    // $X^k_i \geq \sum_h Y^k_{ih}$ (C17p) : chỉ bay drone tới nơi mà xe ở đó
+    for (int k = 1; k <= node_max_stage; k++) {
+        for (int i = 0; i <= D; i++) {
+
+            IloExpr expr(env);
+            for (int h : C)
+                if (h != i)
+                    if (tau_prime[h][i] <= dtl-sr) {
+                        expr += W[k][i][h];
+                    }
+            model.add(expr <= X[k][i]).setName(("C17p_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
+        }
+    }
+
+    // $\sum_{i} X^k_{ih}\tau^D_{ih} + \sum_{i} Y^{k'}_{ih}\tau^D_{hi} \leq D_d$
+    //- drone duration constraint cho mỗi $h$ (C19)
+    for (int h : C) {
+        IloExpr expr(env);
+
+        for (int k = 1; k <= node_max_stage; k++) {
+
+            for (int i = 0; i <= D; i++) {
+                if (i != h && i != D && tau_prime[i][h] <= dtl-sr)
+                    expr += Y[k][i][h] * tau_prime[i][h];
+
+                if (i != h && i != 0 && tau_prime[h][i] <= dtl-sr)
+                    expr += W[k][i][h] * tau_prime[h][i];
+            }
+        }
+
+        model.add(expr <= (dtl-sr) * phi[h]).setName(("C19_" + std::to_string(h)).c_str());
+
+    }
+    //exit(0);
+
+    //// aux var z_{k, k_p}: sortie launch from k and rendezvous at k_p.
+    IloArray<IloBoolVarArray> z(env, node_max_stage);
+    for (int k = 1; k <= node_max_stage - 1; k++) {
+        z[k] = IloBoolVarArray(env, node_max_stage + 1);
+        for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
+            {
+                z[k][k_p] = IloBoolVar(env);
+                auto v_name = "z_" + std::to_string(k) + "_" + std::to_string(k_p);
+                z[k][k_p].setName(v_name.c_str());
+            }
+        }
+    }
+
+    //// aux var Z_{k, k_p, h}: sortie launch from k and rendezvous at k_p.
+    IloArray<IloArray<IloBoolVarArray>> Z(env, node_max_stage);
+    for (int h : C) {
+        Z[h] = IloArray<IloBoolVarArray>(env, node_max_stage + 1);
+        for (int k = 1; k <= node_max_stage - 1; k++) {
+            Z[h][k] = IloBoolVarArray(env, node_max_stage + 1);
+            for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
+                {
+                    Z[h][k][k_p] = IloBoolVar(env);
+                    auto v_name = "Z_" + std::to_string(h) + "_" + std::to_string(k) + "_" + std::to_string(k_p);
+                    Z[h][k][k_p].setName(v_name.c_str());
+                }
+            }
+        }
+
+    }
+
+    // $Z_{kk'} = \sum_{h}Z^h_{kk'}$: mỗi cặp (k,k') chỉ phục vụ tối đa một khách hàng (C22)
+    for (int k = 1; k < node_max_stage; k++)
+        for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
+            IloExpr expr(env);
+            for (int h : C) {
+                expr += Z[h][k][k_p];
+            }
+            model.add(expr == z[k][k_p]).setName(("C22_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
+        }
+
+
+    //C20:$\sum_{k'>k}Z_{kk'} = \sum_{i,h}Y^k_{ih}$ : với mỗi $k$,
+    //ràng buộc liên kết drone đi ra từ stage $k$ và đoạn mà oto di chuyển không có drone. (C20)
+
+    for (int h : C) {
+        for (int k = 1; k <= node_max_stage - 1; k++) {
+
+            IloExpr expr(env);
+            for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
+                {
+                    expr += Z[h][k][k_p];
+                }
+            }
+
+            for (int i = 0; i < D; i++)
+            {
+                if (i != h && tau_prime[i][h] <= dtl-sr) {
+                    expr -= Y[k][i][h];
+                }
+            }
+            model.add(expr == 0).setName(("C20_" + std::to_string(k) + "_" + std::to_string(h)).c_str());
+
+        }
+
+    }
+
+    for (int h : C) {
+        for (int k_p = 2; k_p <= node_max_stage; k_p++) {
+
+            IloExpr expr(env);
+            for (int k = 1; k < k_p; k++) {
+                {
+                    expr += Z[h][k][k_p];
+                }
+            }
+
+            for (int i = 1; i <= D; i++)
+            {
+                if (i != h && tau_prime[h][i] <= dtl-sr) {
+                    expr -= W[k_p][i][h];
+                }
+            }
+            model.add(expr == 0).setName(("C20p_" + std::to_string(k_p)
+                                          + "_" + std::to_string(h)).c_str());
+
+        }
+    }
+
+    // arrival\departure variables a and d.
+    IloNumVarArray a(env, node_max_stage + 1);
+    IloNumVarArray d(env, node_max_stage + 1);
+    for (int k = 1; k <= node_max_stage; k++) {
+        a[k] = IloNumVar(env);
+        auto v_name = "a_" + std::to_string(k);
+        a[k].setName(v_name.c_str());
+        d[k] = IloNumVar(env);
+        v_name = "d_" + std::to_string(k);
+        d[k].setName(v_name.c_str());
+        model.add(d[k] >= a[k]).setName(("C13_" + std::to_string(k)).c_str());
+    }
+
+    model.add(a[1] == 0).setName("arrival to depot at time 0");
+    model.add(d[1] == 0).setName("depart from depot at time 0");;
+
+    ////////// Constraint C1
+    for (int k = 1; k < node_max_stage; k++) {
+        for (int i = 0; i < D; i++) {
+            { // i == D => khong co i -> j.
+                IloExpr sum(env);
+                for (int j = 1; j <= D; j++) {
+                    if (i != j) {
+                        sum += x[k][i][j];
+                    }
+                }
+
+                // neu node i la node_stage k, i khac D thi kieu gi cung co canh i, j.
+                model.add(X[k][i] == sum).setName(("C1_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
+            }
+        }
+    }
+
+    for (int k = 2; k <= node_max_stage; k++) {
+        for (int i = 1; i <= D; i++) {
+            {
+                IloExpr sum(env);
+                for (int j = 0; j < D; j++) {
+                    if (i != j) {
+                        sum += x[k - 1][j][i];
+                    }
+                }
+                // arcs entering i at stage k.
+                model.add(X[k][i] == sum).setName(("C1p_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
+            }
+        }
+    }
+
+    //////////// C2 - depart from the depot
+    IloExpr C2(env);
+    for (int i = 1; i <= D; i++) {
+        C2 += x[1][O][i];
+    }
+
+    IloConstraint c2(C2 == 1);
+    model.add(c2).setName("C2");
+    // , "C2"
+
+    ///////////// C3: arc_stage
+    IloExpr C3(env);
+    for (int k = 2; k <= node_max_stage; k++) {
+        {
+            C3 += X[k][D];
+        }
+    }
+    // , "C3"
+    model.add(C3 == 1).setName("C3"); // arrival to depot
+
+    // $R_{k} = \sum_{k'}Z_{kk'}$: các đoạn bắt đầu từ k (C23)
+    IloBoolVarArray R(env, node_max_stage + 1);
+    for (int k = 1; k < node_max_stage; k++) {
+        R[k].setName(("R_" + std::to_string(k)).c_str());
+    }
+
+    for (int k = 1; k < node_max_stage; k++)
+    {
+        IloExpr expr(env);
+        for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
+            expr += z[k][k_p];
+        }
+
+        model.add(R[k] == expr).setName(("C23_" + std::to_string(k)).c_str());
+    }
+
+    // modified C7
+    for (int k = 1; k <= node_max_stage - 1; k++) {
+        for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
+            for (int l = k + 1; l < k_p; l++) {
+                {
+                    // tranh drone bay cac doan giao nhau.
+                    if (k < l) {
+                        model.add(z[k][k_p] + R[l] <= 1).setName(("C7m_" + std::to_string(k)
+                                                                  + "_" + std::to_string(k_p) + "_" + std::to_string(l)).c_str());
+                    }
+                    else {
+//                        model.add(R[k] <= 1).setName(("C7k_" + std::to_string(k);
+                        //    + "_" + std::to_string(k_p) + "_" + std::to_string(l)).c_str());
+                    }
+
+                }
+            }
+        }
+    }
+
+
+
+    for (int i = 0; i < D; i++) {
+        for (int k = 1; k <= node_max_stage - 1; k++)
+        {
+            IloExpr lhs(env);
+
+            for (int h : C) {
+                if (i != h)
+                {
+                    lhs += Y[k][i][h];
+                }
+
+
+            }
+            model.add(lhs <= X[k][i]).setName(("C8_launch_" + std::to_string(i) + "_" + std::to_string(k)).c_str());
+
+        }
+    }
+
+    for (int j = 1; j <= D; j++) {
+        for (int k_p = 2; k_p <= node_max_stage; k_p++)
+        {
+            IloExpr lhs(env);
+
+            for (int h : C) {
+                if (h != j)
+                {
+                    lhs += W[k_p][j][h];
+                }
+            }
+
+            model.add(lhs <= X[k_p][j]).setName(("C8_rendezvous_" + std::to_string(j) + "_" + std::to_string(k_p)).c_str());
+        }
+    }
+
+
+    // $\phi_h = \sum_{k,i}X^k_{ih} = \sum_{k,i}Y^k_{ih}$
+    // - chỉ có duy nhất một điểm xuất phát và môt điểm đích cho
+    //mỗi khách hàng $h$ được phục vụ bởi drone (C18)
+    for (int h : C) {
+        IloExpr rhs(env);
+        for (int i = 0; i < D; i++) {
+            if (i != h && tau_prime[i][h] <= dtl-sr)
+                for (int k = 1; k <= node_max_stage - 1; k++) {
+                    rhs += Y[k][i][h];
+                }
+        }
+        // consistency constraint cho sortie phuc vu h.
+        model.add(phi[h] == rhs).setName(("C18_" + std::to_string(h)).c_str());
+    }
+
+
+    for (int h : C) {
+        IloExpr rhs(env);
+        for (int i = 1; i <= D; i++) {
+            if (i != h && tau_prime[h][i] <= dtl-sr)
+                for (int k = 2; k <= node_max_stage; k++) {
+                    rhs += W[k][i][h];
+                }
+        }
+        // consistency constraint cho sortie phuc vu h.
+        model.add(phi[h] == rhs).setName(("C18p_" + std::to_string(h)).c_str());
+    }
+
+    //////////// C10: node_stage
+    for (int h : C) {
+        IloExpr sum_k(env);
+        for (int k = 2; k < node_max_stage; k++) {
+            sum_k += X[k][h];
+        }
+        // phuc vu h it nhat 1 lan.
+        model.add(phi[h] + sum_k >= 1).setName(("C10_" + std::to_string(h)).c_str());
+
+    }
+
+
+
+    /////////// C14: node_stage
+    for (int k = 1; k <= arc_max_stage; k++) {
+        IloExpr sum(env);
+        for (int i = 0; i < D; i++) {
+            for (int j = 1; j <= D; j++) {
+                if (i != j) {
+                    sum += x[k][i][j] * tau[i][j];
+                }
+            }
+        }
+
+        // o to toi k+1 >= o to den k + thoi gian di chuyen tu k->k+1 (tau_(ij)). (old model).
+        // em nghĩ nên đổi thành bằng nhau, a_(k+1) chắc chắn bằng departure stage trước + di chuyển.
+        // d[k+1] mới >= d[k]. trường hợp lớn hơn xảy ra khi truck phải đợi drone bay đến.
+        model.add(a[k + 1] == d[k] + sum).setName(("C14_" + std::to_string(k) + "_" + std::to_string(k + 1)).c_str());
+    }
+
+    ////////// C15: node_stage
+    auto M = 1e5;
+    for (int k = 1; k <= node_max_stage - 1; k++) {
+        for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
+            if (k < k_p) {
+                // o to phai den k_p tu k trong khoang thoi gian <= dtl.
+                // , "C15_" + std::to_string(k) + "_" + std::to_string(k_p)
+                model.add(a[k_p] - d[k] <= z[k][k_p] * (dtl-sr) + (1 - z[k][k_p]) * M).setName(("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
+
+                IloExpr rhs(env);
+                for (int i = 0; i <= D; i++) {
+                    for (int h : C) {
+                        if (h != i && i != D) {
+                            if (tau_prime[i][h] <= dtl-sr) {
+                                rhs += Y[k][i][h] * tau_prime[i][h];
+                            }
+                        }
+
+                        if (h != i && i != 0) {
+                            if (tau_prime[h][i] <= dtl-sr) {
+                                rhs += W[k_p][i][h] * tau_prime[h][i];
+                            }
+                        }
+
+                    }
+                }
+                // vehicle phai doi drone truoc khi di chuyen.
+//                model.add(d[k_p] - d[k] + (1 - z[k][k_p]) * 2 * (dtl-sr) >= rhs).setName(("C21_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
+//                model.add(d[k_p] - d[k] >= z[k][k_p] * sr - (1-z[k][k_p]) * 100000 + rhs);
+
+            }
+        }
+    }
+
+    for (int k = 1; k <= node_max_stage-1; k++) {
+        for (int k_p = k+1; k_p <= node_max_stage; k_p++) {
+            if (k < k_p) {
+                IloExpr sum_length_y_k(env);
+                IloExpr sum_length_w_k_p(env);
+                IloExpr sum_w_k_p(env);
+                IloExpr sum_y_k_p(env);
+
+                for (int i = 0; i < D; i++) {
+                    for (int h:C) {
+                        if (i != h) {
+                            sum_length_y_k += Y[k][i][h] * tau_prime[i][h];
+                            sum_y_k_p += Y[k_p][i][h];
+                        }
+                    }
+                }
+                for (int j = 1; j <= D; j++) {
+                    for (int h:C) {
+                        if (h != j) {
+                            sum_length_w_k_p += W[k_p][j][h] * tau_prime[h][j];
+                            sum_w_k_p += W[k_p][j][h];
+                        }
+                    }
+                }
+                model.add(d[k_p] >= d[k] + sum_length_y_k + sum_length_w_k_p + sl*sum_y_k_p + sr*sum_w_k_p - (1-z[k][k_p]) * M);
+            }
+        }
+    }
+    for (int k = 2; k <= node_max_stage; k++) {
+        IloExpr sum(env);
+        IloExpr sum_w_K(env);
+        IloExpr sum_y_K(env);
+        for (int i = 0; i < D; i++) {
+            for (int j = 1; j <= D; j++) {
+                if (i != j) {
+                    sum += x[k-1][i][j] * tau[i][j];
+                }
+            }
+        }
+        for (int i = 0; i < D; i++) {
+            for (int h:C) {
+                if (i != h && k != node_max_stage) {
+                    sum_y_K += sl * Y[k][i][h];
+                }
+            }
+        }
+
+        for (int i = 1; i <= D; i++) {
+            for (int h:C) {
+                if (i != h) {
+                    sum_w_K += sr * W[k][i][h];
+                }
+            }
+        }
+        auto constr_name = "CC_d_" + std::to_string(k) + "_constr";
+        model.add(d[k] >= d[k-1] + sum + sum_w_K + sum_y_K).setName(constr_name.c_str());
+    }
+
+    // - sum_sl_at_O * sl + sum_sl_sr)
+    for (int k = 1; k <= node_max_stage-1; k++) {
+        for (int k_p = k+1; k_p <= node_max_stage; k_p++) {
+            IloExpr sum(env);
+            for (int k_p_p = k; k_p_p <= k_p-1; k_p_p++) {
+                for (int i = 0; i < D; i++) {
+                    for (int j = 1; j <= D; j++) {
+                        if (i != j) {
+                            sum += x[k_p_p][i][j] * tau[i][j];
+                        }
+                    }
+                }
+            }
+//            model.add(sum - M * (1 - z[k][k_p]) <= dtl-sr);
+        }
+    }
+    model.add(IloMinimize(env, d[node_max_stage]));
+    cplex.exportModel("cplex_model_1.lp");
+    std::vector<Sortie> st;
+    double obj = 0;
+    // Solve the model
+    if (!cplex.solve()) {
+        // Check if the problem is infeasible
+        if (cplex.getStatus() == IloAlgorithm::Infeasible) {
+            // Handle infeasibility
+            std::cout << "The problem is infeasible." << std::endl;
+            std::cout << "Infeasibility at: " << cplex.getInfeasibility(c2) << std::endl;
+            // You can also retrieve the infeasible constraints using cplex.getInfeasibility() method
+        }
+        else {
+            // Handle other solver errors
+            std::cerr << "Solver error: " << cplex.getStatus() << std::endl;
+        }
+    } else {
+
+        std::cout << "Feasible solution found!" << std::endl;
+        std::cout << "Truck nodes:" << std::endl;
+        for (int k = 1; k <= node_max_stage; k++) {
+            for (int i = 0; i <= D; i++) {
+                auto X_val = cplex.getValue(X[k][i]);
+                //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
+                if (abs(X_val - 1) < 1e-6) {
+                    auto d_k = cplex.getValue(d[k]);
+                    auto a_k = cplex.getValue(a[k]);
+                    std::cout << "Stage " << k << " at customer " << i << " with arrival time is: " << a_k << std::endl;
+                    std::cout << "Stage " << k << " at customer " << i << " with departure time is: " << d_k << std::endl;
+                    break;
+                }
+            }
+        }
+        std::cout << "Truck arcs:" << std::endl;
+        std::map<int, std::pair<int, int>> map_stage_truck_arc;
+        for (int k = 1; k <= arc_max_stage; k++) {
+            for (int i = 0; i < D; i++)
+                for (int j = 1; j <= D; j++)
+                    if (i != j) {
+                        auto X_val = cplex.getValue(x[k][i][j]);
+                        //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
+                        if (abs(X_val - 1) < 1e-6) {
+                            std::cout << "Arc " << k << " connecting " << i << " and " << j
+                                      << " with cost " << tau[i][j] << " " << std::endl;
+                            obj += tau[i][j];
+                            map_stage_truck_arc[k] = std::make_pair(i, j);
+                            break;
+                        }
+                    }
+        }
+        std::cout << "Drone served customers" << std::endl;
+        //IloNumArray phi_val(env);
+        //cplex.getValues(phi_val, phi);
+
+
+        for (int k = 1; k < node_max_stage; k++)
+            for (int kp = k + 1; kp <= node_max_stage; kp++) {
+                //std::cout << k << " " << kp << std::endl;
+                if (abs(cplex.getValue(z[k][kp]) - 1) < 1e-6) {
+                    std::cout << "Drone flies from stage " << k << " to stage " << kp << std::endl;
+                }
+            }
+        for(int h:C)
+            for (int k = 1; k < node_max_stage; k++)
+                for (int kp = k + 1; kp <= node_max_stage; kp++) {
+                    //std::cout << k << " " << kp << std::endl;
+                    if (abs(cplex.getValue(Z[h][k][kp]) - 1) < 1e-6) {
+                        std::cout << "Drone flies from stage " << k << " to stage " << kp << " to serve customer " << h << std::endl;
+                    }
+                }
+
+        for (int h : C) {
+            if (abs(cplex.getValue(phi[h]) - 1) < 1e-6) {
+                std::cout << "Customer " << h << " served by drone." << std::endl;
+                auto sortie = Sortie(h);
+                st.push_back(sortie);
+                int sv_i = -1, sv_j = -1, sv_k = -1, sv_kp = -1;
+                for (int k = 1; k <= node_max_stage; k++) {
+                    for (int i = 0; i <= D; i++)
+                        if (i != h)
+                        {
+                            try {
+                                //std::cout << "from stage " << k << " at customer " << i << " to serve" << h << std::endl;
+                                auto Y_val = cplex.getValue(Y[k][i][h]);
+                                if (abs(Y_val - 1) < 1e-6) {
+                                    sv_i = i;
+                                    sv_k = k;
+                                    //std::cout << "XXX from stage " << k << " at customer " << i << " to serve" << h << std::endl;
+                                }
+
+                                //std::cout << "to stage " << k << " at customer" << i << " from " << h << std::endl;
+                                auto W_val = cplex.getValue(W[k][i][h]);
+                                if (abs(W_val - 1) < 1e-6) {
+                                    sv_j = i;
+                                    sv_kp = k;
+                                    //std::cout << "ZZZ to stage " << k << " at customer" << i << " from " << h << std::endl;
+                                }
+
+
+                            }
+                            catch (...) {
+
+                            }
+                        }
+
+                }
+                ////assert(abs(cplex.getValue(z[sv_k][sv_kp]) - 1.0) < 1e-6);
+
+                std::cout << "Drone fly from " << sv_i << " at stage " << sv_k <<
+                          " to serve " << h << " and then fly back to " << sv_j
+                          << " at stage " << sv_kp << ". " << std::endl;
+                obj += (sl+sr);
+                if (sv_i == O) {
+                    obj -= sl;
+                }
+                double drone_travel_time = tau_prime[sv_i][h] + tau_prime[h][sv_j];
+                double truck_travel_time = 0;
+                for (int k_start = sv_k; k_start <= sv_kp-1; k_start++) {
+                    truck_travel_time += tau[map_stage_truck_arc[k_start].first][map_stage_truck_arc[k_start].second];
+                }
+                std::cout << "Truck travel time from stage " << sv_k << " to " << sv_kp << " is: " << truck_travel_time << std::endl;
+                if (drone_travel_time > truck_travel_time) {
+                    obj += drone_travel_time - truck_travel_time;
+                }
+                auto drone_arrival_time = cplex.getValue(d[sv_k]) + drone_travel_time;
+                auto vehicle_departure_time = cplex.getValue(d[sv_kp]);
+                auto truck_arrival_time = cplex.getValue(a[sv_kp]);
+                std::cout << "Start arc cost: "
+                          << tau_prime[sv_i][h] << ", end arc cost: " << tau_prime[h][sv_j] << ". Total drone travel time: " << drone_travel_time << std::endl;
+
+                std::cout << "Drone arrival time: " << drone_arrival_time << std::endl;
+                std::cout << "Truck arrival time: " << truck_arrival_time << std::endl;
+
+                std::cout << "Truck departure time = max(d/a, t/a) plus (sl): " << vehicle_departure_time << std::endl;
+                assert(drone_arrival_time <= vehicle_departure_time);
+                assert(abs(cplex.getValue(Z[h][sv_k][sv_kp]) - 1.0) < 1e-6);
+
+                assert(abs(cplex.getValue(z[sv_k][sv_kp]) - 1.0) < 1e-6);
+
+            }
+        }
+
+        std::cout << "Done!" << std::endl;
+        std::cout << "-------------------------Re-calculated objective-----------------------" << std::endl;
+        std::cout << obj << std::endl;
+        std::cout <<"------------------------------------------------------------------------" << std::endl;
+    }
+    double c = cplex.getObjValue();
+    env.end();
+    cplex.end();
+    model.end();
+    std::cout << "OBJECTIVE VALUE: " << c << ", NUMBER OF SORTIES: " << st.size() << "." << std::endl;
+    return Result{c, obj, st};
+}
 
