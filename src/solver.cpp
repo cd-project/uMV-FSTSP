@@ -4424,13 +4424,13 @@ Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
      * */
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dis_3(3, n / 2);
+    std::uniform_int_distribution<int> dis_3(n / 3, n / 2);
 
     auto n_random_stage = dis_3(gen);
 
 
     // Generate the random truck stage
-    std::uniform_int_distribution<int> dis_truck(1, 10);
+    std::uniform_int_distribution<int> dis_truck(1, C.size());
 
     // Generate the random matrix
     std::unordered_set<int> seen;
