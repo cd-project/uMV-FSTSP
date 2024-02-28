@@ -9,56 +9,64 @@
 #include "instance.h"
 #include<ilcplex/ilocplex.h>
 #include <utility>
-class MyCutCallback : public IloCplex::UserCutCallbackI {
+
+// On a new feasible solution callback.
+class MyCallback : public IloCplex::MIPCallbackI {
 public:
-    MyCutCallback(IloEnv env) : IloCplex::UserCutCallbackI(env) {}
+    // Constructor
+    MyCallback(IloEnv env, IloArray<IloBoolVarArray&> variables, int numProcedures)
+            : IloCplex::MIPCallbackI(env), variables(variables), numProcedures(numProcedures) {}
 
+protected:
     // Override the main callback method
-//    void main() override {
-//        // Get current incumbent solution
-//        IloNumArray vals(getEnv());
-//        getValues(vals, x); // Assuming x is your decision variable array
-//
-//        // Evaluate current solution and add cutting planes as needed
-//        if (/* condition for adding cutting planes */) {
-//            addCut(/* cutting plane constraint */);
-//        }
-//
-//        vals.end();
-//    }
-    void addCut1();
+    void main() override {
+        for (int procedure = 0; procedure < numProcedures; ++procedure) {
+            // Obtain current solution
+            IloNumArray currentSolution(getEnv());
+            getIncumbentValues(currentSolution, variables);
+
+            // Do some processing on the current solution
+            for (int i = 0; i < variables.getSize(); ++i) {
+                if (rand() % 2 == 0) { // Randomly fix some variables to their current values
+                    variables[i].setLB(currentSolution[i]); // Fix the lower bound
+                    variables[i].setUB(currentSolution[i]); // Fix the upper bound
+                } else { // Reset other variables
+                    variables[i].setLB(-IloInfinity); // Reset lower bound
+                    variables[i].setUB(IloInfinity);  // Reset upper bound
+                }
+            }
+
+            // Solve for another new solution
+            if (procedure < numProcedures - 1) {
+                // Let the solver solve for another new solution
+                solveFixedVariables();
+            }
+
+            // End of a procedure
+            currentSolution.end();
+        }
+    }
+
+    // Helper function to solve with fixed variables
+    void solveFixedVariables() {
+        try {
+            IloEnv env = getEnv();
+            IloCplex cplex(env);
+            cplex.solve();
+        } catch (IloException& e) {
+            std::cerr << "Error: " << e << std::endl;
+            throw;
+        }
+    }
+    // Implement duplicateCallback method
+    [[nodiscard]] IloCplex::CallbackI * duplicateCallback() const override {
+        return new (getEnv()) MyCallback(*this);
+    }
+
+private:
+    IloArray<IloBoolVarArray&> variables;
+    int numProcedures;
 };
-
-
-//// On a new feasible solution callback.
-//class NewSolutionCallback : public IloCplex::MIPCallbackI {
-//public:
-//    // Constructor
-//    NewSolutionCallback(IloEnv env) : IloCplex::MIPCallbackI(env) {}
-//
-//    // Override the main callback method
-//    void main() override {
-//        // Execute custom code every time a new solution is found
-//        if (hasIncumbent()) {
-//            // Get the incumbent solution
-//            // Get all stage solution.
-//            // Fixed a part of the solution with addMIPStart.
-//            // Solve the flexible node stage value.
-//
-//            IloNumArray X_val(getEnv());
-//            getIncumbentValues(X_val, X); // Assuming x is your decision variable array
-//
-//            // Process the solution, e.g., print it
-//            std::cout << "New incumbent solution found: ";
-//            for (int i = 0; i < vals.getSize(); ++i) {
-//                std::cout << vals[i] << " ";
-//            }
-//            std::cout << std::endl;
-//
-//            vals.end();
-//        }
-//    }
-//};
 
 class Sortie {
 public:

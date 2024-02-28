@@ -2405,6 +2405,12 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
     //    try {
     auto tau = instance->tau;
     auto tau_prime = instance->tau_prime;
+    for (int i = 0; i < tau_prime.size(); i++) {
+        for (int j = 0; j < tau_prime[i].size(); j++) {
+            std::cout << tau_prime[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
     auto dtl = e;
     //dtl = 5;
     auto sl = 1, sr = 1;
@@ -3076,6 +3082,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
 
         for (int h : C) {
             if (abs(cplex.getValue(phi[h]) - 1) < 1e-6) {
+                std::cout << cplex.getValue(phi[h]) << std::endl;
                 std::cout << "Customer " << h << " served by drone." << std::endl;
                 auto sortie = Sortie(h);
                 st.push_back(sortie);
@@ -3136,7 +3143,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                 std::cout << "Drone arrival time: " << drone_arrival_time << std::endl;
                 std::cout << "Truck arrival time: " << truck_arrival_time << std::endl;
 
-                std::cout << "Truck departure time = max(d/a, t/a) plus (sl): " << vehicle_departure_time << std::endl;
+                std::cout << "Truck departure time = max(d/a, t/a) plus (sl/sr): " << vehicle_departure_time << std::endl;
                 assert(drone_arrival_time <= vehicle_departure_time);
                 assert(abs(cplex.getValue(Z[h][sv_k][sv_kp]) - 1.0) < 1e-6);
 
@@ -3151,9 +3158,9 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
         std::cout <<"------------------------------------------------------------------------" << std::endl;
     }
     double c = cplex.getObjValue();
-    env.end();
     cplex.end();
     model.end();
+    env.end();
     std::cout << "OBJECTIVE VALUE: " << c << ", NUMBER OF SORTIES: " << st.size() << "." << std::endl;
     return Result{c, obj, st};
 }
@@ -3210,6 +3217,7 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
     IloEnv env;
     IloModel model(env);
     IloCplex cplex(model);
+
     auto K = C, k_prime = V;
     auto O = 0;
     auto D = n;
@@ -3238,7 +3246,6 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
         }
 
     }
-
 
     model.add(X[1][0] == 1).setName("start depot is the first node");
     model.add(X[1][D] == 0).setName("ending depot cannot be the first node");
@@ -3782,6 +3789,8 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
     cplex.exportModel("cplex_model_1.lp");
     std::vector<Sortie> st;
     double obj = 0;
+    MyCallback myCallback(env, X[1], 3);
+    cplex.use(&myCallback);
     // Solve the model
     if (!cplex.solve()) {
         // Check if the problem is infeasible
@@ -4328,6 +4337,36 @@ Result Solver::OriginalSolverCPLEX(int n_thread, int e) {
         }
         model.add(IloMinimize(env, objective));
         cplex.solve();
+        std::cout << "Truck arcs:" << std::endl;
+        for (int i:c_s) {
+            for (int j:c_t) {
+                if (i != j) {
+                    if (cplex.getValue(y[i][j]) == 1) {
+                        std::cout << i << " " << j << std::endl;
+                    }
+                }
+            }
+         }
+        for (int h:C) {
+            if (cplex.getValue(theta[h]) == 1) {
+                std::cout << "customer " << h << " is served by drone" << std::endl;
+                for (int i:c_s) {
+                    if (h != i) {
+                        if (cplex.getValue(omega[h][i]) == 1) {
+                            std::cout << "start of this sortie: " << i << std::endl;
+                        }
+                    }
+                }
+                for (int j:c_t) {
+                    if (j != h) {
+                        if (cplex.getValue(delta[h][j]) == 1) {
+                            std::cout << "end of this sortie: " << j << std::endl;
+                        }
+                    }
+                }
+                std::cout << std::endl;
+            }
+        }
         std::cout << cplex.getObjValue() << std::endl;
         std::vector<Sortie> st;
         return Result{cplex.getObjValue(), 0, st};

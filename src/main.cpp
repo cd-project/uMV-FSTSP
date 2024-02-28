@@ -38,15 +38,15 @@ int main(int argc, char**argv) {
         folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/" + std::string(argv[1]);
         write = true;
     } else {
-        folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/PDSTSP/PDSTSP_20_customer_problems/20140813T124847";
+        folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/v18";
     }
 
     std::cout << "Instance name: " << folder_path << std::endl;
     std::cout << "Write arg val: " << write << std::endl;
     auto instance = std::make_shared<Instance>(folder_path, false);
     auto solver = std::make_shared<Solver>(instance);
-                    auto result = solver->SolverWithRandomTruckStageFixed(
-            20, 20);
+                    auto result = solver->OriginalSolverCPLEX(
+            20, 10);
     if (write) {
         std::cout << "In write mode" << std::endl;
         auto i_name_split = SplitStringWithDelimiter(folder_path, "/");

@@ -181,7 +181,7 @@ GenInstance::GenInstance(int n_customer, double dtl, int v) {
 //    std::vector<std::tuple<int, double, double, double>> nodes(n_customer+2);
     write_c_prime_to_csv(c_prime, "Cprime.csv", "/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
     write_tau_to_csv(tau, "tau.csv", "/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
-    write_tau_to_csv(tau_prime, "tau_prime.csv", "/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
+    write_tau_to_csv(tau_prime, "tauprime.csv", "/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
     create_and_write_node_file(n_customer, c_prime, "nodes.csv", "/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
 }
 
