@@ -33,20 +33,23 @@ int main(int argc, char**argv) {
         return EXIT_SUCCESS;
     }
     std::string folder_path;
+
     bool write = false;
     if (argc == 2) {
         folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/" + std::string(argv[1]);
         write = true;
     } else {
-        folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/v18";
+        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123437v1";
     }
+
+
 
     std::cout << "Instance name: " << folder_path << std::endl;
     std::cout << "Write arg val: " << write << std::endl;
     auto instance = std::make_shared<Instance>(folder_path, false);
     auto solver = std::make_shared<Solver>(instance);
-                    auto result = solver->OriginalSolverCPLEX(
-            20, 10);
+                    auto result = solver->HeuristicFixCallback(
+            20, 20);
     if (write) {
         std::cout << "In write mode" << std::endl;
         auto i_name_split = SplitStringWithDelimiter(folder_path, "/");
@@ -57,5 +60,4 @@ int main(int argc, char**argv) {
         }
         out << i_name <<"," << result.cost << "," << result.recalculated_cost << "," << result.sortie.size() << "\n";
     }
-    return 0;
 }

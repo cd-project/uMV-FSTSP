@@ -3789,7 +3789,7 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
     cplex.exportModel("cplex_model_1.lp");
     std::vector<Sortie> st;
     double obj = 0;
-    MyCallback myCallback(env, X[1], 3);
+    MyCallback myCallback(env, X, 3, node_max_stage, D);
     cplex.use(&myCallback);
     // Solve the model
     if (!cplex.solve()) {

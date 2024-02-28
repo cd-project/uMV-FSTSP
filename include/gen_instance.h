@@ -5,6 +5,7 @@
 #ifndef UMV_FSTSP_GEN_INSTANCE_H
 #define UMV_FSTSP_GEN_INSTANCE_H
 
+#include <algorithm>
 #include <vector>
 #include <random>
 #include <iostream>
