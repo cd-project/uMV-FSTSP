@@ -11,43 +11,48 @@
 #include <utility>
 
 // On a new feasible solution callback.
-class MyCallback : public IloCplex::MIPCallbackI {
+class MyCallback : public IloCplex::UserCutCallbackI {
 public:
     // Constructor
-    MyCallback(IloEnv env, IloArray<IloBoolVarArray> X, int numProcedures, int node_max_stage, int D)
-            : IloCplex::MIPCallbackI(env), X(X), numProcedures(numProcedures), node_max_stage(node_max_stage), D(D) {}
-
+    MyCallback(IloEnv env, IloModel &model, IloArray<IloBoolVarArray> X, double &best_objective,int numProcedures, int node_max_stage, int D)
+            : IloCplex::UserCutCallbackI(env), model(model), X(X), best_objective(IloInfinity), numProcedures(numProcedures), node_max_stage(node_max_stage), D(D) {
+        fixed = std::vector<int>(node_max_stage);
+    }
 protected:
     // Override the main callback method
     void main() override {
-        auto model = getModel();
-        IloCplex cplex(getEnv());
-        for (int procedure = 0; procedure < numProcedures; ++procedure) {
-            // Obtain current solution
-            IloNumArray currentSolution(getEnv());
-            // getIncumbentValues(currentSolution, variables);
-
-            // Do some processing on the current solution
-            for (int k = 2; k < node_max_stage; ++k) {
-                for (int i = 1; i < D; ++i) {
-                    IloNum X_val = cplex.getValue(X[k][i]);
-                    if (X_val == 1) {
-                        if (rand() % 2 == 0) { // Randomly fix some variables to their current values
-                            model.add(X[k][i] == X_val); // Fix
-                        } else { // Reset
-                            X[k][i].setLB(0); // Reset lower bound
-                            X[k][i].setUB(1); // Reset UPPER bound
+        if (hasIncumbent()) {
+            double current_obj = getIncumbentObjValue();
+            if (current_obj < best_objective) {
+                best_objective = current_obj;
+                // copy the current state
+                IloArray<IloNumArray> X_val(getEnv(), node_max_stage+1);
+                for (int k = 1; k <= node_max_stage; k++) {
+                    X_val[k] = IloNumArray(getEnv(), D);
+                    getIncumbentValues(X_val[k], X[k]);
+                    for (int i = 0; i <= D; i++) {
+                        if (X_val[k][i] == 1) {
+                            std::cout << "Value of X[" << k << "][" << i << "] = " << X_val[k][i] << " " << std::endl;
                         }
                     }
                 }
+                for (int k = 2; k <= node_max_stage-1; k++) {
+                    for (int i = 1; i < D; i++) {
+                        if (X_val[k][i] == 1) {
+                            if (rand() % 2 == 0) {
+                                if (fixed[k] == 0) {
+                                    model.add(X[k][i] == 1);
+                                    fixed[k] = 1;
+                                    std::cout << "Fixed X[" << k << "][" << i << "] to 1" << std::endl;
+                                }
+                            } else {
+                                // X[k][i].
+                            }
+                        }
+                    }
+                }
+
             }
-            // Solve for another new solution
-            if (procedure < numProcedures - 1) {
-                // Let the solver solve for another new solution
-                solveFixedVariables();
-            }
-            // End of a procedure
-            currentSolution.end();
         }
     }
 
@@ -69,9 +74,12 @@ protected:
 
 private:
     IloArray<IloBoolVarArray> X;
+    IloModel &model;
+    double best_objective;
     int numProcedures;
     int node_max_stage;
     int D;
+    std::vector<int> fixed;
 };
 
 class Sortie {
@@ -90,15 +98,17 @@ public:
     double cost;
     std::vector<Sortie> sortie;
     double recalculated_cost;
+    double time_spent;
     Result() {}
     Result(double c, std::vector<Sortie>& st);
-    Result(double c, double re_c, std::vector<Sortie> &st);
+    Result(double c, double re_c, double time_spent, std::vector<Sortie> &st);
 
 };
 class Solver {
 public:
+    void Knapsack();
     std::shared_ptr<Instance> instance;
-    explicit Solver(std::shared_ptr<Instance>& inst) {
+    explicit Solver(const std::shared_ptr<Instance>& inst) {
         instance = inst;
     }
     double sl = {1};

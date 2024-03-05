@@ -1,6 +1,6 @@
 #!/bin/bash
-folder_path="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances"
-binary_file="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/cmake-build-release/uMV-FSTSP"
+folder_path="/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances"
+binary_file="/home/cuong/CLionProjects/uMV-FSTSP/cmake-build-release/uMV-FSTSP"
 
 # Use find to get a list of all directories in the specified folder
 # The -maxdepth 1 option ensures that only immediate subdirectories are considered

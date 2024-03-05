@@ -34,10 +34,11 @@ set (HEADER_FILES
         include/gen_instance.h)
 
 set (SOURCE_FILES
-        src/main.cpp src/instance.cpp src/solver.cpp)
+        src/main.cpp src/instance.cpp src/solver.cpp
+)
 
 add_executable(uMV-FSTSP ${SOURCE_FILES} ${HEADER_FILES})
-
+set_target_properties(uMV-FSTSP PROPERTIES OUTPUT_NAME "uMV-FSTSP")
 if(CXX)
     target_link_libraries(${CMAKE_PROJECT_NAME} optimized ${GUROBI_CXX_LIBRARY}
             debug ${GUROBI_CXX_DEBUG_LIBRARY})

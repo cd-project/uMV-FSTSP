@@ -29,35 +29,35 @@ int main(int argc, char**argv) {
         auto dtl = stod(dtl_str);
         auto v = stoi(v_str);
 
-        auto g = GenInstance(n_customer, dtl, v);
+        auto g = GenInstance(n_customer, dtl, v, true);
         return EXIT_SUCCESS;
     }
+
+
     std::string folder_path;
 
     bool write = false;
     if (argc == 2) {
-        folder_path ="/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/" + std::string(argv[1]);
+        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/" + std::string(argv[1]);
         write = true;
     } else {
-        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123437v1";
+        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/v1";
     }
-
-
 
     std::cout << "Instance name: " << folder_path << std::endl;
     std::cout << "Write arg val: " << write << std::endl;
-    auto instance = std::make_shared<Instance>(folder_path, false);
+    auto instance = std::make_shared<Instance>(folder_path, false, 4);
     auto solver = std::make_shared<Solver>(instance);
-                    auto result = solver->HeuristicFixCallback(
+    auto result = solver->mvdSolverWithLR(
             20, 20);
     if (write) {
         std::cout << "In write mode" << std::endl;
         auto i_name_split = SplitStringWithDelimiter(folder_path, "/");
         auto i_name = i_name_split[i_name_split.size()-1];
-        std::ofstream out("/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/gen_ins_res_20.csv", std::ios::app);
+        std::ofstream out("/home/cuong/CLionProjects/uMV-FSTSP/multi_d20.csv", std::ios::app);
         if(!out.is_open()) {
             std::cout << "Error opening file!" << std::endl;
         }
-        out << i_name <<"," << result.cost << "," << result.recalculated_cost << "," << result.sortie.size() << "\n";
+        out << i_name <<"," << result.cost << "," << result.recalculated_cost << "," << result.sortie.size() << "," << result.time_spent << "\n";
     }
 }

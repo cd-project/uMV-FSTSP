@@ -63,10 +63,11 @@ public:
     double dtl;
     std::vector<std::vector<double>> tau;
     std::vector<std::vector<double>> tau_prime;
+    std::vector<std::tuple<int, double, double, double>> Nodes;
     std::vector<int> c_prime;
     std::vector<int> heavy;
 
-    GenInstance(int n_customer, double dtl, int v);
+    GenInstance(int n_customer, double dtl, int v, bool gen_node);
 };
 
 class path;
@@ -127,6 +128,27 @@ void write_tau_to_csv(const std::vector<std::vector<double>>& matrix, const std:
         std::cerr << "Error copying file: " << e.what() << std::endl;
     }
 }
+inline void write_node_file(const std::string& filename, const std::string& folderPath, std::vector<std::tuple<int, double, double, double>>& nodes) {
+    std::ofstream file(filename);
+    if(file.is_open()) {
+        for (auto &n:nodes) {
+            file << get<0>(n) << "," << get<1>(n) << "," << get<2>(n) << "," << get<3>(n) << "\n";
+        }
+        file.close();
+    } else {
+        std::cerr << "Unable to open file '" << filename << "' for writing." << std::endl;
+        return;
+    }
+    fs::path srcPath(filename);
+    fs::path destPath = fs::path(folderPath) / srcPath.filename();
+    try {
+        fs::copy_file(srcPath, destPath, fs::copy_options::overwrite_existing);
+        std::cout << "File copied to folder path: " << destPath << std::endl;
+    } catch (const fs::filesystem_error& e) {
+        std::cerr << "Error copying file: " << e.what() << std::endl;
+    }
+
+}
 void create_and_write_node_file(int n_customer, std::vector<int>& c_prime, const std::string& filename, const std::string& folderPath) {
     std::ofstream file(filename);
     if(file.is_open()) {
@@ -173,17 +195,99 @@ void createDirectory(const std::string& directoryPath, const std::string& direct
         std::cerr << "Error creating directory: " << e.what() << std::endl;
     }
 }
-// v: version number. just for naming purpose.
-GenInstance::GenInstance(int n_customer, double dtl, int v) {
-    createDirectory("/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances", "v"+std::to_string(v));
-    c_prime = generate1DMatrix(n_customer);
-    tau = generateSymmetricMatrix(n_customer+2, n_customer+2, 20);
-    tau_prime = generateSymmetricMatrix(n_customer+2, n_customer+2, 20);
-//    std::vector<std::tuple<int, double, double, double>> nodes(n_customer+2);
-    write_c_prime_to_csv(c_prime, "Cprime.csv", "/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
-    write_tau_to_csv(tau, "tau.csv", "/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
-    write_tau_to_csv(tau_prime, "tauprime.csv", "/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
-    create_and_write_node_file(n_customer, c_prime, "nodes.csv", "/mnt/c/Users/ORG/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
+double generateRandomDouble() {
+    // Create a random number engine
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // Create a uniform real distribution for doubles between 0 and 25
+    std::uniform_real_distribution<double> dist(0.0, 25.0);
+
+    // Generate a random double
+    return dist(gen);
 }
+bool exist(const std::vector<int>& vec, int element) {
+    // Use std::find to search for the element in the vector
+    return std::find(vec.begin(), vec.end(), element) != vec.end();
+}
+
+inline double manhattanDistance(double x1, double y1, double x2, double y2) {
+    return std::abs(x1 - x2) + std::abs(y1 - y2);
+}
+inline double euclideanDistance(double x1, double y1, double x2, double y2) {
+    return std::sqrt(std::pow(x1 - x2, 2) + std::pow(y1 - y2, 2));
+}
+// v: version number. just for naming purpose.
+GenInstance::GenInstance(int n_customer, double dtl, int v, bool gen_node) {
+    createDirectory("/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/", "v"+std::to_string(v));
+    c_prime = generate1DMatrix(n_customer);
+    if (!gen_node) {
+        tau = generateSymmetricMatrix(n_customer+2, n_customer+2, 20);
+        tau_prime = generateSymmetricMatrix(n_customer+2, n_customer+2, 20);
+        create_and_write_node_file(n_customer, c_prime, "nodes.csv", "/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
+    } else {
+        // Generate node info then calculate.
+        for (int i = 0; i <= n_customer+1; i++) {
+            double last = 0;
+            if (i != n_customer+1) {
+                if (!exist(c_prime, i)) {
+                    last = 1;
+                }
+                auto node = std::make_tuple(i, generateRandomDouble(), generateRandomDouble(), last);
+                Nodes.push_back(node);
+            }
+            if (i == n_customer+1) {
+                auto n_clone = Nodes[0];
+                get<0>(n_clone) = n_customer+2;
+                Nodes.push_back(n_clone);
+            }
+        }
+        std::cout << "Printing nodes" << std::endl;
+        for (int i = 0; i < n_customer+2; i++) {
+            std::cout << std::get<0>(Nodes[i]) << " " << std::get<1>(Nodes[i]) << " "<<  std::get<2>(Nodes[i]) << " " << std::get<3>(Nodes[i]) << std::endl;
+        }
+        tau.resize(n_customer+2);
+        tau_prime.resize(n_customer+2);
+        for (int i = 0; i < tau.size(); i++) {
+            tau[i].resize(n_customer+2);
+            tau_prime[i].resize(n_customer+2);
+        }
+        for (int i = 0; i < n_customer+2; i++) {
+            for (int j = 0; j < n_customer+2; j++) {
+                if (i == j || i == n_customer+1) {
+                    tau[i][j] = 0;
+                    tau_prime[i][j] = 0;
+                } else {
+                    // truck_speed = 2/3 drone_speed.
+                    tau[i][j] = manhattanDistance(
+                        get<1>(Nodes[i]), get<2>(Nodes[i]), get<1>(Nodes[j]), get<2>(Nodes[j])) / 2;
+                    tau_prime[i][j] = euclideanDistance(
+                        get<1>(Nodes[i]), get<2>(Nodes[i]), get<1>(Nodes[j]), get<2>(Nodes[j])) / 3;
+                }
+            }
+        }
+        std::cout << "Printing tau:" << std::endl;
+        for (int i = 0; i < n_customer+2; i++) {
+            for (int j = 0; j < n_customer+2; j++) {
+                std::cout << tau[i][j] << " ";
+            }
+            std::cout << std::endl;
+        }
+
+        std::cout << "Printing tau_prime:" << std::endl;
+        for (int i = 0; i < n_customer+2; i++) {
+            for (int j = 0; j < n_customer+2; j++) {
+                std::cout << tau_prime[i][j] << " ";
+            }
+            std::cout << std::endl;
+        }
+        write_node_file("nodes.csv", "/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v), Nodes);
+
+    }
+    write_c_prime_to_csv(c_prime, "Cprime.csv", "/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
+    write_tau_to_csv(tau, "tau.csv", "/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
+    write_tau_to_csv(tau_prime, "tauprime.csv", "/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
+}
+
 
 #endif //UMV_FSTSP_GEN_INSTANCE_H
