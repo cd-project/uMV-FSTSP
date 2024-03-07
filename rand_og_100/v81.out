@@ -1,0 +1,114 @@
+Instance name: /home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/v81
+Write arg val: 1
+
+drone speed: 1 miles/minute
+uav non-eligible customer: 4 6 7 11 12 14 
+Printing tau:
+0 7.24664 16.7177 10.7993 6.33193 4.01595 2.22842 8.61348 9.46851 8.10175 1.25325 5.13166 7.05424 0 
+7.24664 0 11.3818 5.46341 12.4683 6.35413 5.01821 2.47372 4.13261 9.63118 6.65564 12.3783 11.4671 7.24664 
+16.7177 11.3818 0 5.91839 10.3858 17.7359 15.9139 8.90808 7.2492 8.61596 15.4645 13.9875 9.66347 16.7177 
+10.7993 5.46341 5.91839 0 13.0427 11.8175 9.99554 2.98969 4.56185 10.2056 9.54607 12.9527 12.0415 10.7993 
+6.33193 12.4683 10.3858 13.0427 0 9.2376 7.45008 13.8351 8.48085 2.83711 5.81265 3.60174 1.00119 6.33193 
+4.01595 6.35413 17.7359 11.8175 9.2376 0 1.822 8.82785 10.4867 9.11998 3.42495 9.14761 8.23642 4.01595 
+2.22842 5.01821 15.9139 9.99554 7.45008 1.822 0 7.00585 8.66474 7.29798 1.63743 7.36009 6.44889 2.22842 
+8.61348 2.47372 8.90808 2.98969 13.8351 8.82785 7.00585 0 5.35429 10.998 8.02248 13.7451 12.8339 8.61348 
+9.46851 4.13261 7.2492 4.56185 8.48085 10.4867 8.66474 5.35429 0 5.64373 8.21527 8.39085 7.47966 9.46851 
+8.10175 9.63118 8.61596 10.2056 2.83711 9.11998 7.29798 10.998 5.64373 0 6.84851 5.37156 1.83593 8.10175 
+1.25325 6.65564 15.4645 9.54607 5.81265 3.42495 1.63743 8.02248 8.21527 6.84851 0 5.72266 5.80099 1.25325 
+5.13166 12.3783 13.9875 12.9527 3.60174 9.14761 7.36009 13.7451 8.39085 5.37156 5.72266 0 4.32404 5.13166 
+7.05424 11.4671 9.66347 12.0415 1.00119 8.23642 6.44889 12.8339 7.47966 1.83593 5.80099 4.32404 0 7.05424 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Printing tau_prime:
+0 4.24227 8.23862 6.28568 3.86894 1.95304 1.11673 5.48092 4.72052 3.98119 0.653181 2.74015 3.87512 0 
+4.24227 0 5.4605 2.58967 5.89633 3.3603 3.18757 1.3323 2.70712 4.72369 3.68075 5.96307 5.466 4.24227 
+8.23862 5.4605 0 3.07176 6.90073 8.37625 7.6226 4.51507 3.52514 5.37841 7.59287 8.16806 6.32726 8.23862 
+6.28568 2.58967 3.07176 0 6.49905 5.8525 5.39935 1.45802 2.24012 4.97618 5.64508 7.19388 5.94463 6.28568 
+3.86894 5.89633 6.90073 6.49905 0 5.56493 4.37326 6.55904 4.26257 1.57632 3.63868 1.6984 0.58197 3.86894 
+1.95304 3.3603 8.37625 5.8525 5.56493 0 1.20323 4.69203 4.95635 5.25231 1.93735 4.66022 5.43657 1.95304 
+1.11673 3.18757 7.6226 5.39935 4.37326 1.20323 0 4.46843 4.1134 4.06994 0.800444 3.58645 4.23363 1.11673 
+5.48092 1.3323 4.51507 1.45802 6.55904 4.69203 4.46843 0 2.6424 5.18634 4.88413 6.9078 6.06045 5.48092 
+4.72052 2.70712 3.52514 2.24012 4.26257 4.95635 4.1134 2.6424 0 2.73739 4.07185 5.07305 3.70507 4.72052 
+3.98119 4.72369 5.37841 4.97618 1.57632 5.25231 4.06994 5.18634 2.73739 0 3.51997 2.84411 0.996429 3.98119 
+0.653181 3.68075 7.59287 5.64508 3.63868 1.93735 0.800444 4.88413 4.07185 3.51997 0 2.78608 3.55283 0.653181 
+2.74015 5.96307 8.16806 7.19388 1.6984 4.66022 3.58645 6.9078 5.07305 2.84411 2.78608 0 2.08314 2.74015 
+3.87512 5.466 6.32726 5.94463 0.58197 5.43657 4.23363 6.06045 3.70507 0.996429 3.55283 2.08314 0 3.87512 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+Printing number of nodes: 13
+
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+CPXPARAM_ClockType                               0
+CPXPARAM_Emphasis_MIP                            2
+CPXPARAM_MIP_Tolerances_Integrality              0
+Tried aggregator 2 times.
+MIP Presolve eliminated 7850 rows and 1179 columns.
+MIP Presolve modified 2382 coefficients.
+Aggregator did 2 substitutions.
+Reduced MIP has 18920 rows, 1548 columns, and 749835 nonzeros.
+Reduced MIP has 1541 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.34 sec. (742.54 ticks)
+Found incumbent of value 117.949280 after 0.61 sec. (1271.91 ticks)
+Probing fixed 162 vars, tightened 0 bounds.
+Probing changed sense of 70 constraints.
+Probing time = 0.16 sec. (270.56 ticks)
+Tried aggregator 1 time.
+MIP Presolve eliminated 97 rows and 232 columns.
+MIP Presolve modified 24 coefficients.
+Reduced MIP has 18823 rows, 1316 columns, and 748705 nonzeros.
+Reduced MIP has 1309 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.21 sec. (507.29 ticks)
+Probing time = 0.02 sec. (29.70 ticks)
+Tried aggregator 1 time.
+Detecting symmetries...
+Reduced MIP has 18823 rows, 1316 columns, and 748705 nonzeros.
+Reduced MIP has 1309 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.16 sec. (355.72 ticks)
+Probing time = 0.02 sec. (28.94 ticks)
+Clique table members: 353807.
+MIP emphasis: optimality.
+MIP search method: dynamic search.
+Parallel mode: deterministic, using up to 20 threads.
+Root relaxation solution time = 0.23 sec. (243.78 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                          117.9493      -12.0000           110.17%
+      0     0       37.9511    59      117.9493       37.9511      957   67.82%
+*     0+    0                           42.6926       37.9511            11.11%
+*     0+    0                           37.9511       37.9511             0.00%
+      0     0        cutoff             37.9511       37.9511      957    0.00%
+Elapsed time = 2.14 sec. (4325.62 ticks, tree = 0.01 MB, solutions = 3)
+
+Root node processing (before b&c):
+  Real time             =    2.14 sec. (4327.99 ticks)
+Parallel b&c, 20 threads:
+  Real time             =    0.00 sec. (0.00 ticks)
+  Sync time (average)   =    0.00 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    2.14 sec. (4327.99 ticks)
+Truck arcs:
+0 10
+1 7
+4 11
+6 1
+7 8
+8 9
+9 12
+10 6
+11 13
+12 4
+customer 2 is served by drone
+start of this sortie: 7
+end of this sortie: 9
+
+customer 3 is served by drone
+start of this sortie: 0
+end of this sortie: 7
+
+customer 5 is served by drone
+start of this sortie: 4
+end of this sortie: 13
+
+37.9511
+In write mode

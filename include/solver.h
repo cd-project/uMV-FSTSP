@@ -106,7 +106,7 @@ public:
 };
 class Solver {
 public:
-    void Knapsack();
+
     std::shared_ptr<Instance> instance;
     explicit Solver(const std::shared_ptr<Instance>& inst) {
         instance = inst;
@@ -121,5 +121,6 @@ public:
     Result mvdSolverWithLR(int n_thread, int e);
     Result HeuristicFixCallback(int n_thread, int e);
     Result SolverWithRandomTruckStageFixed(int n_thread, int e);
+    Result Roberti2020(int n_thread, int e);
 };
 #endif //UMV_FSTSP_SOLVER_H

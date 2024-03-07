@@ -1,0 +1,4 @@
+Instance name: /home/cuong/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/FSTSP_10_customer_problems
+Write arg val: 1
+terminate called after throwing an instance of 'std::invalid_argument'
+  what():  stoi
