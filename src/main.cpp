@@ -18,7 +18,6 @@ static std::vector <std::string> SplitStringWithDelimiter(const std::string& s, 
     return returnValue;
 }
 
-
 int main(int argc, char**argv) {
     if (argc == 4) {
         std::string n_c = argv[1];
@@ -47,8 +46,7 @@ int main(int argc, char**argv) {
     std::cout << "Write arg val: " << write << std::endl;
     auto instance = std::make_shared<Instance>(folder_path, false, 0);
     auto solver = std::make_shared<Solver>(instance);
-    auto result = solver->mvdSolverWithLR(
-            20, 20);
+    auto result = solver->mvdSolverWithLR(20, 20);
     if (write) {
         std::cout << "In write mode" << std::endl;
         auto i_name_split = SplitStringWithDelimiter(folder_path, "/");

@@ -122,5 +122,8 @@ public:
     Result HeuristicFixCallback(int n_thread, int e);
     Result SolverWithRandomTruckStageFixed(int n_thread, int e);
     Result Roberti2020(int n_thread, int e);
+    Result Amico2021_3Index(int n_thread, int e);
+    Result Amico2021_2Index(int n_thread, int e);
+
 };
 #endif //UMV_FSTSP_SOLVER_H
