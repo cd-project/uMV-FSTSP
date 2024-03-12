@@ -46,7 +46,7 @@ int main(int argc, char**argv) {
     std::cout << "Write arg val: " << write << std::endl;
     auto instance = std::make_shared<Instance>(folder_path, false, 0);
     auto solver = std::make_shared<Solver>(instance);
-    auto result = solver->mvdSolverWithLR(20, 20);
+    auto result = solver->mvdSolverRevisitDepotLRLoop(20, 20, true);
     if (write) {
         std::cout << "In write mode" << std::endl;
         auto i_name_split = SplitStringWithDelimiter(folder_path, "/");

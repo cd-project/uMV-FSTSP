@@ -34,12 +34,14 @@ Result::Result(double c, double re_c, double t, std::vector<Sortie> &st) {
     sortie = st;
     time_spent = t;
 }
-inline bool exist(const std::vector<int>& vec, int element) {
+
+inline bool exist(const std::vector<int> &vec, int element) {
     // Use std::find to search for the element in the vector
     return std::find(vec.begin(), vec.end(), element) != vec.end();
 }
+
 std::vector<std::pair<std::vector<int>, std::vector<int> > > generateSetsAndComplements(
-        const std::vector<int> &elements) {
+    const std::vector<int> &elements) {
     auto n = elements.size();
     std::vector<std::pair<std::vector<int>, std::vector<int> > > result;
 
@@ -1364,8 +1366,8 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
                     if ((k != l) || (k_p != l_p)) {
                         // tranh drone bay cac doan giao nhau.
                         model.add(z[k][k_p] + z[l][l_p] <= 1).setName(
-                                ("C7_" + std::to_string(k) + "_" + std::to_string(k_p) + "_" + std::to_string(l) + "_" +
-                                 std::to_string(l_p)).c_str());
+                            ("C7_" + std::to_string(k) + "_" + std::to_string(k_p) + "_" + std::to_string(l) + "_" +
+                             std::to_string(l_p)).c_str());
                     }
                 }
             }
@@ -1439,7 +1441,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
                 }
             }
             model.add(lhs <= X[k_p][j]).setName(
-                    ("C8_rendezvous_" + std::to_string(j) + "_" + std::to_string(k_p)).c_str());
+                ("C8_rendezvous_" + std::to_string(j) + "_" + std::to_string(k_p)).c_str());
         }
     }
 
@@ -1523,7 +1525,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
                 // o to phai den k_p tu k trong khoang thoi gian <= dtl.
                 // , "C15_" + std::to_string(k) + "_" + std::to_string(k_p)
                 model.add(a[k_p] - d[k] <= z[k][k_p] * dtl + (1 - z[k][k_p]) * M).setName(
-                        ("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
+                    ("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
 
                 IloExpr rhs(env);
                 for (int i = 0; i < D; i++) {
@@ -1543,7 +1545,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
                 // vehicle phai doi drone truoc khi di chuyen.
                 // , "C16_" + std::to_string(k) + "_" + std::to_string(k_p)
                 model.add(d[k_p] - d[k] >= rhs).setName(
-                        ("C16_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
+                    ("C16_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
             }
         }
     }
@@ -1587,7 +1589,7 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
 
                         if (abs(X_val - 1) < 1e-6) {
                             std::cout << "Arc " << k << " connecting " << i << " and " << j
-                                      << " with cost " << tau[i][j] << " " << std::endl;
+                                    << " with cost " << tau[i][j] << " " << std::endl;
                             break;
                         }
                     }
@@ -1611,8 +1613,8 @@ Result Solver::mvdSolverCPLEX(int n_thread, int e) {
                                             auto Z_val = cplex.getValue(Z[k][k_p][i][j][h]);
                                             if (abs(Z_val - 1) < 1e-6) {
                                                 std::cout << "Drone fly from " << i << " at stage " << k <<
-                                                          " to serve " << h << " and then fly back to " << j
-                                                          << " at stage " << k_p << std::endl;
+                                                        " to serve " << h << " and then fly back to " << j
+                                                        << " at stage " << k_p << std::endl;
                                             }
                                         }
                         }
@@ -2021,7 +2023,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
                     if (k < l) {
                         model.add(z[k][k_p] + R[l] <= 1).setName(("C7m_" + std::to_string(k)
                                                                   + "_" + std::to_string(k_p) + "_" + std::to_string(l))
-                                                                         .c_str());
+                            .c_str());
                     } else {
                         //model.add(R[k] <= 1).setName(("C7k_" + std::to_string(k)
                         //    + "_" + std::to_string(k_p) + "_" + std::to_string(l)).c_str());
@@ -2056,7 +2058,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
             }
 
             model.add(lhs <= X[k_p][j]).setName(
-                    ("C8_rendezvous_" + std::to_string(j) + "_" + std::to_string(k_p)).c_str());
+                ("C8_rendezvous_" + std::to_string(j) + "_" + std::to_string(k_p)).c_str());
         }
     }
 
@@ -2125,7 +2127,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
                 // o to phai den k_p tu k trong khoang thoi gian <= dtl.
                 // , "C15_" + std::to_string(k) + "_" + std::to_string(k_p)
                 model.add(a[k_p] - d[k] <= z[k][k_p] * dtl + (1 - z[k][k_p]) * M).setName(
-                        ("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
+                    ("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
 
                 IloExpr rhs(env);
                 for (int i = 0; i <= D; i++) {
@@ -2145,7 +2147,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
                     // vehicle phai doi drone truoc khi di chuyen.
                 }
                 model.add(d[k_p] - d[k] + (1 - z[k][k_p]) * 2 * dtl >= rhs).setName(
-                        ("C21_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
+                    ("C21_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
             }
         }
     }
@@ -2247,7 +2249,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
                 if (abs(X_val - 1) < 1e-6) {
                     auto d_k = cplex.getValue(d[k]);
                     std::cout << "Stage " << k << " at customer " << i << " with departure time is: " << d_k <<
-                              std::endl;
+                            std::endl;
                     break;
                 }
             }
@@ -2261,7 +2263,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
                         //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
                         if (abs(X_val - 1) < 1e-6) {
                             std::cout << "Arc " << k << " connecting " << i << " and " << j
-                                      << " with cost " << tau[i][j] << " " << std::endl;
+                                    << " with cost " << tau[i][j] << " " << std::endl;
                             break;
                         }
                     }
@@ -2285,7 +2287,7 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
                     //std::cout << k << " " << kp << std::endl;
                     if (abs(cplex.getValue(Z[h][k][kp]) - 1) < 1e-6) {
                         std::cout << "Drone flies from stage " << k << " to stage " << kp << " to serve customer " << h
-                                  << std::endl;
+                                << std::endl;
                     }
                 }
 
@@ -2321,15 +2323,15 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
                 ////assert(abs(cplex.getValue(z[sv_k][sv_kp]) - 1.0) < 1e-6);
 
                 std::cout << "Drone fly from " << sv_i << " at stage " << sv_k <<
-                          " to serve " << h << " and then fly back to " << sv_j
-                          << " at stage " << sv_kp << ". " << std::endl;
+                        " to serve " << h << " and then fly back to " << sv_j
+                        << " at stage " << sv_kp << ". " << std::endl;
                 double travel_time = tau_prime[sv_i][h] + tau_prime[h][sv_j];
                 auto drone_arrival_time = cplex.getValue(d[sv_k]) + travel_time;
                 auto vehicle_departure_time = cplex.getValue(d[sv_kp]);
                 auto truck_arrival_time = cplex.getValue(a[sv_kp]);
                 std::cout << "Start arc cost: "
-                          << tau_prime[sv_i][h] << ", end arc cost: " << tau_prime[h][sv_j] <<
-                          ". Total drone travel time: " << travel_time << std::endl;
+                        << tau_prime[sv_i][h] << ", end arc cost: " << tau_prime[h][sv_j] <<
+                        ". Total drone travel time: " << travel_time << std::endl;
 
                 //                    std::cout << "Drone/Vehicle time: " << drone_arrival_time << " " << vehicle_departure_time << std::endl;
                 std::cout << "Drone arrival time: " << drone_arrival_time << std::endl;
@@ -2389,7 +2391,6 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
             //std::cout << v_name << std::endl;
             X[k][i].setName(v_name.c_str());
             if (k > 1 && i == 0) X[k][0].setBounds(0, 0);
-
         }
     }
 
@@ -2487,6 +2488,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
             model.add(expr <= X[k][i]).setName(("C17_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
         }
     }
+
     // $X^k_i \geq \sum_h Y^k_{ih}$ (C17p) : chỉ bay drone tới nơi mà xe ở đó
     for (int k = 1; k <= node_max_stage; k++) {
         for (int i = 0; i <= D; i++) {
@@ -2692,7 +2694,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                     if (k < l) {
                         model.add(z[k][k_p] + R[l] <= 1).setName(("C7m_" + std::to_string(k)
                                                                   + "_" + std::to_string(k_p) + "_" + std::to_string(l))
-                                                                         .c_str());
+                            .c_str());
                     } else {
                         //                        model.add(R[k] <= 1).setName(("C7k_" + std::to_string(k);
                         //    + "_" + std::to_string(k_p) + "_" + std::to_string(l)).c_str());
@@ -2727,7 +2729,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
             }
 
             model.add(lhs <= X[k_p][j]).setName(
-                    ("C8_rendezvous_" + std::to_string(j) + "_" + std::to_string(k_p)).c_str());
+                ("C8_rendezvous_" + std::to_string(j) + "_" + std::to_string(k_p)).c_str());
         }
     }
 
@@ -2804,7 +2806,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                 // o to phai den k_p tu k trong khoang thoi gian <= dtl.
                 // , "C15_" + std::to_string(k) + "_" + std::to_string(k_p)
                 model.add(a[k_p] - d[k] <= z[k][k_p] * (dtl - sr) + (1 - z[k][k_p]) * M).setName(
-                        ("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
+                    ("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
 
                 IloExpr rhs(env);
                 for (int i = 0; i <= D; i++) {
@@ -2868,8 +2870,8 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                 }
 
                 model.add(
-                        d[k_p] >=
-                        d[k] + sum_length_y_k + sum_length_w_k_p + sum_y_k_p + sum_w_k_p - (1 - z[k][k_p]) * M);
+                    d[k_p] >=
+                    d[k] + sum_length_y_k + sum_length_w_k_p + sum_y_k_p + sum_w_k_p - (1 - z[k][k_p]) * M);
             }
         }
     }
@@ -2919,17 +2921,16 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
 
     // (k,h): k chỉ có thể là đến hoặc đi của khách hàng h.
     for (int k = 2; k < node_max_stage; k++) {
-        for (int h : C) {
+        for (int h: C) {
             IloExpr expr(env);
-            for (int i : C)
+            for (int i: C)
                 if (i != h && tau_prime[i][h] <= dtl)
                     expr += Y[k][i][h];
-            for (int i : C)
+            for (int i: C)
                 if (i != h && tau_prime[h][i] <= dtl)
                     expr += W[k][i][h];
 
             model.add(expr <= phi[h]).setName(("Cxyz_" + std::to_string(k) + "_" + std::to_string(h)).c_str());
-
         }
     }
 
@@ -2945,8 +2946,8 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
 
     IloExpr lb_drone_tour(env);
     for (int k = 1; k < node_max_stage; k++) {
-        for (int i = 0; i< D; i++) {
-            for (int h:C) {
+        for (int i = 0; i < D; i++) {
+            for (int h: C) {
                 if (i != h) {
                     lb_drone_tour += Y[k][i][h] * tau_prime[i][h];
                 }
@@ -2955,7 +2956,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
     }
     for (int k = 2; k <= node_max_stage; k++) {
         for (int j = 1; j <= D; j++) {
-            for (int h:C) {
+            for (int h: C) {
                 if (j != h) {
                     lb_drone_tour += W[k][j][h] * tau_prime[h][j];
                 }
@@ -2964,7 +2965,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
     }
     model.add(lb_drone_tour <= d[node_max_stage]);
 
-    for (int k = 2; k < node_max_stage/2; k++) {
+    for (int k = 2; k < node_max_stage / 2; k++) {
         model.add(X[k][D] == 0);
     }
 
@@ -3013,7 +3014,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                     //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
                     if (abs(X_val - 1) < 2e-5) {
                         std::cout << "Arc " << k << " connecting " << i << " and " << j
-                                  << " with cost " << tau[i][j] << " " << std::endl;
+                                << " with cost " << tau[i][j] << " " << std::endl;
                         obj += tau[i][j];
                         map_stage_truck_arc[k] = std::make_pair(i, j);
                         break;
@@ -3038,7 +3039,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                 //std::cout << k << " " << kp << std::endl;
                 if (abs(cplex.getValue(Z[h][k][kp]) - 1) < 1e-5) {
                     std::cout << "Drone flies from stage " << k << " to stage " << kp << " to serve customer " << h <<
-                              std::endl;
+                            std::endl;
                 }
             }
 
@@ -3077,8 +3078,8 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
             ////assert(abs(cplex.getValue(z[sv_k][sv_kp]) - 1.0) < 1e-6);
 
             std::cout << "Drone fly from " << sv_i << " at stage " << sv_k <<
-                      " to serve " << h << " and then fly back to " << sv_j
-                      << " at stage " << sv_kp << ". " << std::endl;
+                    " to serve " << h << " and then fly back to " << sv_j
+                    << " at stage " << sv_kp << ". " << std::endl;
             obj += (sl + sr);
             if (sv_i == O) {
                 obj -= sl;
@@ -3089,7 +3090,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                 truck_travel_time += tau[map_stage_truck_arc[k_start].first][map_stage_truck_arc[k_start].second];
             }
             std::cout << "Truck travel time from stage " << sv_k << " to " << sv_kp << " is: " << truck_travel_time <<
-                      std::endl;
+                    std::endl;
             if (drone_travel_time > truck_travel_time) {
                 obj += drone_travel_time - truck_travel_time;
             }
@@ -3097,8 +3098,8 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
             auto vehicle_departure_time = cplex.getValue(d[sv_kp]);
             auto truck_arrival_time = cplex.getValue(a[sv_kp]);
             std::cout << "Start arc cost: "
-                      << tau_prime[sv_i][h] << ", end arc cost: " << tau_prime[h][sv_j] << ". Total drone travel time: "
-                      << drone_travel_time << std::endl;
+                    << tau_prime[sv_i][h] << ", end arc cost: " << tau_prime[h][sv_j] << ". Total drone travel time: "
+                    << drone_travel_time << std::endl;
 
             std::cout << "Drone arrival time: " << drone_arrival_time << std::endl;
             std::cout << "Truck arrival time: " << truck_arrival_time << std::endl;
@@ -3547,7 +3548,7 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
                 }
 
                 model.add(lhs <= X[k_p][j]).setName(
-                        ("C8_rendezvous_" + std::to_string(j) + "_" + std::to_string(k_p)).c_str());
+                    ("C8_rendezvous_" + std::to_string(j) + "_" + std::to_string(k_p)).c_str());
             }
         }
 
@@ -3606,7 +3607,7 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
             // em nghĩ nên đổi thành bằng nhau, a_(k+1) chắc chắn bằng departure stage trước + di chuyển.
             // d[k+1] mới >= d[k]. trường hợp lớn hơn xảy ra khi truck phải đợi drone bay đến.
             model.add(a[k + 1] == d[k] + sum).setName(
-                    ("C14_" + std::to_string(k) + "_" + std::to_string(k + 1)).c_str());
+                ("C14_" + std::to_string(k) + "_" + std::to_string(k + 1)).c_str());
         }
 
         ////////// C15: node_stage
@@ -3617,7 +3618,7 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
                     // o to phai den k_p tu k trong khoang thoi gian <= dtl.
                     // , "C15_" + std::to_string(k) + "_" + std::to_string(k_p)
                     model.add(a[k_p] - d[k] <= z[k][k_p] * (dtl - sr) + (1 - z[k][k_p]) * M).setName(
-                            ("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
+                        ("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
 
                     IloExpr rhs(env);
                     for (int i = 0; i <= D; i++) {
@@ -3667,10 +3668,10 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
                         }
                     }
                     model.add(
-                            d[k_p] >= d[k] + sum_length_y_k + sum_length_w_k_p + sl * sum_y_k_p + sr * sum_w_k_p - (
-                                                                                                                           1 -
-                                                                                                                           z[k][k_p]) *
-                                                                                                                   M);
+                        d[k_p] >= d[k] + sum_length_y_k + sum_length_w_k_p + sl * sum_y_k_p + sr * sum_w_k_p - (
+                            1 -
+                            z[k][k_p]) *
+                        M);
                 }
             }
         }
@@ -3751,9 +3752,9 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
                         auto d_k = cplex.getValue(d[k]);
                         auto a_k = cplex.getValue(a[k]);
                         std::cout << "Stage " << k << " at customer " << i << " with arrival time is: " << a_k <<
-                                  std::endl;
+                                std::endl;
                         std::cout << "Stage " << k << " at customer " << i << " with departure time is: " << d_k <<
-                                  std::endl;
+                                std::endl;
                         break;
                     }
                 }
@@ -3768,7 +3769,7 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
                             //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
                             if (abs(X_val - 1) < 1e-6) {
                                 std::cout << "Arc " << k << " connecting " << i << " and " << j
-                                          << " with cost " << tau[i][j] << " " << std::endl;
+                                        << " with cost " << tau[i][j] << " " << std::endl;
                                 obj += tau[i][j];
                                 map_stage_truck_arc[k] = std::make_pair(i, j);
                                 break;
@@ -3793,7 +3794,7 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
                         //std::cout << k << " " << kp << std::endl;
                         if (abs(cplex.getValue(Z[h][k][kp]) - 1) < 1e-6) {
                             std::cout << "Drone flies from stage " << k << " to stage " << kp << " to serve customer "
-                                      << h << std::endl;
+                                    << h << std::endl;
                         }
                     }
 
@@ -3829,8 +3830,8 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
                     ////assert(abs(cplex.getValue(z[sv_k][sv_kp]) - 1.0) < 1e-6);
 
                     std::cout << "Drone fly from " << sv_i << " at stage " << sv_k <<
-                              " to serve " << h << " and then fly back to " << sv_j
-                              << " at stage " << sv_kp << ". " << std::endl;
+                            " to serve " << h << " and then fly back to " << sv_j
+                            << " at stage " << sv_kp << ". " << std::endl;
                     obj += (sl + sr);
                     if (sv_i == O) {
                         obj -= sl;
@@ -3839,10 +3840,10 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
                     double truck_travel_time = 0;
                     for (int k_start = sv_k; k_start <= sv_kp - 1; k_start++) {
                         truck_travel_time += tau[map_stage_truck_arc[k_start].first][map_stage_truck_arc[k_start].
-                                second];
+                            second];
                     }
                     std::cout << "Truck travel time from stage " << sv_k << " to " << sv_kp << " is: " <<
-                              truck_travel_time << std::endl;
+                            truck_travel_time << std::endl;
                     if (drone_travel_time > truck_travel_time) {
                         obj += drone_travel_time - truck_travel_time;
                     }
@@ -3850,14 +3851,14 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
                     auto vehicle_departure_time = cplex.getValue(d[sv_kp]);
                     auto truck_arrival_time = cplex.getValue(a[sv_kp]);
                     std::cout << "Start arc cost: "
-                              << tau_prime[sv_i][h] << ", end arc cost: " << tau_prime[h][sv_j] <<
-                              ". Total drone travel time: " << drone_travel_time << std::endl;
+                            << tau_prime[sv_i][h] << ", end arc cost: " << tau_prime[h][sv_j] <<
+                            ". Total drone travel time: " << drone_travel_time << std::endl;
 
                     std::cout << "Drone arrival time: " << drone_arrival_time << std::endl;
                     std::cout << "Truck arrival time: " << truck_arrival_time << std::endl;
 
                     std::cout << "Truck departure time = max(d/a, t/a) plus (sl): " << vehicle_departure_time <<
-                              std::endl;
+                            std::endl;
                     assert(drone_arrival_time <= vehicle_departure_time);
                     assert(abs(cplex.getValue(Z[h][sv_k][sv_kp]) - 1.0) < 1e-6);
 
@@ -4728,7 +4729,7 @@ Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
                     if (k < l) {
                         model.add(z[k][k_p] + R[l] <= 1).setName(("C7m_" + std::to_string(k)
                                                                   + "_" + std::to_string(k_p) + "_" + std::to_string(l))
-                                                                         .c_str());
+                            .c_str());
                     } else {
                         //                        model.add(R[k] <= 1).setName(("C7k_" + std::to_string(k);
                         //    + "_" + std::to_string(k_p) + "_" + std::to_string(l)).c_str());
@@ -4763,7 +4764,7 @@ Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
             }
 
             model.add(lhs <= X[k_p][j]).setName(
-                    ("C8_rendezvous_" + std::to_string(j) + "_" + std::to_string(k_p)).c_str());
+                ("C8_rendezvous_" + std::to_string(j) + "_" + std::to_string(k_p)).c_str());
         }
     }
 
@@ -4832,7 +4833,7 @@ Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
                 // o to phai den k_p tu k trong khoang thoi gian <= dtl.
                 // , "C15_" + std::to_string(k) + "_" + std::to_string(k_p)
                 model.add(a[k_p] - d[k] <= z[k][k_p] * (dtl - sr) + (1 - z[k][k_p]) * M).setName(
-                        ("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
+                    ("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
 
                 IloExpr rhs(env);
                 for (int i = 0; i <= D; i++) {
@@ -4882,10 +4883,10 @@ Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
                     }
                 }
                 model.add(
-                        d[k_p] >= d[k] + sum_length_y_k + sum_length_w_k_p + sl * sum_y_k_p + sr * sum_w_k_p - (
-                                                                                                                       1 -
-                                                                                                                       z[k][k_p]) *
-                                                                                                               M);
+                    d[k_p] >= d[k] + sum_length_y_k + sum_length_w_k_p + sl * sum_y_k_p + sr * sum_w_k_p - (
+                        1 -
+                        z[k][k_p]) *
+                    M);
             }
         }
     }
@@ -4963,7 +4964,7 @@ Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
                     auto a_k = cplex.getValue(a[k]);
                     std::cout << "Stage " << k << " at customer " << i << " with arrival time is: " << a_k << std::endl;
                     std::cout << "Stage " << k << " at customer " << i << " with departure time is: " << d_k <<
-                              std::endl;
+                            std::endl;
                     break;
                 }
             }
@@ -4978,7 +4979,7 @@ Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
                         //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
                         if (abs(X_val - 1) < 1e-6) {
                             std::cout << "Arc " << k << " connecting " << i << " and " << j
-                                      << " with cost " << tau[i][j] << " " << std::endl;
+                                    << " with cost " << tau[i][j] << " " << std::endl;
                             obj += tau[i][j];
                             map_stage_truck_arc[k] = std::make_pair(i, j);
                             break;
@@ -5003,7 +5004,7 @@ Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
                     //std::cout << k << " " << kp << std::endl;
                     if (abs(cplex.getValue(Z[h][k][kp]) - 1) < 1e-6) {
                         std::cout << "Drone flies from stage " << k << " to stage " << kp << " to serve customer " << h
-                                  << std::endl;
+                                << std::endl;
                     }
                 }
 
@@ -5039,8 +5040,8 @@ Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
                 ////assert(abs(cplex.getValue(z[sv_k][sv_kp]) - 1.0) < 1e-6);
 
                 std::cout << "Drone fly from " << sv_i << " at stage " << sv_k <<
-                          " to serve " << h << " and then fly back to " << sv_j
-                          << " at stage " << sv_kp << ". " << std::endl;
+                        " to serve " << h << " and then fly back to " << sv_j
+                        << " at stage " << sv_kp << ". " << std::endl;
                 obj += (sl + sr);
                 if (sv_i == O) {
                     obj -= sl;
@@ -5051,7 +5052,7 @@ Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
                     truck_travel_time += tau[map_stage_truck_arc[k_start].first][map_stage_truck_arc[k_start].second];
                 }
                 std::cout << "Truck travel time from stage " << sv_k << " to " << sv_kp << " is: " << truck_travel_time
-                          << std::endl;
+                        << std::endl;
                 if (drone_travel_time > truck_travel_time) {
                     obj += drone_travel_time - truck_travel_time;
                 }
@@ -5059,8 +5060,8 @@ Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
                 auto vehicle_departure_time = cplex.getValue(d[sv_kp]);
                 auto truck_arrival_time = cplex.getValue(a[sv_kp]);
                 std::cout << "Start arc cost: "
-                          << tau_prime[sv_i][h] << ", end arc cost: " << tau_prime[h][sv_j] <<
-                          ". Total drone travel time: " << drone_travel_time << std::endl;
+                        << tau_prime[sv_i][h] << ", end arc cost: " << tau_prime[h][sv_j] <<
+                        ". Total drone travel time: " << drone_travel_time << std::endl;
 
                 std::cout << "Drone arrival time: " << drone_arrival_time << std::endl;
                 std::cout << "Truck arrival time: " << truck_arrival_time << std::endl;
@@ -5438,7 +5439,6 @@ Result Solver::Roberti2020(int n_thread, int e) {
                     std::cout << i << " " << j << std::endl;
                 }
             }
-
         }
     }
     std::cout << "Drone served customers:" << std::endl;
@@ -5461,11 +5461,10 @@ Result Solver::Roberti2020(int n_thread, int e) {
                     std::cout << i << " " << j << " " << cplex.getValue(xd[i][j]) << std::endl;
                 }
             }
-
         }
     }
     std::vector<Sortie> st;
-    return Result(cplex.getObjValue(), 0, duration.count()/1000, st);
+    return Result(cplex.getObjValue(), 0, duration.count() / 1000, st);
 }
 
 Result Solver::Amico2021_3Index(int n_thread, int e) {
@@ -5523,22 +5522,22 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     IloCplex cplex(model);
     cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);
 
-    IloArray<IloBoolVarArray> x(env, n+1);
-    for (int i:N0) {
-        x[i] = IloBoolVarArray(env, n+1);
-        for (int j:N_p) {
+    IloArray<IloBoolVarArray> x(env, n + 1);
+    for (int i: N0) {
+        x[i] = IloBoolVarArray(env, n + 1);
+        for (int j: N_p) {
             if (i != j) {
                 x[i][j] = IloBoolVar(env);
             }
         }
     }
-    IloArray<IloArray<IloBoolVarArray>> y(env, n+1);
-    for (int i:N0) {
-        y[i] = IloArray<IloBoolVarArray>(env, n+1);
-        for (int j:c_prime) {
+    IloArray<IloArray<IloBoolVarArray> > y(env, n + 1);
+    for (int i: N0) {
+        y[i] = IloArray<IloBoolVarArray>(env, n + 1);
+        for (int j: c_prime) {
             if (i != j) {
-                y[i][j] = IloBoolVarArray(env, n+1);
-                for (int k:N_p) {
+                y[i][j] = IloBoolVarArray(env, n + 1);
+                for (int k: N_p) {
                     if (i != k && j != k) {
                         if (tau_prime[i][j] + tau_prime[j][k] + sr <= dtl) {
                             y[i][j][k] = IloBoolVar(env);
@@ -5549,22 +5548,22 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
         }
     }
 
-    IloNumVarArray w(env, n+1), t(env, n+1);
-    for (int i:N) {
+    IloNumVarArray w(env, n + 1), t(env, n + 1);
+    for (int i: N) {
         w[i] = IloNumVar(env, 0, IloInfinity);
         t[i] = IloNumVar(env, 0, IloInfinity);
     }
 
-    IloBoolVarArray z(env, n+1);
-    for (int i:N) {
+    IloBoolVarArray z(env, n + 1);
+    for (int i: N) {
         z[i] = IloBoolVar(env);
     }
 
     IloExpr objective(env);
 
     // Objective's first term
-    for (int i:N0) {
-        for (int j:N_p) {
+    for (int i: N0) {
+        for (int j: N_p) {
             if (i != j) {
                 objective += x[i][j] * tau[i][j];
             }
@@ -5573,8 +5572,8 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
 
     // Objective's second term
     IloExpr obj_2nd_term(env);
-    for (int j:c_prime) {
-        for (int k:N_p) {
+    for (int j: c_prime) {
+        for (int k: N_p) {
             if (j != k) {
                 if (tau_prime[0][j] + tau_prime[j][k] + sr <= dtl) {
                     obj_2nd_term += y[0][j][k];
@@ -5586,11 +5585,11 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
 
     // Objective's third term
     IloExpr obj_3rd_term(env);
-    for (int i:N0) {
+    for (int i: N0) {
         if (i != 0) {
-            for (int j:c_prime) {
+            for (int j: c_prime) {
                 if (i != j) {
-                    for (int k:N_p) {
+                    for (int k: N_p) {
                         if (i != k && j != k) {
                             if (tau_prime[i][j] + tau_prime[j][k] + sr <= dtl) {
                                 obj_3rd_term += y[i][j][k];
@@ -5604,23 +5603,23 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     objective += (sl + sr) * obj_3rd_term;
 
     // Fourth term
-    for (int i:N_p) {
+    for (int i: N_p) {
         objective += w[i];
     }
 
     // Constraints:
 
     // C2
-    for (int j:C) {
+    for (int j: C) {
         IloExpr s1(env), s2(env);
-        for (int i:N0) {
+        for (int i: N0) {
             if (i != j) {
                 s1 += x[i][j];
             }
         }
         if (exist(c_prime, j)) {
-            for (int i:N0) {
-                for (int k:N_p) {
+            for (int i: N0) {
+                for (int k: N_p) {
                     if (i != j && i != k && j != k) {
                         if (tau_prime[i][j] + tau_prime[j][k] + sr <= dtl) {
                             s2 += y[i][j][k];
@@ -5639,24 +5638,24 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
 
     // C3
     IloExpr c3_s1(env), c3_s2(env);
-    for (int j:N_p) {
+    for (int j: N_p) {
         c3_s1 += x[0][j];
     }
-    for (int i:N0) {
+    for (int i: N0) {
         c3_s2 += x[i][n];
     }
     model.add(c3_s1 == 1);
     model.add(c3_s2 == 1);
 
     // C4
-    for (int j:C) {
+    for (int j: C) {
         IloExpr c4_s1(env), c4_s2(env);
-        for (int i:N0) {
+        for (int i: N0) {
             if (i != j) {
                 c4_s1 += x[i][j];
             }
         }
-        for (int i:N_p) {
+        for (int i: N_p) {
             if (i != j) {
                 c4_s2 += x[j][i];
             }
@@ -5665,8 +5664,8 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     }
 
     // C5
-    for (int i:N0) {
-        for (int j:N_p) {
+    for (int i: N0) {
+        for (int j: N_p) {
             if (i != j) {
                 model.add(t[j] >= t[i] + tau[i][j] - M * (1 - x[i][j]));
             }
@@ -5674,11 +5673,11 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     }
 
     // C6
-    for (int i:N0) {
-        for (int j:N_p) {
+    for (int i: N0) {
+        for (int j: N_p) {
             if (i != j) {
                 IloExpr c6_s1(env);
-                for (int k:c_prime) {
+                for (int k: c_prime) {
                     if (i != j && i != k && j != k) {
                         if (tau_prime[i][k] + tau_prime[k][j] + sr <= dtl) {
                             c6_s1 += (M + tau_prime[i][k] + tau_prime[k][j]) * y[i][k][j];
@@ -5691,8 +5690,8 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     }
 
     // C7
-    for (int i:N0) {
-        for (int j:N_p) {
+    for (int i: N0) {
+        for (int j: N_p) {
             if (i != j) {
                 model.add(w[j] >= t[j] - t[i] - tau[i][j] - M * (1 - x[i][j]));
             }
@@ -5700,11 +5699,11 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     }
 
     // C8
-    for (int i:N0) {
-        for (int j:N_p) {
+    for (int i: N0) {
+        for (int j: N_p) {
             if (i != j) {
                 IloExpr c8_s1(env);
-                for (int k:c_prime) {
+                for (int k: c_prime) {
                     if (i != j && i != k && j != k) {
                         if (tau_prime[i][k] + tau_prime[k][j] + sr <= dtl) {
                             c8_s1 += y[i][k][j];
@@ -5717,9 +5716,9 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     }
 
     // C9
-    for (int i:N_p) {
+    for (int i: N_p) {
         IloExpr c9_s1(env);
-        for (int j:N0) {
+        for (int j: N0) {
             if (i != j) {
                 c9_s1 += x[j][i];
             }
@@ -5728,10 +5727,10 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     }
 
     // C10
-    for (int i:N0) {
+    for (int i: N0) {
         IloExpr c10_s1(env);
-        for (int j:c_prime) {
-            for (int k:N_p) {
+        for (int j: c_prime) {
+            for (int k: N_p) {
                 if (i != j && j != k && i != k) {
                     if (tau_prime[i][j] + tau_prime[j][k] + sr <= dtl) {
                         c10_s1 += y[i][j][k];
@@ -5743,22 +5742,21 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     }
 
     // C11
-    for (int i:N0) {
-        for (int j:N_p) {
+    for (int i: N0) {
+        for (int j: N_p) {
             if (i != j) {
                 IloExpr c11_s1(env), c11_s2(env);
-                for (int l:N0) {
-                    for (int k:c_prime) {
+                for (int l: N0) {
+                    for (int k: c_prime) {
                         if (l != k && l != j && k != j) {
                             if (tau_prime[l][k] + tau_prime[k][j] + sr <= dtl) {
                                 c11_s1 += y[l][k][j];
                             }
-
                         }
                     }
                 }
-                for (int k:c_prime) {
-                    for (int l:N_p) {
+                for (int k: c_prime) {
+                    for (int l: N_p) {
                         if (i != k && i != l && l != k) {
                             if (tau_prime[i][k] + tau_prime[k][l] + sr <= dtl) {
                                 c11_s2 += y[i][k][l];
@@ -5772,24 +5770,24 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     }
 
     // Add constraint
-    for (int j:c_prime) {
+    for (int j: c_prime) {
         IloExpr sum(env);
-        for (int i:c_s) {
-            for (int k:c_t) {
+        for (int i: c_s) {
+            for (int k: c_t) {
                 if (i != j && j != k && i != k) {
                     sum += y[i][j][k];
                 }
             }
         }
-        for (int i:c_prime) {
-            for (int k:c_t) {
+        for (int i: c_prime) {
+            for (int k: c_t) {
                 if (i != j && j != k && i != k) {
                     sum += y[j][i][k];
                 }
             }
         }
-        for (int k:c_s) {
-            for (int i:c_prime) {
+        for (int k: c_s) {
+            for (int i: c_prime) {
                 if (i != j && j != k && i != k) {
                     sum += y[k][i][j];
                 }
@@ -5802,18 +5800,18 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
 
     // Valid inequalities
 
-//    // C17
+    //    // C17
     IloExpr c17_s1(env);
-    for (int j:N_p) {
+    for (int j: N_p) {
         c17_s1 += x[0][j];
     }
     model.add(z[0] <= c17_s1);
 
     // C18
-    for (int i:N_p) {
+    for (int i: N_p) {
         IloExpr c18_s1(env);
-        for (int k:N0) {
-            for (int j:c_prime) {
+        for (int k: N0) {
+            for (int j: c_prime) {
                 if (i != j && j != k && i != k) {
                     if (tau_prime[k][j] + tau_prime[j][i] + sr <= dtl) {
                         c18_s1 += y[k][j][i];
@@ -5825,10 +5823,10 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     }
 
     // C19
-    for (int i:c_prime) {
+    for (int i: c_prime) {
         IloExpr c19_s1(env);
-        for (int j:N0) {
-            for (int k:N_p) {
+        for (int j: N0) {
+            for (int k: N_p) {
                 if (i != j && j != k && i != k) {
                     if (tau_prime[j][i] + tau_prime[i][k] + sr <= dtl) {
                         c19_s1 += y[j][i][k];
@@ -5840,10 +5838,10 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     }
 
     // C20
-    for (int j:N_p) {
+    for (int j: N_p) {
         IloExpr c20_s1(env);
-        for (int i:N0) {
-            for (int k:c_prime) {
+        for (int i: N0) {
+            for (int k: c_prime) {
                 if (i != j && j != k && i != k) {
                     if (tau_prime[i][k] + tau_prime[k][j] + sr <= dtl) {
                         c20_s1 += y[i][k][j];
@@ -5855,10 +5853,10 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     }
 
     // C21
-    for (int j:c_prime) {
+    for (int j: c_prime) {
         IloExpr c21_s1(env);
-        for (int i:N0) {
-            for (int k:N_p) {
+        for (int i: N0) {
+            for (int k: N_p) {
                 if (i != j && j != k && i != k) {
                     if (tau_prime[i][j] + tau_prime[j][k] + sr <= dtl) {
                         c21_s1 += y[i][j][k];
@@ -5883,8 +5881,8 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
         // Handle other solver errors
         std::cerr << "Solver error: " << cplex.getStatus() << std::endl;
     }
-    for (int i:c_s) {
-        for (int j:c_t) {
+    for (int i: c_s) {
+        for (int j: c_t) {
             if (i != j) {
                 if (cplex.getValue(x[i][j]) == 1) {
                     std::cout << i << " " << j << std::endl;
@@ -5893,9 +5891,9 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
         }
     }
     std::cout << "Drone sorties:" << std::endl;
-    for (int i:N0) {
-        for (int j:c_prime) {
-            for (int k:N_p) {
+    for (int i: N0) {
+        for (int j: c_prime) {
+            for (int k: N_p) {
                 if (i != j && i != k && j != k) {
                     if (tau_prime[i][j] + tau_prime[j][k] <= e - sr) {
                         if (cplex.getValue(y[i][j][k]) == 1) {
@@ -5908,7 +5906,7 @@ Result Solver::Amico2021_3Index(int n_thread, int e) {
     }
     std::cout << cplex.getObjValue() << std::endl;
     std::vector<Sortie> st;
-    return Result(cplex.getObjValue(), 0, duration.count()/1000, st);
+    return Result(cplex.getObjValue(), 0, duration.count() / 1000, st);
 }
 
 Result Solver::Amico2021_2Index(int n_thread, int e) {
@@ -5966,45 +5964,45 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
     IloCplex cplex(model);
     cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);
 
-    IloNumVarArray w(env, n+1), t(env, n+1);
-    for (int i:N) {
+    IloNumVarArray w(env, n + 1), t(env, n + 1);
+    for (int i: N) {
         w[i] = IloNumVar(env, 0, IloInfinity);
         t[i] = IloNumVar(env, 0, IloInfinity);
     }
 
-    IloBoolVarArray z(env, n+1);
-    for (int i:N) {
+    IloBoolVarArray z(env, n + 1);
+    for (int i: N) {
         z[i] = IloBoolVar(env);
     }
 
-    IloArray<IloBoolVarArray> x(env, n+1);
-    for (int i:N0) {
-        x[i] = IloBoolVarArray(env, n+1);
-        for (int j:N_p) {
+    IloArray<IloBoolVarArray> x(env, n + 1);
+    for (int i: N0) {
+        x[i] = IloBoolVarArray(env, n + 1);
+        for (int j: N_p) {
             if (i != j) {
                 x[i][j] = IloBoolVar(env);
             }
         }
     }
-    IloArray<IloBoolVarArray> gl(env, n+1);
-    for (int i:N0) {
-        gl[i] = IloBoolVarArray(env, n+1);
-        for (int j:c_prime) {
+    IloArray<IloBoolVarArray> gl(env, n + 1);
+    for (int i: N0) {
+        gl[i] = IloBoolVarArray(env, n + 1);
+        for (int j: c_prime) {
             if (i != j) {
                 gl[i][j] = IloBoolVar(env);
-                if (tau_prime[i][j] > e) {
+                if (tau_prime[i][j] < e) {
                     model.add(gl[i][j] == 0);
                 }
             }
         }
     }
-    IloArray<IloBoolVarArray> gr(env, n+1);
-    for (int j:c_prime) {
-        gr[j] = IloBoolVarArray(env, n+1);
-        for (int k:N_p) {
+    IloArray<IloBoolVarArray> gr(env, n + 1);
+    for (int j: c_prime) {
+        gr[j] = IloBoolVarArray(env, n + 1);
+        for (int k: N_p) {
             if (j != k) {
                 gr[j][k] = IloBoolVar(env);
-                if (tau_prime[j][k] > e) {
+                if (tau_prime[j][k] < e) {
                     model.add(gr[j][k] == 0);
                 }
             }
@@ -6015,8 +6013,8 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
     IloExpr objective(env);
 
     // First term
-    for (int i:N0) {
-        for (int j:N_p) {
+    for (int i: N0) {
+        for (int j: N_p) {
             if (i != j) {
                 objective += x[i][j] * tau[i][j];
             }
@@ -6025,11 +6023,12 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
 
     // Second term
     IloExpr obj_2nd_term(env);
-    for (int i:N0) {
+    for (int i: N0) {
         if (i != 0) {
-            for (int j:c_prime) {
+            for (int j: c_prime) {
                 if (i != j) {
-                    obj_2nd_term += gl[i][j];
+                    if (tau_prime[i][j] < e)
+                        obj_2nd_term += gl[i][j];
                 }
             }
         }
@@ -6038,26 +6037,28 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
 
     // Third term
     IloExpr obj_3rd_term(env);
-    for (int j:c_prime) {
-        for (int k:N_p) {
+    for (int j: c_prime) {
+        for (int k: N_p) {
             if (j != k) {
-                objective += gr[j][k];
+                if (tau_prime[j][k] < e)
+                    objective += gr[j][k];
             }
         }
     }
     objective += sr * obj_3rd_term;
 
     // Fourth term
-    for (int i:N_p) {
+    for (int i: N_p) {
         objective += w[i];
     }
 
     // C23
-    for (int j:C) {
+    for (int j: C) {
         IloExpr c23_s1(env), c23_s2(env);
-        for (int i:N0) {
+        for (int i: N0) {
             if (i != j) {
-                c23_s1 += x[i][j];
+                if (tau_prime[i][j] < e)
+                    c23_s1 += x[i][j];
                 c23_s2 += gl[i][j];
             }
         }
@@ -6065,27 +6066,30 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
     }
 
     // C24
-    for (int i:N0) {
-        for (int j:N_p) {
+    for (int i: N0) {
+        for (int j: N_p) {
             if (i != j) {
-                model.add(t[j] >= t[i] + tau_prime[i][j] - M * (1 - gl[i][j]));
+                if (tau_prime[i][j] < e)
+                    model.add(t[j] >= t[i] + tau_prime[i][j] - M * (1 - gl[i][j]));
             }
         }
     }
 
     // C25
-    for (int j:c_prime) {
-        for (int k:N_p) {
+    for (int j: c_prime) {
+        for (int k: N_p) {
             if (j != k) {
-                model.add(t[k] >= t[j] + tau_prime[j][k] - M * (1 - gr[j][k]));
+                if (tau_prime[j][k] < e)
+
+                    model.add(t[k] >= t[j] + tau_prime[j][k] - M * (1 - gr[j][k]));
             }
         }
     }
 
     // C26
-    for (int i:N0) {
-        for (int j:c_prime) {
-            for (int k:N_p) {
+    for (int i: N0) {
+        for (int j: c_prime) {
+            for (int k: N_p) {
                 if (i != j && i != k && j != k) {
                     if (tau_prime[i][j] + tau_prime[j][k] + sr <= dtl) {
                         model.add(t[k] - t[i] + sr - M * (2 - gl[i][j] - gr[j][k]) <= e);
@@ -6096,38 +6100,42 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
     }
 
     // C27
-    for (int j:c_prime) {
+    for (int j: c_prime) {
         IloExpr s1(env), s2(env);
-        for (int i:N0) {
+        for (int i: N0) {
             if (i != j) {
-                s1 += gl[i][j];
+                if (tau_prime[i][j] < e)
+                    s1 += gl[i][j];
             }
         }
-        for (int k:N_p) {
+        for (int k: N_p) {
             if (j != k) {
-                s2 += gr[j][k];
+                if (tau_prime[j][k] < e)
+                    s2 += gr[j][k];
             }
         }
         model.add(s1 == s2);
     }
 
     // C28
-    for (int i:N0) {
+    for (int i: N0) {
         IloExpr s(env);
-        for (int j:c_prime) {
+        for (int j: c_prime) {
             if (i != j) {
-                s += gl[i][j];
+                if (tau_prime[i][j] < e)
+
+                    s += gl[i][j];
             }
         }
         model.add(s <= z[i]);
     }
 
     // C29
-    for (int i:N0) {
-        for (int j:N_p) {
+    for (int i: N0) {
+        for (int j: N_p) {
             if (i != j) {
                 IloExpr s(env);
-                for (int k:c_prime) {
+                for (int k: c_prime) {
                     if (k != j && i != k) {
                         s += gr[k][j];
                         s -= gl[i][k];
@@ -6139,10 +6147,12 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
     }
 
     // C30
-    for (int i:c_prime) {
-        for (int j:c_prime) {
+    for (int i: c_prime) {
+        for (int j: c_prime) {
             if (i != j) {
-                model.add(gl[i][j] + gr[i][j] <= 1);
+                if (tau_prime[i][j] < e)
+
+                    model.add(gl[i][j] + gr[i][j] <= 1);
                 model.add(gl[i][j] + gr[j][i] <= 1);
             }
         }
@@ -6150,24 +6160,24 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
 
     // C3
     IloExpr c3_s1(env), c3_s2(env);
-    for (int j:N_p) {
+    for (int j: N_p) {
         c3_s1 += x[0][j];
     }
-    for (int i:N0) {
+    for (int i: N0) {
         c3_s2 += x[i][n];
     }
     model.add(c3_s1 == 1);
     model.add(c3_s2 == 1);
 
     // C4
-    for (int j:C) {
+    for (int j: C) {
         IloExpr c4_s1(env), c4_s2(env);
-        for (int i:N0) {
+        for (int i: N0) {
             if (i != j) {
                 c4_s1 += x[i][j];
             }
         }
-        for (int i:N_p) {
+        for (int i: N_p) {
             if (i != j) {
                 c4_s2 += x[j][i];
             }
@@ -6175,25 +6185,25 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
         model.add(c4_s1 == c4_s2);
     }
     // C5
-    for (int i:N0) {
-        for (int j:N_p) {
+    for (int i: N0) {
+        for (int j: N_p) {
             if (i != j) {
                 model.add(t[j] >= t[i] + tau[i][j] - M * (1 - x[i][j]));
             }
         }
     }
     // C7
-    for (int i:N0) {
-        for (int j:N_p) {
+    for (int i: N0) {
+        for (int j: N_p) {
             if (i != j) {
                 model.add(w[j] >= t[j] - t[i] - tau[i][j] - M * (1 - x[i][j]));
             }
         }
     }
     // C9
-    for (int i:N_p) {
+    for (int i: N_p) {
         IloExpr c9_s1(env);
-        for (int j:N0) {
+        for (int j: N0) {
             if (i != j) {
                 c9_s1 += x[j][i];
             }
@@ -6204,8 +6214,8 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
     model.add(IloMinimize(env, objective));
     cplex.solve();
     std::cout << cplex.getObjValue() << std::endl;
-    for (int i:c_s) {
-        for (int j:c_t) {
+    for (int i: c_s) {
+        for (int j: c_t) {
             if (i != j) {
                 if (cplex.getValue(x[i][j]) == 1) {
                     std::cout << i << " " << j << std::endl;
@@ -6214,8 +6224,8 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
         }
     }
     std::cout << "gl:" << std::endl;
-    for (int i:N0) {
-        for (int j:c_prime) {
+    for (int i: N0) {
+        for (int j: c_prime) {
             if (i != j) {
                 if (tau_prime[i][j] <= e) {
                     if (cplex.getValue(gl[i][j]) == 1) {
@@ -6227,8 +6237,8 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
     }
 
     std::cout << "gr:" << std::endl;
-    for (int j:c_prime) {
-        for (int k:N_p) {
+    for (int j: c_prime) {
+        for (int k: N_p) {
             if (k != j) {
                 if (tau_prime[j][k] <= e) {
                     if (cplex.getValue(gr[j][k]) == 1) {
@@ -6240,5 +6250,602 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
     }
 
     std::cout << cplex.getObjValue() << std::endl;
+    return Result();
+}
+
+
+//// On depot revisiting, a complete new drone will be prepared?
+///
+Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDepot) {
+    auto tau = instance->tau;
+    auto tau_prime = instance->tau_prime;
+    auto dtl = e;
+    auto n = instance->num_node;
+    std::vector<int> C;
+    for (int i = 0; i < n + 1; i++) {
+        if (i != 0 && i != n) {
+            C.push_back(i);
+        }
+    }
+
+    IloEnv env;
+    IloModel model(env);
+    IloCplex cplex(model);
+    cplex.setParam(IloCplex::Param::Emphasis::MIP, CPX_MIPEMPHASIS_OPTIMALITY);
+    cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);
+
+    const auto O = 0;
+    const auto D = n;
+    const auto K = n + 1;
+    auto ka = K - 1;
+
+    // cs: points that from it vehicle can leave.
+    std::vector<int> cs;
+
+    // ce: points that the truck can enter.
+    std::vector<int> ce;
+
+    for (int i = O; i <= D; i++) {
+        if (i != D) {
+            cs.push_back(i);
+            ce.push_back(i);
+        } else {
+            ce.push_back(i);
+        }
+    }
+
+    IloArray<IloBoolVarArray> X(env, K + 1);
+    for (int k = 1; k <= K; k++) {
+        X[k] = IloBoolVarArray(env, D + 1);
+        for (int i = O; i <= D; i++) {
+            X[k][i] = IloBoolVar(env);
+            auto v_name = "X_" + std::to_string(k) + "_" + std::to_string(i);
+            //std::cout << v_name << std::endl;
+            X[k][i].setName(v_name.c_str());
+        }
+    }
+
+    model.add(X[1][D] == 0);
+    model.add(X[1][O] == 1);
+
+
+    // x^k_(ij) (binary variable) và nhận giá trị một nếu Xk
+    // mô ta cạnh nối 2 đỉnh liên tiếp trên đường đi.
+    // cho phep lap dinh: x[k][i][i] is available.
+    IloArray<IloArray<IloBoolVarArray> > x(env, ka + 1);
+    for (int k = 1; k <= ka; k++) {
+        x[k] = IloArray<IloBoolVarArray>(env, D);
+        for (const int i: cs) {
+            x[k][i] = IloBoolVarArray(env, D + 1);
+            for (const int j: ce) {
+                x[k][i][j] = IloBoolVar(env);
+                auto v_name = "x_" + std::to_string(k) + "_" + std::to_string(i) + "_" + std::to_string(j);
+                x[k][i][j].setName(v_name.c_str());
+            }
+        }
+    }
+
+    //// phi^h equals to 1 if customer h is served by the drone
+    IloBoolVarArray phi(env, n);
+    for (int h:C) {
+        phi[h] = IloBoolVar(env);
+        auto v_name = "phi_" + std::to_string(h);
+        phi[h].setName(v_name.c_str());
+        if (exist(instance->heavy, h)) {
+            model.add(phi[h] == 0);
+        }
+    }
+
+    // separate Y/W declaration.
+
+    // Y: start from i at stage k.
+    IloArray<IloArray<IloBoolVarArray> > Y(env, K + 1);
+    for (int k = 1; k < K; ++k) {
+        Y[k] = IloArray<IloBoolVarArray>(env, D + 1);
+        for (int i: cs) {
+            Y[k][i] = IloBoolVarArray(env, D);
+            for (int h: instance->c_prime) {
+                if (i != h && tau_prime[i][h] < dtl - sr) {
+                    Y[k][i][h] = IloBoolVar(env);
+                    Y[k][i][h].setName(("Y_" + std::to_string(k) + "_"
+                                        + std::to_string(i) + "_" + std::to_string(h)).c_str());
+                }
+            }
+        }
+    }
+
+
+    IloArray<IloArray<IloBoolVarArray> > W(env, K + 1);
+    for (int k = 2; k <= K; ++k) {
+        W[k] = IloArray<IloBoolVarArray>(env, D + 1);
+        for (int j: ce) {
+            W[k][j] = IloBoolVarArray(env, D);
+            for (int h: instance->c_prime) {
+                if (j != h && tau_prime[h][j] < dtl - sr) {
+                    W[k][j][h] = IloBoolVar(env);
+                    W[k][j][h].setName(("W_" + std::to_string(k) + "_"
+                                        + std::to_string(j) + "_" + std::to_string(h)).c_str());
+                }
+            }
+        }
+    }
+
+    IloArray<IloBoolVarArray> z(env, K);
+    for (int k = 1; k <= K - 1; k++) {
+        z[k] = IloBoolVarArray(env, K + 1);
+        for (int k_p = k + 1; k_p <= K; k_p++) {
+            z[k][k_p] = IloBoolVar(env);
+            auto v_name = "z_" + std::to_string(k) + "_" + std::to_string(k_p);
+            z[k][k_p].setName(v_name.c_str());
+        }
+    }
+
+    //// aux var Z_{h, k, k_p}: sortie launch from k and rendezvous at k_p.
+    IloArray<IloArray<IloBoolVarArray>> Z(env, D);
+    for (int h: instance->c_prime) {
+        Z[h] = IloArray<IloBoolVarArray>(env, K);
+        for (int k = 1; k <= K - 1; k++) {
+            Z[h][k] = IloBoolVarArray(env, K + 1);
+            for (int k_p = k + 1; k_p <= K; k_p++) {
+                Z[h][k][k_p] = IloBoolVar(env);
+                auto v_name = "Z_" + std::to_string(h) + "_" + std::to_string(k) + "_" + std::to_string(k_p);
+                Z[h][k][k_p].setName(v_name.c_str());
+            }
+        }
+    }
+
+    IloNumVarArray a(env, K+1), d(env, K+1);
+    for (int k = 1; k <= K; k++) {
+        a[k] = IloNumVar(env, 0, IloInfinity);
+        auto v_name = "a_" + std::to_string(k);
+        a[k].setName(v_name.c_str());
+        d[k] = IloNumVar(env, 0, IloInfinity);
+        v_name = "d_" + std::to_string(k);
+        d[k].setName(v_name.c_str());
+        model.add(d[k] >= a[k]).setName(("C13_" + std::to_string(k)).c_str());
+    }
+
+    model.add(a[1] == 0);
+    model.add(d[1] == 0);
+
+    // Constraints
+
+    // Truck-stage routing constraints
+
+    // Constraint 40 is not needed.
+    // Constraint 41
+    IloExpr c41_s(env);
+    for (int k = 2; k <= K; k++) {
+        c41_s += X[k][D];
+    }
+    model.add(c41_s == 1);
+    c41_s.end();
+
+    // Constraint 42
+    for (int k = 1; k <= K; k++) {
+        IloExpr c42_sumk(env);
+        for (int i = O; i <= D; i++) {
+            c42_sumk += X[k][i];
+        }
+        model.add(c42_sumk <= 1);
+    }
+
+    // Constraint 43
+    for (int k = 1; k < K; k++) {
+        for (int i:cs) {
+            IloExpr c43_expr(env);
+            for (int j:ce) {
+                c43_expr += x[k][i][j];
+            }
+            model.add(X[k][i] == c43_expr);
+        }
+    }
+
+    // Constraint 44
+    for (int k = 2; k <= K; k++) {
+        for (int i:ce) {
+            IloExpr c44_expr(env);
+            for (int j:cs) {
+                c44_expr += x[k-1][j][i];
+            }
+            model.add(X[k][i] == c44_expr);
+        }
+    }
+
+    // Constraint 45
+    ////////////////////////
+    ///
+    ///
+    //
+
+    // Launch and rendezvous constraints
+    // Constraint 48
+    for (int k = 1; k < K; k++) {
+        for (int h:instance->c_prime) {
+            IloExpr c48_s1(env), c48_s2(env);
+            for (int kp = k+1; kp <= K; kp++) {
+                c48_s1 += Z[h][k][kp];
+            }
+            for (const int i:cs) {
+                c48_s2 += Y[k][i][h];
+            }
+            model.add(c48_s1 == c48_s2);
+        }
+    }
+
+    // Constraint 49
+    for (int kp = 2; kp <= K; kp++) {
+        for (int h:instance->c_prime) {
+            IloExpr c49_s1(env), c49_s2(env);
+            for (int k = 1; k < kp; k++) {
+                c49_s1 += Z[h][k][kp];
+            }
+            for (int j:ce) {
+                c49_s2 +=  W[kp][j][h];
+            }
+            model.add(c49_s1 == c49_s2);
+        }
+    }
+
+    // Constraint 50
+    for (int k = 1; k < K; k++) {
+        for (int kp = k+1; kp <= K; kp++) {
+            IloExpr c50_s(env);
+            for (int h:instance->c_prime) {
+                c50_s += Z[h][k][kp];
+            }
+            model.add(z[k][kp] == c50_s);
+        }
+    }
+
+    // Constraint 51
+    for (int k = 1; k < K; k++) {
+        IloExpr c51_s(env);
+        for (int kp = k+1; kp <= K; kp++) {
+            c51_s += z[k][kp];
+        }
+        model.add(c51_s <= 1);
+    }
+
+    // Constraint 52
+    for (int k = 1; k < K; k++) {
+        for (int kp = k+1; kp <= K; kp++) {
+            for (int l = 2; l <= K; l++) {
+                IloExpr c52_s(env);
+                if (k < l && l <= kp) {
+                    c52_s += z[k][kp];
+                }
+                model.add(c52_s <= 1);
+            }
+        }
+    }
+
+    //// Assignment constraints
+
+    // Constraint 53
+    for (int h:C) {
+        IloExpr c53_s(env);
+        for (int k = 2; k < K; k++) {
+            c53_s += X[k][h];
+        }
+        model.add(phi[h] + c53_s >= 1);
+    }
+
+    // Constraint 54
+    for (int h:instance->c_prime) {
+        IloExpr c54_sum(env);
+        for (int k = 1; k < K; k++) {
+            for (int i:cs) {
+                if (i != h && tau_prime[i][h] < dtl - sr) {
+                    c54_sum += Y[k][i][h];
+                }
+            }
+        }
+        model.add(phi[h] == c54_sum);
+    }
+
+    // Constraint 55
+    for (int h:instance->c_prime) {
+        IloExpr c55_sum(env);
+        for (int kp = 2; kp <= K; kp++) {
+            for (int j:ce) {
+                if (j != h && tau_prime[h][j] < dtl - sr) {
+                    c55_sum += W[kp][j][h];
+                }
+            }
+        }
+        model.add(phi[h] == c55_sum);
+    }
+
+    // Constraint 56
+    for (int k = 1; k < K; k++) {
+        for (int i:cs) {
+            IloExpr c56_s(env);
+            for (int h:instance->c_prime) {
+                if (i != h && tau_prime[i][h] < dtl - sr) {
+                    c56_s += Y[k][i][h];
+                }
+            }
+            model.add(X[k][i] >= c56_s);
+        }
+    }
+
+    // Constraint 57
+    for (int kp = 2; kp <= K; kp++) {
+        for (int j:ce) {
+            IloExpr c57_s(env);
+            for (int h:instance->c_prime) {
+                if (j != h && tau_prime[h][j] < dtl - sr) {
+                    c57_s += W[kp][j][h];
+                }
+            }
+            model.add(X[kp][j] >= c57_s);
+        }
+    }
+
+    // Constraint 58
+    for (int k = 1; k < K; k++) {
+        IloExpr c58_s1(env), c58_s2(env);
+        for (int i:ce) {
+            c58_s1 += X[k][i];
+        }
+        for (int kp = k+1; kp <= K; kp++) {
+            c58_s2 += z[k][kp];
+        }
+        model.add(c58_s1 >= c58_s2);
+    }
+
+    // Constraint 59
+    for (int kp = 2; kp <= K; kp++) {
+        IloExpr c59_s1(env), c59_s2(env);
+        for (int i:ce) {
+            c59_s1 += X[kp][i];
+        }
+        for (int k = 1; k < kp; k++) {
+            c59_s2 += z[k][kp];
+        }
+        model.add(c59_s1 >= c59_s2);
+    }
+
+    //// Time synchronization constraints
+
+    // Constraint 61
+    for (int k = 1; k < K; k++) {
+        IloExpr c61_s(env);
+        for (int i:cs) {
+            for (int j:ce) {
+                c61_s += x[k][i][j] * tau[i][j];
+            }
+        }
+        model.add(a[k+1] == d[k] + c61_s);
+    }
+
+    // Constraint 65
+    for (int k = 2; k <= K; k++) {
+        IloExpr c65_s1(env), c65_s2(env), c65_s3(env);
+        for (int i:cs) {
+            for (int j:ce) {
+                c65_s1 += x[k-1][i][j] * tau[i][j];
+            }
+        }
+        for (int i:cs) {
+            for (int h:instance->c_prime) {
+                if (i != h && tau_prime[i][h] < dtl - sr && k != K) {
+                    c65_s2 += Y[k][i][h];
+                }
+            }
+        }
+        for (int j:ce) {
+            for (int h:instance->c_prime) {
+                if (j != h && tau_prime[h][j] < dtl - sr) {
+                    c65_s3 += W[k][j][h];
+                }
+            }
+        }
+        model.add(d[k] >= d[k-1] + c65_s1 + sl * c65_s2 + sr * c65_s3);
+    }
+    auto M = 1e5;
+    // Constraint 66
+    for (int k = 1; k < K; k++) {
+        for (int kp = k+1; kp <= K; kp++) {
+            IloExpr c66_s1(env), c66_s2(env), c66_s3(env), c66_s4(env);
+            for (int i:cs) {
+                for (int h:instance->c_prime) {
+                    if (i != h && tau_prime[i][h] < dtl - sr) {
+                        c66_s1 += Y[k][i][h] * tau_prime[i][h];
+                    }
+                }
+            }
+            for (int j:ce) {
+                for (int h:instance->c_prime) {
+                    if (j != h && tau_prime[h][j] < dtl - sr) {
+                        c66_s2 += W[kp][j][h] * tau_prime[h][j];
+                    }
+                }
+            }
+
+            for (int i:cs) {
+                for (int h:instance->c_prime) {
+                    if (i != h && tau_prime[i][h] < dtl - sr && kp != K) {
+                        c66_s3 += Y[kp][i][h];
+                    }
+                }
+            }
+            for (int j:ce) {
+                for (int h:instance->c_prime) {
+                    if (j != h && tau_prime[h][j] < dtl - sr) {
+                        c66_s4 += W[kp][j][h];
+                    }
+                }
+            }
+            model.add(d[kp] >= d[k] + c66_s1 + c66_s2 + sl * c66_s3 + sr * c66_s4 - M * (1 - z[k][kp]));
+        }
+    }
+
+    // Constraint 67
+    for (int k = 1; k < K; k++) {
+        for (int kp = k+1; kp <= K; kp++) {
+            model.add(a[kp] - d[k] <= z[k][kp] * (dtl -sr) + (1 - z[k][kp]) * M);
+        }
+    }
+
+    // Constraint 68
+    for (int h:instance->c_prime) {
+        IloExpr c68_s1(env), c68_s2(env);
+        for (int k = 1; k < K; k++) {
+            for (int i:cs) {
+                if (i != h && tau_prime[i][h] < dtl - sr) {
+                    c68_s1 += Y[k][i][h] * tau_prime[i][h];
+                }
+            }
+        }
+        for (int kp = 2; kp <= K; kp++) {
+            for (int j:ce) {
+                if (j != h && tau_prime[h][j] < dtl - sr) {
+                    c68_s2 += W[kp][j][h] * tau_prime[h][j];
+                }
+            }
+        }
+        model.add(c68_s1 + c68_s2 <= (dtl - sr) * phi[h]);
+    }
+
+    model.add(IloMinimize(env, d[K]));
+    cplex.solve();
+    double obj = 0;
+    std::vector<Sortie> st;
+    std::cout << "Objective value: " << cplex.getObjValue() << std::endl;
+    std::cout << "Truck nodes:" << std::endl;
+    for (int k = 1; k <= K; k++) {
+        for (int i = 0; i <= D; i++) {
+            auto X_val = cplex.getValue(X[k][i]);
+            //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
+            if (abs(X_val - 1) < 2e-5) {
+                auto d_k = cplex.getValue(d[k]);
+                auto a_k = cplex.getValue(a[k]);
+                std::cout << "Stage " << k << " at customer " << i << " with arrival time is: " << a_k << std::endl;
+                std::cout << "Stage " << k << " at customer " << i << " with departure time is: " << d_k << std::endl;
+                break;
+            }
+        }
+    }
+    std::cout << "Truck arcs:" << std::endl;
+    std::map<int, std::pair<int, int> > map_stage_truck_arc;
+    for (int k = 1; k <= ka; k++) {
+        for (int i = 0; i < D; i++)
+            for (int j = 1; j <= D; j++)
+                if (i != j) {
+                    auto X_val = cplex.getValue(x[k][i][j]);
+                    //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
+                    if (X_val == 1) {
+                        std::cout << "Arc " << k << " connecting " << i << " and " << j
+                                << " with cost " << tau[i][j] << " " << std::endl;
+                        obj += tau[i][j];
+                        map_stage_truck_arc[k] = std::make_pair(i, j);
+                        break;
+                    }
+                }
+    }
+    std::cout << "Drone served customers" << std::endl;
+    for (int h:instance->c_prime) {
+        if (cplex.getValue(phi[h]) == 1) {
+            std::cout << "Customer " << h << " served by drone" << std::endl;
+            for (int k = 1; k < K; k++) {
+                for (int i:cs) {
+                    if (i != h && tau_prime[i][h] < dtl - sr) {
+                        if (cplex.getValue(Y[k][i][h]) == 1) {
+                            std::cout << "start at stage " << k << " at vertex " << i << std::endl;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    for (int k = 1; k < K; k++)
+        for (int kp = k + 1; kp <= K; kp++) {
+            if (cplex.getValue(z[k][kp]) == 1) {
+                std::cout << "Drone flies from stage " << k << " to stage " << kp << std::endl;
+            }
+        }
+    for (int h:instance->c_prime)
+        for (int k = 1; k < K; k++)
+            for (int kp = k + 1; kp <= K; kp++) {
+                //std::cout << k << " " << kp << std::endl;
+                if (abs(cplex.getValue(Z[h][k][kp]) - 1) < 1e-5) {
+                    std::cout << "Drone flies from stage " << k << " to stage " << kp << " to serve customer " << h <<
+                            std::endl;
+                }
+            }
+
+    // for (int h:instance->c_prime) {
+    //     if (abs(cplex.getValue(phi[h]) - 1) < 1e-5) {
+    //         std::cout << cplex.getValue(phi[h]) << std::endl;
+    //         std::cout << "Customer " << h << " served by drone." << std::endl;
+    //         auto sortie = Sortie(h);
+    //         st.push_back(sortie);
+    //         int sv_i = -1, sv_j = -1, sv_k = -1, sv_kp = -1;
+    //         for (int k = 1; k <= K; k++) {
+    //             for (int i = 0; i <= D; i++)
+    //                 if (i != h && ) {
+    //                     try {
+    //                         //std::cout << "from stage " << k << " at customer " << i << " to serve" << h << std::endl;
+    //                         auto Y_val = cplex.getValue(Y[k][i][h]);
+    //                         if (abs(Y_val - 1) < 1e-5) {
+    //                             std::cout << "Y_val: " << Y_val << std::endl;
+    //                             sv_i = i;
+    //                             sv_k = k;
+    //                             //std::cout << "XXX from stage " << k << " at customer " << i << " to serve" << h << std::endl;
+    //                         }
+    //
+    //                         //std::cout << "to stage " << k << " at customer" << i << " from " << h << std::endl;
+    //                         auto W_val = cplex.getValue(W[k][i][h]);
+    //                         if (abs(W_val - 1) < 1e-5) {
+    //                             std::cout << "W_val: " << W_val << std::endl;
+    //                             sv_j = i;
+    //                             sv_kp = k;
+    //                             //std::cout << "ZZZ to stage " << k << " at customer" << i << " from " << h << std::endl;
+    //                         }
+    //                     } catch (...) {
+    //                     }
+    //                 }
+    //         }
+    //         ////assert(abs(cplex.getValue(z[sv_k][sv_kp]) - 1.0) < 1e-6);
+    //
+    //         std::cout << "Drone fly from " << sv_i << " at stage " << sv_k <<
+    //                 " to serve " << h << " and then fly back to " << sv_j
+    //                 << " at stage " << sv_kp << ". " << std::endl;
+    //         obj += (sl + sr);
+    //         if (sv_i == O) {
+    //             obj -= sl;
+    //         }
+    //         double drone_travel_time = tau_prime[sv_i][h] + tau_prime[h][sv_j];
+    //         double truck_travel_time = 0;
+    //         for (int k_start = sv_k; k_start <= sv_kp - 1; k_start++) {
+    //             truck_travel_time += tau[map_stage_truck_arc[k_start].first][map_stage_truck_arc[k_start].second];
+    //         }
+    //         std::cout << "Truck travel time from stage " << sv_k << " to " << sv_kp << " is: " << truck_travel_time <<
+    //                 std::endl;
+    //         if (drone_travel_time > truck_travel_time) {
+    //             obj += drone_travel_time - truck_travel_time;
+    //         }
+    //         auto drone_arrival_time = cplex.getValue(d[sv_k]) + drone_travel_time;
+    //         auto vehicle_departure_time = cplex.getValue(d[sv_kp]);
+    //         auto truck_arrival_time = cplex.getValue(a[sv_kp]);
+    //         std::cout << "Start arc cost: "
+    //                 << tau_prime[sv_i][h] << ", end arc cost: " << tau_prime[h][sv_j] << ". Total drone travel time: "
+    //                 << drone_travel_time << std::endl;
+    //
+    //         std::cout << "Drone arrival time: " << drone_arrival_time << std::endl;
+    //         std::cout << "Truck arrival time: " << truck_arrival_time << std::endl;
+    //
+    //         std::cout << "Truck departure time = max(d/a, t/a) plus (sl/sr): " << vehicle_departure_time << std::endl;
+    //         assert(drone_arrival_time <= vehicle_departure_time);
+    //         assert(abs(cplex.getValue(Z[h][sv_k][sv_kp]) - 1.0) < 1e-5);
+    //
+    //         assert(abs(cplex.getValue(z[sv_k][sv_kp]) - 1.0) < 1e-5);
+    //     }
+
     return Result();
 }

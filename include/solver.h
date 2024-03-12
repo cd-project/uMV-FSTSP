@@ -124,6 +124,7 @@ public:
     Result Roberti2020(int n_thread, int e);
     Result Amico2021_3Index(int n_thread, int e);
     Result Amico2021_2Index(int n_thread, int e);
+    Result mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDepot);
 
 };
 #endif //UMV_FSTSP_SOLVER_H
