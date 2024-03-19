@@ -15,7 +15,6 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 # Find GUROBI package.
 find_package(GUROBI REQUIRED)
 include_directories(${GUROBI_INCLUDE_DIRS})
-
 # Set CPLEX installation directory
 set(CPLEX_DIR /opt/ibm/ILOG/CPLEX_Studio2211)
 # Add CPLEX include directory
@@ -31,13 +30,14 @@ link_directories(${CPLEX_DIR}/concert/lib/x86-64_linux/static_pic)
 # Might change to use separate header/source folders.
 set (HEADER_FILES
         include/instance.h include/solver.h
-        include/gen_instance.h)
+        include/gen_instance.h /home/cuong/CLionProjects/matplotlib-cpp/matplotlibcpp.h)
 
 set (SOURCE_FILES
         src/main.cpp src/instance.cpp src/solver.cpp
 )
 
-add_executable(uMV-FSTSP ${SOURCE_FILES} ${HEADER_FILES})
+add_executable(uMV-FSTSP ${SOURCE_FILES} ${HEADER_FILES}
+        ../matplotlib-cpp/matplotlibcpp.h)
 set_target_properties(uMV-FSTSP PROPERTIES OUTPUT_NAME "uMV-FSTSP")
 if(CXX)
     target_link_libraries(${CMAKE_PROJECT_NAME} optimized ${GUROBI_CXX_LIBRARY}

@@ -36,21 +36,7 @@ protected:
                         }
                     }
                 }
-                for (int k = 2; k <= node_max_stage-1; k++) {
-                    for (int i = 1; i < D; i++) {
-                        if (X_val[k][i] == 1) {
-                            if (rand() % 2 == 0) {
-                                if (fixed[k] == 0) {
-                                    model.add(X[k][i] == 1);
-                                    fixed[k] = 1;
-                                    std::cout << "Fixed X[" << k << "][" << i << "] to 1" << std::endl;
-                                }
-                            } else {
-                                // X[k][i].
-                            }
-                        }
-                    }
-                }
+
 
             }
         }
@@ -99,9 +85,11 @@ public:
     std::vector<Sortie> sortie;
     double recalculated_cost;
     double time_spent;
+    double revisit_count;
     Result() {}
     Result(double c, std::vector<Sortie>& st);
     Result(double c, double re_c, double time_spent, std::vector<Sortie> &st);
+    Result(double c, double re_c, double time_spent, double revisit_count);
 
 };
 class Solver {
@@ -125,6 +113,7 @@ public:
     Result Amico2021_3Index(int n_thread, int e);
     Result Amico2021_2Index(int n_thread, int e);
     Result mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDepot);
+    Result mFSTSPSolve(int n_thread, int e);
 
 };
 #endif //UMV_FSTSP_SOLVER_H

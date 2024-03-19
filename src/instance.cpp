@@ -146,7 +146,6 @@ Instance::Instance(const std::string folder_path, bool roundDist, double gamma) 
         }
         n++;
     }
-
     std::cout << "uav non-eligible customer: ";
     for (auto x : heavy) {
         std::cout << x << " ";
@@ -194,7 +193,7 @@ Instance::Instance(const std::string folder_path, bool roundDist, double gamma) 
                     tau_prime[i][j] = (int)d;
                 }
                 else {
-                    tau_prime[i][j] = d;
+                    tau_prime[i][j] = (d);
                 }
             }
         }
@@ -209,7 +208,7 @@ Instance::Instance(const std::string folder_path, bool roundDist, double gamma) 
                     tau[i][j] = (int)d;
                 }
                 else {
-                    tau[i][j] = d;
+                    tau[i][j] = (d);
                 }
             }
         }

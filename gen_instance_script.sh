@@ -1,5 +1,5 @@
 #!/bin/bash
-n_customer=12
+n_customer=10
 dtl=20
 binary_file="/home/cuong/CLionProjects/uMV-FSTSP/cmake-build-release/uMV-FSTSP"
 
