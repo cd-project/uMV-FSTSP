@@ -1,0 +1,230 @@
+Instance name: /home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/v25
+Write arg val: 1
+
+drone speed: 1 miles/minute
+uav non-eligible customer: 11 
+Printing tau:
+0 12.3762 53.5451 78.2232 58.0996 77.471 56.7566 58.7808 51.5914 95.7318 97.1959 0 
+12.3762 0 45.373 66.4322 46.3087 65.68 44.9656 46.9899 39.8004 83.9408 85.4049 12.3762 
+53.5451 45.373 0 24.678 38.6857 33.3806 22.9589 79.9924 66.79 42.4745 44.0067 53.5451 
+78.2232 66.4322 24.678 0 47.3746 42.0695 31.6478 88.6813 75.4789 51.1635 52.6956 78.2232 
+58.0996 46.3087 38.6857 47.3746 0 19.3713 15.7268 41.3067 28.1042 37.6321 39.0963 58.0996 
+77.471 65.68 33.3806 42.0695 19.3713 0 20.7144 46.6119 33.4094 18.2608 19.7249 77.471 
+56.7566 44.9656 22.9589 31.6478 15.7268 20.7144 0 57.0335 43.831 38.9752 40.4393 56.7566 
+58.7808 46.9899 79.9924 88.6813 41.3067 46.6119 57.0335 0 13.2025 37.5179 38.4151 58.7808 
+51.5914 39.8004 66.79 75.4789 28.1042 33.4094 43.831 13.2025 0 44.1404 45.6045 51.5914 
+95.7318 83.9408 42.4745 51.1635 37.6321 18.2608 38.9752 37.5179 44.1404 0 1.53212 95.7318 
+97.1959 85.4049 44.0067 52.6956 39.0963 19.7249 40.4393 38.4151 45.6045 1.53212 0 97.1959 
+0 0 0 0 0 0 0 0 0 0 0 0 
+Printing tau_prime:
+0 4.53267 16.6777 23.5035 15.4797 20.5428 15.2834 19.9558 16.3537 25.5088 25.9378 0 
+4.53267 0 16.3504 22.7114 12.4068 17.704 13.3225 15.4765 11.9846 22.2714 22.6493 4.53267 
+16.6777 16.3504 0 6.93751 10.3289 10.8902 6.14717 21.2566 17.7179 15.8741 16.4359 16.6777 
+23.5035 22.7114 6.93751 0 13.6484 11.1571 10.1403 24.0737 21.2237 14.3392 14.8511 23.5035 
+15.4797 12.4068 10.3289 13.6484 0 5.32574 4.18538 10.9546 7.64948 10.0292 10.4625 15.4797 
+20.5428 17.704 10.8902 11.1571 5.32574 0 6.14872 13.3164 11.206 5.40935 5.94104 20.5428 
+15.2834 13.3225 6.14717 10.1403 4.18538 6.14872 0 15.1328 11.7029 11.558 12.0886 15.2834 
+19.9558 15.4765 21.2566 24.0737 10.9546 13.3164 15.1328 0 3.98625 13.9633 13.9576 19.9558 
+16.3537 11.9846 17.7179 21.2237 7.64948 11.206 11.7029 3.98625 0 13.3629 13.5178 16.3537 
+25.5088 22.2714 15.8741 14.3392 10.0292 5.40935 11.558 13.9633 13.3629 0 0.561944 25.5088 
+25.9378 22.6493 16.4359 14.8511 10.4625 5.94104 12.0886 13.9576 13.5178 0.561944 0 25.9378 
+0 0 0 0 0 0 0 0 0 0 0 0 
+Warning:  Output names have been modified due to duplicate names or characters invalid in LP format.
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+CPXPARAM_TimeLimit                               200
+CPXPARAM_MIP_Tolerances_Integrality              0
+Tried aggregator 2 times.
+MIP Presolve eliminated 1132 rows and 1533 columns.
+MIP Presolve modified 2140 coefficients.
+Aggregator did 42 substitutions.
+Reduced MIP has 1045 rows, 3201 columns, and 30968 nonzeros.
+Reduced MIP has 3180 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.03 sec. (52.70 ticks)
+Probing fixed 262 vars, tightened 0 bounds.
+Probing changed sense of 4 constraints.
+Probing time = 0.05 sec. (122.67 ticks)
+Cover probing fixed 0 vars, tightened 3 bounds.
+Tried aggregator 2 times.
+Detecting symmetries...
+MIP Presolve eliminated 90 rows and 294 columns.
+MIP Presolve modified 227 coefficients.
+Aggregator did 5 substitutions.
+Reduced MIP has 950 rows, 2902 columns, and 25695 nonzeros.
+Reduced MIP has 2881 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (28.59 ticks)
+Probing time = 0.01 sec. (6.73 ticks)
+Cover probing fixed 0 vars, tightened 1 bounds.
+Clique table members: 13158.
+Tightened 1 constraints.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: deterministic, using up to 20 threads.
+Root relaxation solution time = 0.10 sec. (168.42 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0      161.9677   232                    161.9677       29         
+      0     0      169.3245   367                    Cuts: 76     1471         
+      0     0      170.0027   344                    Cuts: 20     1793         
+      0     0      171.9034   355                    Cuts: 31     2262         
+      0     0      172.8220   372                    Cuts: 18     2599         
+      0     0      172.9280   374                     Cuts: 8     2847         
+Detecting symmetries...
+      0     0      172.9972   407                     Cuts: 9     3030         
+      0     0      173.1760   391                     Cuts: 5     3197         
+      0     0      173.2261   383                     Cuts: 4     3294         
+      0     0      173.2345   427                     Cuts: 3     3364         
+      0     0      174.7642   381                     Cuts: 7     4085         
+      0     0      174.8149   399                     Cuts: 8     4210         
+      0     0      174.8309   415                     Cuts: 3     4261         
+*     0+    0                          405.1783      174.8309            56.85%
+*     0+    0                          375.1779      179.5161            52.15%
+*     0+    0                          371.5942      179.5161            51.69%
+      0     0  -1.00000e+75     0      371.5942      179.5161     4261   51.69%
+Detecting symmetries...
+      0     2      174.8309   408      371.5942      179.5161     4261   51.69%
+Elapsed time = 2.07 sec. (3716.31 ticks, tree = 0.02 MB, solutions = 3)
+      3     3      178.1169   278      371.5942      179.5161     5679   51.69%
+*    12+    5                          365.8785      179.5161            50.94%
+*    14+    3                          312.0045      179.5161            42.46%
+     21    10      213.3254    97      312.0045      179.5161    10751   42.46%
+    477   209    infeasible            312.0045      193.3859    58354   38.02%
+    618   292      236.6416   140      312.0045      193.3859    83990   38.02%
+    814   292    infeasible            312.0045      193.6838   104462   37.92%
+   1210   497      238.8485   116      312.0045      193.6838   150589   37.92%
+   1545   593      221.9209   126      312.0045      193.6838   193487   37.92%
+   1699   694      214.6382   181      312.0045      193.6838   236402   37.92%
+   1856   784      238.6031    69      312.0045      193.6838   278962   37.92%
+   3744  1830      211.9097   184      312.0045      193.6838   471793   37.92%
+Elapsed time = 5.29 sec. (6859.87 ticks, tree = 9.81 MB, solutions = 9)
+   4922  2622      236.2837    97      312.0045      193.6838   634490   37.92%
+   6583  3986      215.2851   175      312.0045      209.9372   834648   32.71%
+
+Performing restart 1
+
+Repeating presolve.
+Tried aggregator 2 times.
+MIP Presolve eliminated 21 rows and 4 columns.
+MIP Presolve modified 9272 coefficients.
+Aggregator did 2 substitutions.
+Reduced MIP has 926 rows, 2896 columns, and 21292 nonzeros.
+Reduced MIP has 2875 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (28.68 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 7 rows and 9 columns.
+MIP Presolve modified 172 coefficients.
+Aggregator did 2 substitutions.
+Reduced MIP has 917 rows, 2885 columns, and 21216 nonzeros.
+Reduced MIP has 2864 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.01 sec. (18.44 ticks)
+Represolve time = 0.10 sec. (149.97 ticks)
+   7131     0      176.4543   381      312.0045      Cuts: 15   910634   32.71%
+*  7131+    0                          273.8802      209.9372            23.35%
+   7131     0      176.8694   423      273.8802       Cuts: 9   910810   23.35%
+   7131     0      177.6923   422      273.8802      Cuts: 15   911218   23.35%
+   7131     0      177.8258   436      273.8802       Cuts: 4   911403   23.35%
+   7131     0      177.8318   440      273.8802       Cuts: 2   911440   23.35%
+   7131     2      177.8318   440      273.8802      209.9372   911440   23.35%
+   7135     5      209.9933   197      273.8802      209.9372   913733   23.35%
+*  7142+    2                          265.1929      209.9372            20.84%
+   7209    12      249.6034   122      265.1929      209.9372   917296   20.84%
+   7991   258        cutoff            265.1929      209.9372  1010292   20.84%
+*  8005   282      integral     0      253.2813      209.9372  1024698   17.11%
+   8322    32      247.2793   101      253.2813      209.9372  1092117   17.11%
+   8460    22        cutoff            253.2813      209.9372  1125617   17.11%
+   9705   233      230.0742   175      253.2813      209.9372  1188895   17.11%
+  10544   921      244.7210   224      253.2813      209.9372  1293482   17.11%
+Elapsed time = 16.75 sec. (20791.69 ticks, tree = 0.81 MB, solutions = 13)
+  11674  1886        cutoff            253.2813      209.9372  1422918   17.11%
+  13286  2893        cutoff            253.2813      209.9372  1626164   17.11%
+  14021  3720        cutoff            253.2813      209.9372  1737499   17.11%
+  16301  4192      218.4139   188      253.2813      209.9372  1820794   17.11%
+  16568  5721      227.5052   225      253.2813      209.9372  1991823   17.11%
+  18587  6303      233.5921   118      253.2813      209.9372  2086788   17.11%
+  18856  7332        cutoff            253.2813      209.9372  2295288   17.11%
+  20901  7493      225.1505   156      253.2813      209.9372  2354246   17.11%
+  21567  8625      239.9043    49      253.2813      209.9372  2584651   17.11%
+  23199  8633        cutoff            253.2813      209.9372  2709580   17.11%
+Elapsed time = 27.25 sec. (30343.61 ticks, tree = 13.75 MB, solutions = 13)
+  24352  9481        cutoff            253.2813      214.8218  2919489   15.18%
+  25671  9320      247.8826   112      253.2813      218.7598  2999413   13.63%
+  27534  9766      228.9970   200      253.2813      221.5855  3134387   12.51%
+  28356  9693      247.6216    89      253.2813      222.9801  3312881   11.96%
+  30578  9557        cutoff            253.2813      222.9801  3510131   11.96%
+  31906  8723      251.1906    56      253.2813      225.5107  3653624   10.96%
+  34062  7449        cutoff            253.2813      225.9807  3844543   10.78%
+  36703  6401        cutoff            253.2813      232.4746  3936504    8.21%
+
+GUB cover cuts applied:  11
+Clique cuts applied:  24
+Cover cuts applied:  36
+Flow cuts applied:  1
+Mixed integer rounding cuts applied:  15
+Zero-half cuts applied:  39
+Gomory fractional cuts applied:  1
+
+Root node processing (before b&c):
+  Real time             =    1.98 sec. (3676.38 ticks)
+Parallel b&c, 20 threads:
+  Real time             =   34.87 sec. (35114.76 ticks)
+  Sync time (average)   =   12.05 sec.
+  Wait time (average)   =    0.01 sec.
+                          ------------
+Total (root+branch&cut) =   36.85 sec. (38791.14 ticks)
+Feasible solution found!
+Truck nodes:
+Stage 1 at customer 0 with arrival time is: 0
+Stage 1 at customer 0 with departure time is: 0
+Stage 2 at customer 2 with arrival time is: 53.5451
+Stage 2 at customer 2 with departure time is: 53.5451
+Stage 3 at customer 3 with arrival time is: 78.2231
+Stage 3 at customer 3 with departure time is: 78.2231
+Stage 4 at customer 5 with arrival time is: 120.293
+Stage 4 at customer 5 with departure time is: 121.293
+Stage 5 at customer 9 with arrival time is: 139.553
+Stage 5 at customer 9 with departure time is: 140.553
+Stage 6 at customer 10 with arrival time is: 142.086
+Stage 6 at customer 10 with departure time is: 142.086
+Stage 7 at customer 7 with arrival time is: 180.501
+Stage 7 at customer 7 with departure time is: 181.501
+Stage 8 at customer 8 with arrival time is: 194.703
+Stage 8 at customer 8 with departure time is: 201.105
+Stage 9 at customer 1 with arrival time is: 240.905
+Stage 9 at customer 1 with departure time is: 240.905
+Stage 10 at customer 11 with arrival time is: 253.281
+Stage 10 at customer 11 with departure time is: 253.281
+Truck arcs:
+Arc 1 connecting 0 and 2 with cost 53.5451 
+Arc 2 connecting 2 and 3 with cost 24.678 
+Arc 3 connecting 3 and 5 with cost 42.0695 
+Arc 4 connecting 5 and 9 with cost 18.2608 
+Arc 5 connecting 9 and 10 with cost 1.53212 
+Arc 6 connecting 10 and 7 with cost 38.4151 
+Arc 7 connecting 7 and 8 with cost 13.2025 
+Arc 8 connecting 8 and 1 with cost 39.8004 
+Arc 9 connecting 1 and 11 with cost 12.3762 
+Customer 4 served by drone.
+Drone fly from 7 at stage 7 to serve 4 and then fly back to 8 at stage 8. 
+Truck arcs during this sortie: 7--->8
+Truck travel time from stage 7 to 8 is: 13.2025
+Total drone travel time: 18.6041
+Drone arrival time: 200.105
+Truck arrival time: 194.703
+Truck departure time = max(d/a, t/a) plus (sl/sr): 201.105
+Customer 6 served by drone.
+Drone fly from 5 at stage 4 to serve 6 and then fly back to 9 at stage 5. 
+Truck arcs during this sortie: 5--->9
+Truck travel time from stage 4 to 5 is: 18.2608
+Total drone travel time: 17.7067
+Drone arrival time: 138.999
+Truck arrival time: 139.553
+Truck departure time = max(d/a, t/a) plus (sl/sr): 140.553
+Done!
+-------------------------Re-calculated objective-----------------------
+253.281
+------------------------------------------------------------------------
+Solve time: 36.851
+OBJECTIVE VALUE: 253.281, NUMBER OF SORTIES: 2.
+Number of revisit: 0
+In write mode

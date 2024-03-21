@@ -37,6 +37,18 @@ std::vector<std::vector<double>> generateSymmetricMatrix(int rows, int cols, dou
 
     return matrix;
 }
+inline double ins_perc_higher_dtl(std::vector<std::vector<double>> &tau_prime, double dtl) {
+    double n = tau_prime.size() * tau_prime.size() - 2*tau_prime.size() + 1;
+    double count = 0;
+    for (int i = 0; i < tau_prime.size(); i++) {
+        for (int j = 0; j < tau_prime[i].size(); j++) {
+            if (tau_prime[i][j] > dtl) {
+                count++;
+            }
+        }
+    }
+    return 100.0*count/n;
+}
 std::vector<int> generate1DMatrix(int n) {
     // Calculate the minimum number of elements (at least 0.5*n, rounded up)
     int minElements = static_cast<int>(std::ceil(0.7 * n))+1;
@@ -66,9 +78,11 @@ public:
     std::vector<std::tuple<int, double, double, double>> Nodes;
     std::vector<int> c_prime;
     std::vector<int> heavy;
-
+    GenInstance() = default;
     GenInstance(int n_customer, double dtl, int v, bool gen_node);
     GenInstance(int n_customer, double dtl, int v, bool gen_node, double side_of_area);
+
+    void calculate_avg_ins_perc_dtl_murray(std::string folder_path, double dtl);
 };
 
 class path;
@@ -196,13 +210,13 @@ void createDirectory(const std::string& directoryPath, const std::string& direct
         std::cerr << "Error creating directory: " << e.what() << std::endl;
     }
 }
-double generateRandomDouble(double lim) {
+double generateRandomDouble(double lb, double ub) {
     // Create a random number engine
     std::random_device rd;
     std::mt19937 gen(rd());
 
     // Create a uniform real distribution for doubles between 0 and 25
-    std::uniform_real_distribution<double> dist(0.0, lim);
+    std::uniform_real_distribution<double> dist(lb, ub);
 
     // Generate a random double
     return dist(gen);
@@ -234,7 +248,7 @@ GenInstance::GenInstance(int n_customer, double dtl, int v, bool gen_node) {
                 if (!exist(c_prime, i)) {
                     last = 1;
                 }
-                auto node = std::make_tuple(i, generateRandomDouble(50), generateRandomDouble(50), last);
+                auto node = std::make_tuple(i, generateRandomDouble(0, 50), generateRandomDouble(0, 50), last);
                 Nodes.push_back(node);
             }
             if (i == n_customer+1) {
@@ -291,7 +305,7 @@ GenInstance::GenInstance(int n_customer, double dtl, int v, bool gen_node) {
 }
 
 GenInstance::GenInstance(int n_customer, double dtl, int v, bool gen_node, double side_of_area) {
-    createDirectory("/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/", "v"+std::to_string(v));
+    createDirectory("/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/", "v"+std::to_string(v));
     c_prime = generate1DMatrix(n_customer);
     if (!gen_node) {
         tau = generateSymmetricMatrix(n_customer+2, n_customer+2, 20);
@@ -305,18 +319,26 @@ GenInstance::GenInstance(int n_customer, double dtl, int v, bool gen_node, doubl
                 if (!exist(c_prime, i)) {
                     last = 1;
                 }
-                if (i < n_customer/2) {
-                    auto node = std::make_tuple(i, generateRandomDouble(side_of_area/2), generateRandomDouble(side_of_area/2), last);
+                if (i <= 1) {
+                    auto node = std::make_tuple(i, generateRandomDouble(0, side_of_area/3), generateRandomDouble(0, side_of_area/3), last);
                     Nodes.push_back(node);
-                } else {
-                    auto node = std::make_tuple(i, generateRandomDouble(side_of_area), generateRandomDouble(side_of_area), last);
+                } else if (i >= 2 && i <= 3) {
+                    auto node = std::make_tuple(i, generateRandomDouble(side_of_area*2/3, side_of_area), generateRandomDouble(0, side_of_area/3), last);
+                    Nodes.push_back(node);
+                } else if (i >= 4 && i <= 6) {
+                    auto node = std::make_tuple(i, generateRandomDouble(side_of_area/3, side_of_area*2/3), generateRandomDouble(side_of_area/3, side_of_area*2/3), last);
+                    Nodes.push_back(node);
+                } else if (i >= 7 && i <= 8) {
+                    auto node = std::make_tuple(i, generateRandomDouble(0, side_of_area/3), generateRandomDouble(side_of_area*2/3, side_of_area), last);
+                    Nodes.push_back(node);
+                } else if (i >= 9 && i <= 10) {
+                    auto node = std::make_tuple(i, generateRandomDouble(side_of_area*2/3, side_of_area), generateRandomDouble(side_of_area*2/3, side_of_area), last);
                     Nodes.push_back(node);
                 }
-
             }
             if (i == n_customer+1) {
                 auto n_clone = Nodes[0];
-                get<0>(n_clone) = n_customer+2;
+                get<0>(n_clone) = n_customer+1;
                 Nodes.push_back(n_clone);
             }
         }
@@ -338,9 +360,9 @@ GenInstance::GenInstance(int n_customer, double dtl, int v, bool gen_node, doubl
                 } else {
                     // truck_speed = 2/3 drone_speed.
                     tau[i][j] = manhattanDistance(
-                        get<1>(Nodes[i]), get<2>(Nodes[i]), get<1>(Nodes[j]), get<2>(Nodes[j]))/5;
+                        get<1>(Nodes[i]), get<2>(Nodes[i]), get<1>(Nodes[j]), get<2>(Nodes[j]))/3;
                     tau_prime[i][j] = euclideanDistance(
-                        get<1>(Nodes[i]), get<2>(Nodes[i]), get<1>(Nodes[j]), get<2>(Nodes[j]))/10;
+                        get<1>(Nodes[i]), get<2>(Nodes[i]), get<1>(Nodes[j]), get<2>(Nodes[j]))/8;
                 }
             }
         }
@@ -359,12 +381,39 @@ GenInstance::GenInstance(int n_customer, double dtl, int v, bool gen_node, doubl
             }
             std::cout << std::endl;
         }
-        write_node_file("nodes.csv", "/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v), Nodes);
-
+        write_node_file("nodes.csv", "/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/v" +std::to_string(v), Nodes);
+        std::ofstream fout("/home/cuong/CLionProjects/uMV-FSTSP/avg_report.csv", std::ios::app);
+        fout << ins_perc_higher_dtl(tau_prime, dtl) << "\n";
     }
-    write_c_prime_to_csv(c_prime, "Cprime.csv", "/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
-    write_tau_to_csv(tau, "tau.csv", "/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
-    write_tau_to_csv(tau_prime, "tauprime.csv", "/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/v" +std::to_string(v));
+    write_c_prime_to_csv(c_prime, "Cprime.csv", "/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/v" +std::to_string(v));
+    write_tau_to_csv(tau, "tau.csv", "/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/v" +std::to_string(v));
+    write_tau_to_csv(tau_prime, "tauprime.csv", "/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/v" +std::to_string(v));
 }
 
+void GenInstance::calculate_avg_ins_perc_dtl_murray(std::string folder_path, double dtl) {
+    std::string tau_prime_path = folder_path + "/tauprime.csv";
+    std::ifstream t_prime_ifs(tau_prime_path);
+    std::vector<std::vector<double>> tau_prime(12, std::vector<double>(12));
+    double d;
+    char c;
+    std::string str;
+    for (int i = 0; i < 12; i++) {
+        getline(t_prime_ifs, str);
+        std::istringstream iss(str);
+        for (int j = 0; j < 12; j++) {
+            iss >> d >> c;
+            tau_prime[i][j] = d;
+        }
+    }
+    double count = 0;
+    for (int i = 0; i < tau_prime.size(); i++) {
+        for (int j = 0; j < tau_prime[i].size(); j++) {
+            if (tau_prime[i][j] > dtl) {
+                count++;
+            }
+        }
+    }
+    std::ofstream fout("/home/cuong/CLionProjects/uMV-FSTSP/avg_report.csv", std::ios::app);
+    fout << folder_path << "," << 100.0*count/121.0 << "\n";
+}
 #endif //UMV_FSTSP_GEN_INSTANCE_H

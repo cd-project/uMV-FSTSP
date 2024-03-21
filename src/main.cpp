@@ -28,7 +28,7 @@ int main(int argc, char**argv) {
         auto dtl = stod(dtl_str);
         auto v = stoi(v_str);
 
-        auto g = GenInstance(n_customer, dtl, v, true, 100);
+        auto g = GenInstance(n_customer, dtl, v, true, 200);
         return EXIT_SUCCESS;
     }
 
@@ -36,22 +36,23 @@ int main(int argc, char**argv) {
 
     bool write = false;
     if (argc == 2) {
-        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/" + std::string(argv[1]);
+        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/" + std::string(argv[1]);
         write = true;
     } else {
-        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances/v27";
+        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/v23";
     }
 
     std::cout << "Instance name: " << folder_path << std::endl;
     std::cout << "Write arg val: " << write << std::endl;
+
     auto instance = std::make_shared<Instance>(folder_path, false, 0);
     auto solver = std::make_shared<Solver>(instance);
-    auto result = solver->OriginalSolverCPLEX(20, 20);
+    auto result = solver->mvdSolverWithLR(20, 20, false);
     if (write) {
         std::cout << "In write mode" << std::endl;
         auto i_name_split = SplitStringWithDelimiter(folder_path, "/");
         auto i_name = i_name_split[i_name_split.size()-1];
-        std::ofstream out("/home/cuong/CLionProjects/uMV-FSTSP/rev_100.csv", std::ios::app);
+        std::ofstream out("/home/cuong/CLionProjects/uMV-FSTSP/100_dis_rand_nows.csv", std::ios::app);
         if(!out.is_open()) {
             std::cout << "Error opening file!" << std::endl;
         }

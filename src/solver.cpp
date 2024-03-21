@@ -4,6 +4,7 @@
 #include "../include/solver.h"
 
 #include <chrono>
+#include <functional>
 #include <iostream>
 #include <vector>
 #include <unordered_set>
@@ -42,11 +43,82 @@ Result::Result(double c, double re_c, double t, double rc) {
     recalculated_cost = re_c;
     time_spent = t;
     revisit_count = rc;
-
 }
+
 inline bool exist(const std::vector<int> &vec, int element) {
     // Use std::find to search for the element in the vector
     return std::find(vec.begin(), vec.end(), element) != vec.end();
+}
+
+inline std::vector<std::vector<int> > generateSubsets(const std::vector<int> &set, int L) {
+    std::vector<std::vector<int> > subsets;
+
+    // Helper function to generate subsets recursively
+    std::function<void(std::vector<int> &, int, int)> generate = [&
+            ](std::vector<int> &subset, int index, int remaining) {
+        // Base case: if subset is non-empty and has at most L elements, add it to subsets
+        if (subset.size() > 0 && subset.size() <= L) {
+            subsets.push_back(subset);
+        }
+
+        // Recursive case: generate subsets by including or excluding the current element
+        for (int i = index; i < set.size(); ++i) {
+            subset.push_back(set[i]); // Include current element
+            generate(subset, i + 1, remaining - 1);
+            subset.pop_back(); // Exclude current element
+        }
+    };
+
+    // Start recursion with an empty subset and the entire set
+    std::vector<int> emptySubset;
+    generate(emptySubset, 0, L);
+
+    return subsets;
+}
+
+void permute(std::vector<int> &nums, int l, int r, std::vector<std::vector<int> > &result) {
+    if (l == r) {
+        result.push_back(nums);
+    } else {
+        for (int i = l; i <= r; ++i) {
+            std::swap(nums[l], nums[i]);
+            permute(nums, l + 1, r, result);
+            std::swap(nums[l], nums[i]);
+        }
+    }
+}
+
+std::vector<std::vector<int> > generatePermutations(std::vector<int> &nums) {
+    std::vector<std::vector<int> > result;
+    permute(nums, 0, nums.size() - 1, result);
+    return result;
+}
+
+inline std::pair<double, std::vector<int> > shortestPath(int start, int end, std::vector<int> &middle,
+                                                         std::vector<std::vector<double> > &tau_prime) {
+    std::vector<int> best;
+    double bestDist = INFINITY;
+    std::vector<int> current(2 + middle.size());
+    auto permutations = generatePermutations(middle);
+    for (auto &p: permutations) {
+        double d = 0;
+        std::vector<int> perm;
+        perm.push_back(start);
+        for (int i: p) {
+            perm.push_back(i);
+        }
+        perm.push_back(end);
+        for (int i = 0; i < perm.size() - 1; i++) {
+            d += tau_prime[perm[i]][perm[i + 1]];
+            if (d > bestDist) continue;
+        }
+        if (d < bestDist) {
+            bestDist = d;
+            best = perm;
+        }
+    }
+    best.shrink_to_fit();
+    return {bestDist, best};
 }
 
 std::vector<std::pair<std::vector<int>, std::vector<int> > > generateSetsAndComplements(
@@ -83,7 +155,302 @@ void setPrint(std::vector<int> &set) {
     }
     std::cout << std::endl;
 }
+void generateSets(const std::vector<int>& nodes, int k, std::vector<int>& currentSet, std::vector<std::vector<int>>& result) {
+    // Base case: if currentSet has k nodes, add it to result
+    if (currentSet.size() == k) {
+        result.push_back(currentSet);
+        return;
+    }
 
+    // Recursive case: iterate through all nodes
+    for (int i = 0; i < nodes.size(); ++i) {
+        // Add the current node to the set
+        currentSet.push_back(nodes[i]);
+
+        // Recur with the updated set
+        generateSets(nodes, k, currentSet, result);
+
+        // Backtrack: remove the last node from the set
+        currentSet.pop_back();
+    }
+}
+
+std::vector<std::vector<int>> generateAllSubsets(const std::vector<int>& nodes, int k, int D) {
+    std::vector<std::vector<int>> result;
+    std::vector<int> currentSet;
+    generateSets(nodes, k, currentSet, result);
+    std::vector<std::vector<int>> result2;
+    for (auto vec:result) {
+        // perform test
+        bool check = true;
+        for (int i = 0; i < vec.size(); i++) {
+            if (i < vec.size() - 1 && vec[i] == D) {
+                check = false;
+            }
+            if (i < vec.size()- 1 && vec[i] == vec[i+1]) {
+                check = false;
+            }
+        }
+        if (check) {
+            result2.push_back(vec);
+        }
+
+    }
+
+    return result2;
+
+}
+inline double calculate_tour(std::vector<std::vector<double>> &tau, std::vector<int> &tour) {
+    double l = 0;
+    for (int i = 0; i < tour.size()-1; i++) {
+        l += tau[tour[i]][tour[i+1]];
+    }
+    return l;
+}
+inline double smallest_tour_length(int stage_gap, std::vector<std::vector<double>> &tau, std::vector<int>& V) {
+    int D = V.size()-1;
+    auto sets = generateAllSubsets(V, stage_gap+1, D);
+    double smallest = std::numeric_limits<double>::max();
+    for (auto set:sets) {
+        auto l = calculate_tour(tau, set);
+        if (l < smallest) {
+            smallest = l;
+        }
+    }
+    return smallest;
+}
+IloNumArray Solver::TSP_MTZ(std::vector<std::vector<double> > &tau) {
+    int n = tau.size() - 1;
+
+    IloEnv env;
+    IloModel model(env);
+    IloCplex cplex(model);
+    cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);
+    IloArray<IloBoolVarArray> x(env, n);
+    for (int i = 0; i < n; i++) {
+        x[i] = IloBoolVarArray(env, n);
+        for (int j = 0; j < n; j++) {
+            model.add(x[i][j]);
+        }
+    }
+    IloNumVarArray u(env, n);
+    for (int i = 0; i < n; i++) {
+        u[i] = IloNumVar(env, 0, n - 1, ILOFLOAT);
+        model.add(u[i]);
+    }
+    IloRangeArray cons1(env, n);
+    for (int j = 0; j < n; ++j) {
+        IloExpr expr(env);
+        for (int i = 0; i < n; ++i) {
+            if (i != j) expr += x[i][j];
+        }
+        cons1[j] = IloRange(env, 1, expr, 1);
+        model.add(cons1[j]);
+    }
+
+    IloRangeArray cons2(env, n);
+    for (int i = 0; i < n; ++i) {
+        IloExpr expr(env);
+        for (int j = 0; j < n; ++j) {
+            if (i != j) expr += x[i][j];
+        }
+        cons2[i] = IloRange(env, 1, expr, 1);
+        model.add(cons2[i]);
+    }
+
+    model.add(IloRange(env, 0, u[0], 0));
+    IloArray<IloRangeArray> cons3(env, n);
+    for (int i = 0; i < n; ++i) {
+        cons3[i] = IloRangeArray(env, n);
+        for (int j = 1; j < n; ++j) {
+            if (i == j) continue;
+            cons3[i][j] = IloRange(env, u[i] - u[j] + n * x[i][j], n - 1);
+            model.add(cons3[i][j]);
+        }
+    }
+    IloExpr obj(env);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            obj += tau[i][j] * x[i][j];
+        }
+    }
+    model.add(IloMinimize(env, obj));
+    cplex.solve();
+    std::cout << std::endl;
+    IloNumArray order(env);
+    for (int i = 0; i < n; i++) {
+        for (int vertex = 0; vertex < n; vertex++) {
+            if (abs(cplex.getValue(u[vertex]) - i) < 1e-5) {
+                order.add(vertex);
+                continue;
+            }
+        }
+    }
+    order.add(n);
+    std::cout << "TSP solution for this instance: ";
+    for (int i = 0; i < order.getSize(); i++) {
+        std::cout << order[i] << " ";
+    }
+    std::cout << std::endl;
+    cplex.end();
+    model.end();
+    env.end();
+    return order;
+}
+
+IloNumArray Solver::RevisitTSP(std::vector<std::vector<double> > &tau) {
+    int n = tau.size() - 1;
+
+    IloEnv env;
+    IloModel model(env);
+    IloCplex cplex(model);
+    cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);
+    int D = n;
+    int K = 2 * n;
+    IloArray<IloBoolVarArray> X(env, K + 1);
+    for (int k = 1; k <= K; k++) {
+        X[k] = IloBoolVarArray(env, D + 1);
+        for (int i = 0; i <= D; i++) {
+            X[k][i] = IloBoolVar(env);
+            model.add(X[k][i]);
+            auto v_name = "X_" + std::to_string(k) + "_" + std::to_string(i);
+            //std::cout << v_name << std::endl;
+            X[k][i].setName(v_name.c_str());
+            if (k > 1 && i == 0) {
+                model.add(X[k][0] == 0);
+            }
+        }
+    }
+
+    model.add(X[1][0] == 1).setName("start depot is the first node");
+    model.add(X[1][D] == 0).setName("ending depot cannot be the first node");
+
+
+    for (int k = 1; k <= K; k++) {
+        IloExpr sum(env);
+        for (int i = 0; i <= D; i++)
+            sum += X[k][i];
+        model.add(sum <= 1).setName(("C20_at_most_one_customer_at_stage_" + std::to_string(k)).c_str());
+    }
+
+    IloExpr arrival_depot(env);
+    for (int k = 1; k <= K; k++) {
+        arrival_depot += X[k][D];
+    }
+    model.add(arrival_depot == 1).setName("C21_arrival_depot_once");
+    IloExpr obj(env);
+    // x^k_(ij) (binary variable) và nhận giá trị một nếu Xk
+    // mô ta cạnh nối 2 đỉnh liên tiếp trên đường đi.
+    IloArray<IloArray<IloBoolVarArray> > x(env, K);
+    for (int k = 1; k < K; k++) {
+        x[k] = IloArray<IloBoolVarArray>(env, D);
+        for (int i = 0; i < D; i++) {
+            x[k][i] = IloBoolVarArray(env, D + 1);
+            for (int j = 1; j <= D; j++) {
+                if (i != j) {
+                    x[k][i][j] = IloBoolVar(env);
+                    auto v_name = "x_" + std::to_string(k) + "_" + std::to_string(i) + "_" + std::to_string(j);
+                    x[k][i][j].setName(v_name.c_str());
+                    obj += x[k][i][j] * tau[i][j];
+                    model.add(x[k][0][D] == 0);
+                }
+            }
+        }
+    }
+
+    model.add(IloMinimize(env, obj));
+    ////////// Constraint C1
+    for (int k = 1; k < K; k++) {
+        for (int i = 0; i < D; i++) {
+            {
+                // i == D => khong co i -> j.
+                IloExpr sum(env);
+                for (int j = 1; j <= D; j++) {
+                    if (i != j) {
+                        sum += x[k][i][j];
+                    }
+                }
+
+                // neu node i la node_stage k, i khac D thi kieu gi cung co canh i, j.
+                model.add(X[k][i] == sum).setName(("C1_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
+            }
+        }
+    }
+
+    for (int k = 2; k <= K; k++) {
+        for (int i = 1; i <= D; i++) {
+            {
+                IloExpr sum(env);
+                for (int j = 0; j < D; j++) {
+                    if (i != j) {
+                        sum += x[k - 1][j][i];
+                    }
+                }
+                // arcs entering i at stage k.
+                model.add(X[k][i] == sum).setName(("C1p_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
+            }
+        }
+    }
+
+    //////////// C2 - depart from the depot
+    IloExpr C2(env);
+    for (int i = 1; i <= D; i++) {
+        C2 += x[1][0][i];
+    }
+
+    IloConstraint c2(C2 == 1);
+    model.add(c2).setName("C2");
+
+    ///////////// C3: arc_stage
+    IloExpr C3(env);
+    for (int k = 2; k <= K; k++) {
+        {
+            C3 += X[k][D];
+        }
+    }
+    // , "C3"
+    model.add(C3 == 1).setName("C3"); // arrival to depot
+
+    for (int h = 1; h < D; h++) {
+        IloExpr sum(env);
+        for (int k = 2; k < K; k++) {
+            sum += X[k][h];
+        }
+        model.add(sum >= 1);
+    }
+    model.add(X[5][6] == 1);
+    model.add(X[10][6] == 1);
+    cplex.solve();
+    IloNumArray order(env);
+
+    for (int k = 1; k <= K; k++) {
+        for (int i = 0; i <= D; i++) {
+            if (abs(cplex.getValue(X[k][i]) - 1) < 1e-5) {
+                std::cout << "Stage " << k << " at " << i << std::endl;
+            }
+        }
+    }
+    for (int k = 1; k < K; k++) {
+        for (int i = 0; i < D; i++) {
+            for (int j = 1; j <= D; j++) {
+                if (i != j) {
+                    if (abs(cplex.getValue(x[k][i][j]) - 1) < 1e-5) {
+                        std::cout << i << " " << j << std::endl;
+                        order.add(i);
+                    }
+                }
+            }
+        }
+    }
+
+    order.add(D);
+    std::cout << "Revisit TSP solution for this instance: ";
+    for (int i = 0; i < order.getSize(); i++) {
+        std::cout << order[i] << " ";
+    }
+    std::cout << std::endl;
+    return order;
+}
 
 // Paper: https://drive.google.com/file/d/1CpYCse--JWmrnBY566Obe8IMpcClTpnI/view?usp=sharing
 
@@ -274,7 +641,7 @@ void setPrint(std::vector<int> &set) {
 //            rhs_1 += y[i][t];
 //        }
 //        model.addConstr(lhs_1, GRB_GREATER_EQUAL, 1, "C1_LHS");
-//        model.addConstr(rhs_1, GRB_EQUAL, 1, "C1_RHS");
+//        model.addConstr(rhs_1 == 1, "C1_RHS");
 //
 //        // Constraint 2
 //        for (int i : C) {
@@ -2361,28 +2728,29 @@ Result Solver::mvdSolverCPLEXFewerVariables(int n_thread, int e) {
     return Result();
 }
 
-Result Solver::mvdSolverWithLR(int n_thread, int e) {
+Result Solver::mvdSolverWithLR(int n_thread, int e, bool use_tsp_as_warmstart) {
     auto tau = instance->tau;
     auto tau_prime = instance->tau_prime;
     auto dtl = e;
     auto n = instance->num_node;
     std::vector<int> C;
+    std::vector<int> V;
     for (int i = 0; i < n + 1; i++) {
         if (i != 0 && i != n) {
             C.push_back(i);
         }
+        V.push_back(i);
     }
 
     IloEnv env;
     IloModel model(env);
     IloCplex cplex(model);
     cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);
-
+    cplex.setParam(IloCplex::Param::TimeLimit, 200.0);
     auto O = 0;
     auto D = n;
-    auto node_max_stage = n + 1;
+    auto node_max_stage = n+1;
     auto arc_max_stage = node_max_stage - 1;
-
 
     // Khai bao bien
     //
@@ -2394,6 +2762,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
         X[k] = IloBoolVarArray(env, D + 1);
         for (int i = 0; i <= D; i++) {
             X[k][i] = IloBoolVar(env);
+            model.add(X[k][i]);
             auto v_name = "X_" + std::to_string(k) + "_" + std::to_string(i);
             //std::cout << v_name << std::endl;
             X[k][i].setName(v_name.c_str());
@@ -2406,6 +2775,27 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
     model.add(X[1][0] == 1).setName("start depot is the first node");
     model.add(X[1][D] == 0).setName("ending depot cannot be the first node");
 
+    // WARMSTART CONFIG
+    if (use_tsp_as_warmstart) {
+        auto tsp_solution = RevisitTSP(tau);
+        std::cout << tsp_solution.getSize() << std::endl;
+        IloNumVarArray X_warm_var(env);
+        IloNumArray X_warm_val(env);
+        for (int k = 1; k <= node_max_stage; k++) {
+            for (int i = 0; i <= D; i++) {
+                X_warm_var.add(X[k][i]);
+                if (tsp_solution[k - 1] == i) {
+                    X_warm_val.add(true);
+                    std::cout << "Warmstart X[" << k << "][" << i << "] == 1" << std::endl;
+                } else {
+                    X_warm_val.add(false);
+                }
+            }
+        }
+        cplex.addMIPStart(X_warm_var, X_warm_val);
+        X_warm_var.end();
+        X_warm_val.end();
+    }
     for (int k = 1; k <= node_max_stage; k++) {
         IloExpr sum(env);
         for (int i = 0; i <= D; i++)
@@ -2426,15 +2816,15 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
         x[k] = IloArray<IloBoolVarArray>(env, D);
         for (int i = 0; i < D; i++) {
             x[k][i] = IloBoolVarArray(env, D + 1);
-            for (int j = 1; j <= D; j++)
+            for (int j = 1; j <= D; j++) {
                 if (i != j) {
                     x[k][i][j] = IloBoolVar(env);
                     auto v_name = "x_" + std::to_string(k) + "_" + std::to_string(i) + "_" + std::to_string(j);
                     x[k][i][j].setName(v_name.c_str());
                 }
+            }
         }
     }
-
 
     //// phi^h equals to 1 if customer h is served by the drone
     IloBoolVarArray phi(env, n);
@@ -2445,7 +2835,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
     }
 
     for (int heavy: instance->heavy) {
-        if (heavy != D + 1) {
+        if (heavy != D) {
             model.add(phi[heavy] == 0);
         }
     }
@@ -2483,7 +2873,6 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                 }
         }
     }
-
 
     //// C17 - $X^k_i \geq \sum_h X^k_{ih}$ (C17) - chỉ bay drone ở nơi mà xe ở đó
     for (int k = 1; k <= node_max_stage; k++) {
@@ -2528,21 +2917,47 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
 
         model.add(expr <= (dtl - sr) * phi[h]).setName(("C19_" + std::to_string(h)).c_str());
     }
-    //exit(0);
 
     //// aux var z_{k, k_p}: sortie launch from k and rendezvous at k_p.
     IloArray<IloBoolVarArray> z(env, node_max_stage);
     for (int k = 1; k <= node_max_stage - 1; k++) {
         z[k] = IloBoolVarArray(env, node_max_stage + 1);
         for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
-            {
-                z[k][k_p] = IloBoolVar(env);
-                auto v_name = "z_" + std::to_string(k) + "_" + std::to_string(k_p);
-                z[k][k_p].setName(v_name.c_str());
+            z[k][k_p] = IloBoolVar(env);
+            auto v_name = "z_" + std::to_string(k) + "_" + std::to_string(k_p);
+            z[k][k_p].setName(v_name.c_str());
+        }
+    }
+    int K = node_max_stage;
+    int min_stage_gap = 0;
+    std::cout << "---------------------------------------------" << std::endl;
+    std::cout << "Calculate max stage gap for sortie.... " << std::endl;
+    for (int k = 1; k < K; k++) {
+        for (int kp = k+1; kp <= K; kp++) {
+            if (kp > k+6) {
+                goto after_z_cons;
+            }
+            double smallest_tour = smallest_tour_length(kp-k, tau, V);
+            if (smallest_tour > dtl - sr) {
+                std::cout << "Stage gap of " << kp - k << " with smallest length = " << smallest_tour << " violated endurance constraint!" << std::endl;
+                std::cout << "---------------------------------------------" << std::endl;
+                min_stage_gap = kp - k;
+                goto after_z_cons;
             }
         }
     }
-
+    after_z_cons:
+    if (min_stage_gap == 0) {
+        std::cout << "Stage gap calculation consumes too much memory. No constraint was added." << std::endl;
+        std::cout << "---------------------------------------------" << std::endl;
+    }
+    if (min_stage_gap != 0) {
+        for (int k = 1; k < K; k++) {
+            for (int kp = k + min_stage_gap; kp <= K; kp++) {
+                // model.add(z[k][kp] == 0);
+            }
+        }
+    }
     //// aux var Z_{k, k_p, h}: sortie launch from k and rendezvous at k_p.
     IloArray<IloArray<IloBoolVarArray> > Z(env, node_max_stage);
     for (int h: C) {
@@ -2667,7 +3082,6 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
 
     IloConstraint c2(C2 == 1);
     model.add(c2).setName("C2");
-    // , "C2"
 
     ///////////// C3: arc_stage
     IloExpr C3(env);
@@ -2802,40 +3216,22 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
     ////////// C15: node_stage
     ///// big M calculation
     auto M = 0;
-    for (int k = 1; k < node_max_stage; k++) {
-        M += tau[k - 1][k];
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (i < j) {
+                M += tau[i][j];
+            }
+        }
     }
 
-    for (int k = 2; k < node_max_stage / 2; k++) {
-        model.add(X[k][D] == 0);
-    }
+    // for (int k = 2; k < node_max_stage / 2; k++) {
+    //     model.add(X[k][D] == 0);
+    // }
     for (int k = 1; k <= node_max_stage - 1; k++) {
         for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
             if (k < k_p) {
-                // o to phai den k_p tu k trong khoang thoi gian <= dtl.
-                // , "C15_" + std::to_string(k) + "_" + std::to_string(k_p)
                 model.add(a[k_p] - d[k] <= z[k][k_p] * (dtl - sr) + (1 - z[k][k_p]) * M).setName(
                     ("C15_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
-
-                IloExpr rhs(env);
-                for (int i = 0; i <= D; i++) {
-                    for (int h: C) {
-                        if (h != i && i != D) {
-                            if (tau_prime[i][h] <= dtl - sr) {
-                                rhs += Y[k][i][h] * tau_prime[i][h];
-                            }
-                        }
-
-                        if (h != i && i != 0) {
-                            if (tau_prime[h][i] <= dtl - sr) {
-                                rhs += W[k_p][i][h] * tau_prime[h][i];
-                            }
-                        }
-                    }
-                }
-                // vehicle phai doi drone truoc khi di chuyen.
-                //                model.add(d[k_p] - d[k] + (1 - z[k][k_p]) * 2 * (dtl-sr) >= rhs).setName(("C21_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
-                //                model.add(d[k_p] - d[k] >= z[k][k_p] * sr - (1-z[k][k_p]) * 100000 + rhs);
             }
         }
     }
@@ -2884,6 +3280,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
             }
         }
     }
+
     for (int k = 2; k <= node_max_stage; k++) {
         IloExpr sum(env);
         IloExpr sum_w_K(env);
@@ -2913,20 +3310,6 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
         auto constr_name = "CC_d_" + std::to_string(k) + "_constr";
         model.add(d[k] >= d[k - 1] + sum + sum_w_K + sum_y_K).setName(constr_name.c_str());
     }
-    // for (int i = 1; i < D; i++) {
-    //     for (int h: C) {
-    //         if (i != h) {
-    //             IloExpr sumY(env), sumK(env);
-    //             for (int k = 1; k < node_max_stage; k++) {
-    //                 for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
-    //                     if (k_p > k) {
-    //                         model.add(Y[k][i][h] + W[k_p][i][h] <= 1);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
 
     // (k,h): k chỉ có thể là đến hoặc đi của khách hàng h.
     for (int k = 2; k < node_max_stage; k++) {
@@ -2978,13 +3361,16 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
         model.add(X[k][D] == 0);
     }
 
+    double bestObjective = IloInfinity;
+    // BranchAndCutCallback bc(env, model, X, x, phi, Z, z, Y, W, K, D, bestObjective, C, tau, tau_prime);
+    // cplex.use(&bc);
     model.add(IloMinimize(env, d[node_max_stage]));
     cplex.exportModel("cplex_model_1.lp");
     std::vector<Sortie> st;
     double obj = 0;
     double revisit_count = 0;
     // Solve the model
-    std::vector<int> rev(n+1, 0);
+    std::vector<int> rev(n + 1, 0);
     auto startTime = std::chrono::high_resolution_clock::now();
     cplex.solve();
     auto endTime = std::chrono::high_resolution_clock::now();
@@ -3023,7 +3409,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                 if (i != j) {
                     auto X_val = cplex.getValue(x[k][i][j]);
                     //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
-                    if (abs(X_val - 1) < 2e-5) {
+                    if (X_val == 1) {
                         std::cout << "Arc " << k << " connecting " << i << " and " << j
                                 << " with cost " << tau[i][j] << " " << std::endl;
                         obj += tau[i][j];
@@ -3032,31 +3418,9 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                     }
                 }
     }
-    std::cout << "Drone served customers" << std::endl;
-    //IloNumArray phi_val(env);
-    //cplex.getValues(phi_val, phi);
-
-
-    for (int k = 1; k < node_max_stage; k++)
-        for (int kp = k + 1; kp <= node_max_stage; kp++) {
-            //std::cout << k << " " << kp << std::endl;
-            if (abs(cplex.getValue(z[k][kp]) - 1) < 1e-5) {
-                std::cout << "Drone flies from stage " << k << " to stage " << kp << std::endl;
-            }
-        }
-    for (int h: C)
-        for (int k = 1; k < node_max_stage; k++)
-            for (int kp = k + 1; kp <= node_max_stage; kp++) {
-                //std::cout << k << " " << kp << std::endl;
-                if (abs(cplex.getValue(Z[h][k][kp]) - 1) < 1e-5) {
-                    std::cout << "Drone flies from stage " << k << " to stage " << kp << " to serve customer " << h <<
-                            std::endl;
-                }
-            }
 
     for (int h: C) {
-        if (abs(cplex.getValue(phi[h]) - 1) < 1e-5) {
-            std::cout << cplex.getValue(phi[h]) << std::endl;
+        if (cplex.getValue(phi[h]) == 1) {
             std::cout << "Customer " << h << " served by drone." << std::endl;
             auto sortie = Sortie(h);
             st.push_back(sortie);
@@ -3065,28 +3429,20 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
                 for (int i = 0; i <= D; i++)
                     if (i != h) {
                         try {
-                            //std::cout << "from stage " << k << " at customer " << i << " to serve" << h << std::endl;
                             auto Y_val = cplex.getValue(Y[k][i][h]);
-                            if (abs(Y_val - 1) < 1e-5) {
-                                std::cout << "Y_val: " << Y_val << std::endl;
+                            if (Y_val == 1) {
                                 sv_i = i;
                                 sv_k = k;
-                                //std::cout << "XXX from stage " << k << " at customer " << i << " to serve" << h << std::endl;
                             }
-
-                            //std::cout << "to stage " << k << " at customer" << i << " from " << h << std::endl;
                             auto W_val = cplex.getValue(W[k][i][h]);
-                            if (abs(W_val - 1) < 1e-5) {
-                                std::cout << "W_val: " << W_val << std::endl;
+                            if (W_val == 1) {
                                 sv_j = i;
                                 sv_kp = k;
-                                //std::cout << "ZZZ to stage " << k << " at customer" << i << " from " << h << std::endl;
                             }
                         } catch (...) {
                         }
                     }
             }
-            ////assert(abs(cplex.getValue(z[sv_k][sv_kp]) - 1.0) < 1e-6);
 
             std::cout << "Drone fly from " << sv_i << " at stage " << sv_k <<
                     " to serve " << h << " and then fly back to " << sv_j
@@ -3097,6 +3453,15 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
             }
             double drone_travel_time = tau_prime[sv_i][h] + tau_prime[h][sv_j];
             double truck_travel_time = 0;
+            std::cout << "Truck arcs during this sortie: ";
+            for (int k_start = sv_k; k_start <= sv_kp; k_start++) {
+                if (k_start == sv_kp) {
+                    std::cout << map_stage_truck_arc[k_start].first;
+                } else {
+                    std::cout << map_stage_truck_arc[k_start].first << "--->";
+                }
+            }
+            std::cout << std::endl;
             for (int k_start = sv_k; k_start <= sv_kp - 1; k_start++) {
                 truck_travel_time += tau[map_stage_truck_arc[k_start].first][map_stage_truck_arc[k_start].second];
             }
@@ -3108,9 +3473,7 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
             auto drone_arrival_time = cplex.getValue(d[sv_k]) + drone_travel_time;
             auto vehicle_departure_time = cplex.getValue(d[sv_kp]);
             auto truck_arrival_time = cplex.getValue(a[sv_kp]);
-            std::cout << "Start arc cost: "
-                    << tau_prime[sv_i][h] << ", end arc cost: " << tau_prime[h][sv_j] << ". Total drone travel time: "
-                    << drone_travel_time << std::endl;
+            std::cout << "Total drone travel time: " << drone_travel_time << std::endl;
 
             std::cout << "Drone arrival time: " << drone_arrival_time << std::endl;
             std::cout << "Truck arrival time: " << truck_arrival_time << std::endl;
@@ -3134,13 +3497,14 @@ Result Solver::mvdSolverWithLR(int n_thread, int e) {
     cplex.end();
     model.end();
     env.end();
-    for (int i:rev) {
-        if (i > 1) {
-            revisit_count += i - 1;
-            std::cout << "Node " << i << "was revisited " << i - 1 << " times!" << std::endl;
+    for (int i = 0; i < rev.size(); i++) {
+        if (rev[i] > 1) {
+            revisit_count += rev[i] - 1;
+            std::cout << "Node " << i << " was revisited " << rev[i] - 1 << " times!" << std::endl;
         }
     }
     std::cout << "OBJECTIVE VALUE: " << c << ", NUMBER OF SORTIES: " << st.size() << "." << std::endl;
+    std::cout << "Number of revisit: " << revisit_count << std::endl;
     return Result{c, obj, duration.count() / 1000.0, revisit_count};
 }
 
@@ -3743,8 +4107,7 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
         std::vector<Sortie> st;
         double obj = 0;
         double best_objective = IloInfinity;
-        MyCallback myCallback(env, model, X, best_objective, 3, node_max_stage, D);
-        cplex.use(&myCallback);
+
         cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);
         // Solve the model
         if (!cplex.solve()) {
@@ -3900,14 +4263,10 @@ Result Solver::HeuristicFixCallback(int n_thread, int e) {
     }
 }
 
+// Link: https://drive.google.com/file/d/1CpYCse--JWmrnBY566Obe8IMpcClTpnI/view?usp=drive_link
 Result Solver::OriginalSolverCPLEX(int n_thread, int e) {
     auto tau = instance->tau;
-    // for (int i = 0; i < tau.size(); i++) {
-    //     for (int j = 0; j < tau[i].size(); j++) {
-    //         std::cout << tau[i][j] << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
+
     auto d = instance->tau_prime;
     auto dtl = e;
     auto sl = 1, sr = 1;
@@ -3954,9 +4313,9 @@ Result Solver::OriginalSolverCPLEX(int n_thread, int e) {
 
     // y: (i, j) in A, truck route
     IloArray<IloBoolVarArray> y(env, n + 1);
-    for (int i:c_s) {
+    for (int i: c_s) {
         y[i] = IloBoolVarArray(env, n + 1);
-        for (int j:c_t) {
+        for (int j: c_t) {
             y[i][j] = IloBoolVar(env);
             if (i == j) {
                 model.add(y[i][j] == 0);
@@ -4000,8 +4359,8 @@ Result Solver::OriginalSolverCPLEX(int n_thread, int e) {
         model.add(gamma[h][s][t] == 0);
     }
 
-    IloBoolVarArray theta(env, n+1);
-    for (int h:V) {
+    IloBoolVarArray theta(env, n + 1);
+    for (int h: V) {
         theta[h] = IloBoolVar(env);
         if (!exist(instance->c_prime, h) || h == s || h == t) {
             model.add(theta[h] == 0);
@@ -4231,7 +4590,6 @@ Result Solver::OriginalSolverCPLEX(int n_thread, int e) {
                 std::string cname = "C13_i=" + std::to_string(i) + "_j=" + std::to_string(j);
                 model.add(x[i][j] <= theta[i] + theta[j]);
             }
-
         }
     }
     //        // Constraint 14
@@ -4250,7 +4608,6 @@ Result Solver::OriginalSolverCPLEX(int n_thread, int e) {
         for (int j: c_t) {
             if (i != j) {
                 sum1 += x[i][j];
-
             }
         }
         for (int h: c_prime) {
@@ -4348,7 +4705,7 @@ Result Solver::OriginalSolverCPLEX(int n_thread, int e) {
     }
     std::cout << cplex.getObjValue() << std::endl;
     std::vector<Sortie> st;
-    return Result{cplex.getObjValue(), 0, duration.count()/1000.0, st};
+    return Result{cplex.getObjValue(), 0, duration.count() / 1000.0, st};
 }
 
 Result Solver::SolverWithRandomTruckStageFixed(int n_thread, int e) {
@@ -6357,7 +6714,7 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
 
     //// phi^h equals to 1 if customer h is served by the drone
     IloBoolVarArray phi(env, n);
-    for (int h:C) {
+    for (int h: C) {
         phi[h] = IloBoolVar(env);
         auto v_name = "phi_" + std::to_string(h);
         phi[h].setName(v_name.c_str());
@@ -6411,7 +6768,7 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
     }
 
     //// aux var Z_{h, k, k_p}: sortie launch from k and rendezvous at k_p.
-    IloArray<IloArray<IloBoolVarArray>> Z(env, D);
+    IloArray<IloArray<IloBoolVarArray> > Z(env, D);
     for (int h: instance->c_prime) {
         Z[h] = IloArray<IloBoolVarArray>(env, K);
         for (int k = 1; k <= K - 1; k++) {
@@ -6424,7 +6781,7 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
         }
     }
 
-    IloNumVarArray a(env, K+1), d(env, K+1);
+    IloNumVarArray a(env, K + 1), d(env, K + 1);
     for (int k = 1; k <= K; k++) {
         a[k] = IloNumVar(env, 0, IloInfinity);
         auto v_name = "a_" + std::to_string(k);
@@ -6462,9 +6819,9 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
 
     // Constraint 43
     for (int k = 1; k < K; k++) {
-        for (int i:cs) {
+        for (int i: cs) {
             IloExpr c43_expr(env);
-            for (int j:ce) {
+            for (int j: ce) {
                 c43_expr += x[k][i][j];
             }
             model.add(X[k][i] == c43_expr);
@@ -6473,10 +6830,10 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
 
     // Constraint 44
     for (int k = 2; k <= K; k++) {
-        for (int i:ce) {
+        for (int i: ce) {
             IloExpr c44_expr(env);
-            for (int j:cs) {
-                c44_expr += x[k-1][j][i];
+            for (int j: cs) {
+                c44_expr += x[k - 1][j][i];
             }
             model.add(X[k][i] == c44_expr);
         }
@@ -6491,12 +6848,12 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
     // Launch and rendezvous constraints
     // Constraint 48
     for (int k = 1; k < K; k++) {
-        for (int h:instance->c_prime) {
+        for (int h: instance->c_prime) {
             IloExpr c48_s1(env), c48_s2(env);
-            for (int kp = k+1; kp <= K; kp++) {
+            for (int kp = k + 1; kp <= K; kp++) {
                 c48_s1 += Z[h][k][kp];
             }
-            for (const int i:cs) {
+            for (const int i: cs) {
                 c48_s2 += Y[k][i][h];
             }
             model.add(c48_s1 == c48_s2);
@@ -6505,13 +6862,13 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
 
     // Constraint 49
     for (int kp = 2; kp <= K; kp++) {
-        for (int h:instance->c_prime) {
+        for (int h: instance->c_prime) {
             IloExpr c49_s1(env), c49_s2(env);
             for (int k = 1; k < kp; k++) {
                 c49_s1 += Z[h][k][kp];
             }
-            for (int j:ce) {
-                c49_s2 +=  W[kp][j][h];
+            for (int j: ce) {
+                c49_s2 += W[kp][j][h];
             }
             model.add(c49_s1 == c49_s2);
         }
@@ -6519,9 +6876,9 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
 
     // Constraint 50
     for (int k = 1; k < K; k++) {
-        for (int kp = k+1; kp <= K; kp++) {
+        for (int kp = k + 1; kp <= K; kp++) {
             IloExpr c50_s(env);
-            for (int h:instance->c_prime) {
+            for (int h: instance->c_prime) {
                 c50_s += Z[h][k][kp];
             }
             model.add(z[k][kp] == c50_s);
@@ -6531,7 +6888,7 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
     // Constraint 51
     for (int k = 1; k < K; k++) {
         IloExpr c51_s(env);
-        for (int kp = k+1; kp <= K; kp++) {
+        for (int kp = k + 1; kp <= K; kp++) {
             c51_s += z[k][kp];
         }
         model.add(c51_s <= 1);
@@ -6562,7 +6919,7 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
     //// Assignment constraints
 
     // Constraint 53
-    for (int h:C) {
+    for (int h: C) {
         IloExpr c53_s(env);
         for (int k = 2; k < K; k++) {
             c53_s += X[k][h];
@@ -6571,10 +6928,10 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
     }
 
     // Constraint 54
-    for (int h:instance->c_prime) {
+    for (int h: instance->c_prime) {
         IloExpr c54_sum(env);
         for (int k = 1; k < K; k++) {
-            for (int i:cs) {
+            for (int i: cs) {
                 if (i != h && tau_prime[i][h] < dtl - sr) {
                     c54_sum += Y[k][i][h];
                 }
@@ -6584,10 +6941,10 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
     }
 
     // Constraint 55
-    for (int h:instance->c_prime) {
+    for (int h: instance->c_prime) {
         IloExpr c55_sum(env);
         for (int kp = 2; kp <= K; kp++) {
-            for (int j:ce) {
+            for (int j: ce) {
                 if (j != h && tau_prime[h][j] < dtl - sr) {
                     c55_sum += W[kp][j][h];
                 }
@@ -6598,9 +6955,9 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
 
     // Constraint 56
     for (int k = 1; k < K; k++) {
-        for (int i:cs) {
+        for (int i: cs) {
             IloExpr c56_s(env);
-            for (int h:instance->c_prime) {
+            for (int h: instance->c_prime) {
                 if (i != h && tau_prime[i][h] < dtl - sr) {
                     c56_s += Y[k][i][h];
                 }
@@ -6611,9 +6968,9 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
 
     // Constraint 57
     for (int kp = 2; kp <= K; kp++) {
-        for (int j:ce) {
+        for (int j: ce) {
             IloExpr c57_s(env);
-            for (int h:instance->c_prime) {
+            for (int h: instance->c_prime) {
                 if (j != h && tau_prime[h][j] < dtl - sr) {
                     c57_s += W[kp][j][h];
                 }
@@ -6625,10 +6982,10 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
     // Constraint 58
     for (int k = 1; k < K; k++) {
         IloExpr c58_s1(env), c58_s2(env);
-        for (int i:ce) {
+        for (int i: ce) {
             c58_s1 += X[k][i];
         }
-        for (int kp = k+1; kp <= K; kp++) {
+        for (int kp = k + 1; kp <= K; kp++) {
             c58_s2 += z[k][kp];
         }
         model.add(c58_s1 >= c58_s2);
@@ -6637,7 +6994,7 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
     // Constraint 59
     for (int kp = 2; kp <= K; kp++) {
         IloExpr c59_s1(env), c59_s2(env);
-        for (int i:ce) {
+        for (int i: ce) {
             c59_s1 += X[kp][i];
         }
         for (int k = 1; k < kp; k++) {
@@ -6651,67 +7008,67 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
     // Constraint 61
     for (int k = 1; k < K; k++) {
         IloExpr c61_s(env);
-        for (int i:cs) {
-            for (int j:ce) {
+        for (int i: cs) {
+            for (int j: ce) {
                 c61_s += x[k][i][j] * tau[i][j];
             }
         }
-        model.add(a[k+1] == d[k] + c61_s);
+        model.add(a[k + 1] == d[k] + c61_s);
     }
 
     // Constraint 65
     for (int k = 2; k <= K; k++) {
         IloExpr c65_s1(env), c65_s2(env), c65_s3(env);
-        for (int i:cs) {
-            for (int j:ce) {
-                c65_s1 += x[k-1][i][j] * tau[i][j];
+        for (int i: cs) {
+            for (int j: ce) {
+                c65_s1 += x[k - 1][i][j] * tau[i][j];
             }
         }
-        for (int i:cs) {
-            for (int h:instance->c_prime) {
+        for (int i: cs) {
+            for (int h: instance->c_prime) {
                 if (i != h && tau_prime[i][h] < dtl - sr && k != K) {
                     c65_s2 += Y[k][i][h];
                 }
             }
         }
-        for (int j:ce) {
-            for (int h:instance->c_prime) {
+        for (int j: ce) {
+            for (int h: instance->c_prime) {
                 if (j != h && tau_prime[h][j] < dtl - sr) {
                     c65_s3 += W[k][j][h];
                 }
             }
         }
-        model.add(d[k] >= d[k-1] + c65_s1 + sl * c65_s2 + sr * c65_s3);
+        model.add(d[k] >= d[k - 1] + c65_s1 + sl * c65_s2 + sr * c65_s3);
     }
     auto M = 1e5;
     // Constraint 66
     for (int k = 1; k < K; k++) {
-        for (int kp = k+1; kp <= K; kp++) {
+        for (int kp = k + 1; kp <= K; kp++) {
             IloExpr c66_s1(env), c66_s2(env), c66_s3(env), c66_s4(env);
-            for (int i:cs) {
-                for (int h:instance->c_prime) {
+            for (int i: cs) {
+                for (int h: instance->c_prime) {
                     if (i != h && tau_prime[i][h] < dtl - sr) {
                         c66_s1 += Y[k][i][h] * tau_prime[i][h];
                     }
                 }
             }
-            for (int j:ce) {
-                for (int h:instance->c_prime) {
+            for (int j: ce) {
+                for (int h: instance->c_prime) {
                     if (j != h && tau_prime[h][j] < dtl - sr) {
                         c66_s2 += W[kp][j][h] * tau_prime[h][j];
                     }
                 }
             }
 
-            for (int i:cs) {
-                for (int h:instance->c_prime) {
+            for (int i: cs) {
+                for (int h: instance->c_prime) {
                     if (i != h && tau_prime[i][h] < dtl - sr && kp != K) {
                         c66_s3 += Y[kp][i][h];
                     }
                 }
             }
-            for (int j:ce) {
-                for (int h:instance->c_prime) {
+            for (int j: ce) {
+                for (int h: instance->c_prime) {
                     if (j != h && tau_prime[h][j] < dtl - sr) {
                         c66_s4 += W[kp][j][h];
                     }
@@ -6723,23 +7080,23 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
 
     // Constraint 67
     for (int k = 1; k < K; k++) {
-        for (int kp = k+1; kp <= K; kp++) {
-            model.add(a[kp] - d[k] <= z[k][kp] * (dtl -sr) + (1 - z[k][kp]) * M);
+        for (int kp = k + 1; kp <= K; kp++) {
+            model.add(a[kp] - d[k] <= z[k][kp] * (dtl - sr) + (1 - z[k][kp]) * M);
         }
     }
 
     // Constraint 68
-    for (int h:instance->c_prime) {
+    for (int h: instance->c_prime) {
         IloExpr c68_s1(env), c68_s2(env);
         for (int k = 1; k < K; k++) {
-            for (int i:cs) {
+            for (int i: cs) {
                 if (i != h && tau_prime[i][h] < dtl - sr) {
                     c68_s1 += Y[k][i][h] * tau_prime[i][h];
                 }
             }
         }
         for (int kp = 2; kp <= K; kp++) {
-            for (int j:ce) {
+            for (int j: ce) {
                 if (j != h && tau_prime[h][j] < dtl - sr) {
                     c68_s2 += W[kp][j][h] * tau_prime[h][j];
                 }
@@ -6785,11 +7142,11 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
                 }
     }
     std::cout << "Drone served customers" << std::endl;
-    for (int h:instance->c_prime) {
+    for (int h: instance->c_prime) {
         if (cplex.getValue(phi[h]) == 1) {
             std::cout << "Customer " << h << " served by drone" << std::endl;
             for (int k = 1; k < K; k++) {
-                for (int i:cs) {
+                for (int i: cs) {
                     if (i != h && tau_prime[i][h] < dtl - sr) {
                         if (cplex.getValue(Y[k][i][h]) == 1) {
                             std::cout << "start at stage " << k << " at vertex " << i << std::endl;
@@ -6801,14 +7158,13 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
     }
 
 
-
     for (int k = 1; k < K; k++)
         for (int kp = k + 1; kp <= K; kp++) {
             if (cplex.getValue(z[k][kp]) == 1) {
                 std::cout << "Drone flies from stage " << k << " to stage " << kp << std::endl;
             }
         }
-    for (int h:instance->c_prime)
+    for (int h: instance->c_prime)
         for (int k = 1; k < K; k++)
             for (int kp = k + 1; kp <= K; kp++) {
                 //std::cout << k << " " << kp << std::endl;
@@ -6888,6 +7244,7 @@ Result Solver::mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDe
 
     return Result();
 }
+
 Result Solver::mFSTSPSolve(int n_thread, int e) {
     auto tau = instance->tau;
     auto tau_prime = instance->tau_prime;
@@ -6925,10 +7282,10 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
         }
     }
 
-    IloArray<IloBoolVarArray> y(env, n+1);
-    for (int i:c_s) {
-        y[i] = IloBoolVarArray(env, n+1);
-        for (int j:c_t) {
+    IloArray<IloBoolVarArray> y(env, n + 1);
+    for (int i: c_s) {
+        y[i] = IloBoolVarArray(env, n + 1);
+        for (int j: c_t) {
             if (i != j) {
                 y[i][j] = IloBoolVar(env);
             }
@@ -6936,24 +7293,24 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     }
     int nd = 3;
     std::vector<int> d = {0, 1, 2};
-    IloArray<IloArray<IloBoolVarArray>> x(env, nd);
+    IloArray<IloArray<IloBoolVarArray> > x(env, nd);
     for (int v: d) {
-        x[v] = IloArray<IloBoolVarArray>(env, n+1);
-        for (int i:c_s) {
-           x[v][i] = IloBoolVarArray(env, n+1);
-            for (int j:c_t) {
+        x[v] = IloArray<IloBoolVarArray>(env, n + 1);
+        for (int i: c_s) {
+            x[v][i] = IloBoolVarArray(env, n + 1);
+            for (int j: c_t) {
                 x[v][i][j] = IloBoolVar(env);
             }
         }
     }
-    IloArray<IloArray<IloArray<IloBoolVarArray>>> gamma(env, n);
-    for (int h:C) {
-        gamma[h] = IloArray<IloArray<IloBoolVarArray>>(env, nd);
-        for (int v:d) {
-            gamma[h][v] = IloArray<IloBoolVarArray>(env, n+1);
-            for (int i:c_s) {
-                gamma[h][v][i] = IloBoolVarArray(env, n+1);
-                for (int j:c_t) {
+    IloArray<IloArray<IloArray<IloBoolVarArray> > > gamma(env, n);
+    for (int h: C) {
+        gamma[h] = IloArray<IloArray<IloBoolVarArray> >(env, nd);
+        for (int v: d) {
+            gamma[h][v] = IloArray<IloBoolVarArray>(env, n + 1);
+            for (int i: c_s) {
+                gamma[h][v][i] = IloBoolVarArray(env, n + 1);
+                for (int j: c_t) {
                     if (i != j) {
                         gamma[h][v][i][j] = IloBoolVar(env);
                     }
@@ -6962,31 +7319,31 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
         }
     }
 
-    IloArray<IloBoolVarArray> theta(env, n+1);
-    for (int h:C) {
-        theta[h] = IloBoolVarArray(env, n+1);
-        for (int v:d) {
+    IloArray<IloBoolVarArray> theta(env, n + 1);
+    for (int h: C) {
+        theta[h] = IloBoolVarArray(env, n + 1);
+        for (int v: d) {
             theta[h][v] = IloBoolVar(env);
         }
     }
-    IloArray<IloArray<IloBoolVarArray>> omega(env, n+1);
-    for (int h:C) {
+    IloArray<IloArray<IloBoolVarArray> > omega(env, n + 1);
+    for (int h: C) {
         omega[h] = IloArray<IloBoolVarArray>(env, nd);
-        for (int v:d) {
-            omega[h][v] = IloBoolVarArray(env, n+1);
-            for (int i:c_s) {
+        for (int v: d) {
+            omega[h][v] = IloBoolVarArray(env, n + 1);
+            for (int i: c_s) {
                 if (h != i) {
                     omega[h][v][i] = IloBoolVar(env);
                 }
             }
         }
     }
-    IloArray<IloArray<IloBoolVarArray>> delta(env, n+1);
-    for (int h:C) {
+    IloArray<IloArray<IloBoolVarArray> > delta(env, n + 1);
+    for (int h: C) {
         delta[h] = IloArray<IloBoolVarArray>(env, nd);
-        for (int v:d) {
-            delta[h][v] = IloBoolVarArray(env, n+1);
-            for (int j:c_t) {
+        for (int v: d) {
+            delta[h][v] = IloBoolVarArray(env, n + 1);
+            for (int j: c_t) {
                 if (h != j) {
                     delta[h][v][j] = IloBoolVar(env);
                 }
@@ -6995,43 +7352,44 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     }
 
     IloNumVarArray w(env, n);
-    for (int i:c_t) {
-        w[i] =  IloNumVar(env, 0, IloInfinity);
+    for (int i: c_t) {
+        w[i] = IloNumVar(env, 0, IloInfinity);
     }
 
-    IloArray<IloArray<IloBoolVarArray>> z(env, n+1);
-    for (int i:c_s) {
+    IloArray<IloArray<IloBoolVarArray> > z(env, n + 1);
+    for (int i: c_s) {
         z[i] = IloArray<IloBoolVarArray>(env, nd);
-        for (int v:d) {
+        for (int v: d) {
             z[i][v] = IloBoolVarArray(env, nd);
-            for (int w:d) {
+            for (int w: d) {
                 if (v != w) {
                     z[i][v][w] = IloBoolVar(env);
                 }
             }
         }
     }
-    auto s = 0; auto t = n;
+    auto s = 0;
+    auto t = n;
     // C1
     IloExpr c1s1(env), c1s2(env);
-    for (int j:c_t) {
+    for (int j: c_t) {
         c1s1 += y[s][j];
     }
-    for (int i:c_s) {
+    for (int i: c_s) {
         c1s2 += y[i][t];
     }
     model.add(c1s1 == c1s2);
     model.add(c1s1 == 1);
 
     // C2
-    for (int i:C) {
+    for (int i: C) {
         IloExpr c2s1(env), c2s2(env);
-        for (int j:c_t) {
+        for (int j: c_t) {
             if (i != j) {
                 c2s1 += y[i][j];
             }
         }
-        for (int j:c_s) {
+        for (int j: c_s) {
             if (i != j) {
                 c2s2 += y[j][i];
             }
@@ -7071,7 +7429,7 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
                 } else {
                     if (exist(C, k)) {
                         sum3 += 1;
-                        for (int v:d) {
+                        for (int v: d) {
                             sum3 -= theta[k][v];
                         }
                     }
@@ -7083,10 +7441,10 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     }
 
     // C4
-    for (int h:C) {
-        for (int v:d) {
+    for (int h: C) {
+        for (int v: d) {
             IloExpr c4(env);
-            for (int j:c_t) {
+            for (int j: c_t) {
                 c4 += gamma[h][v][s][j];
             }
             model.add(c4 == omega[h][v][s]);
@@ -7094,10 +7452,10 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     }
 
     // C5
-    for (int h:C) {
-        for (int v:d) {
+    for (int h: C) {
+        for (int v: d) {
             IloExpr c5(env);
-            for (int i:c_s) {
+            for (int i: c_s) {
                 c5 += gamma[h][v][i][t];
             }
             model.add(c5 == delta[h][v][t]);
@@ -7108,7 +7466,7 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     for (int i: C) {
         for (int h: C) {
             if (i != h) {
-                for (int v:d) {
+                for (int v: d) {
                     IloExpr c6s1(env), c6s2(env);
                     for (int j: c_t) {
                         c6s1 += gamma[h][v][i][j];
@@ -7124,29 +7482,29 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     }
 
     // C7
-    for (int j:c_t) {
+    for (int j: c_t) {
         IloExpr c7s1(env);
-        for (int v:d) {
+        for (int v: d) {
             c7s1 += x[v][s][j];
         }
         model.add(y[s][j] + c7s1 <= 1);
     }
 
     // C8
-    for (int i:c_s) {
+    for (int i: c_s) {
         IloExpr c8s1(env);
-        for (int v:d) {
+        for (int v: d) {
             c8s1 += x[v][i][t];
         }
         model.add(y[i][t] + c8s1 <= 1);
     }
 
     // C9
-    for (int i:C) {
-        for (int j:C) {
+    for (int i: C) {
+        for (int j: C) {
             if (i != j) {
                 IloExpr c9s1(env);
-                for (int v:d) {
+                for (int v: d) {
                     c9s1 += x[v][i][j] + x[v][j][i];
                 }
                 model.add(y[i][j] + c9s1 <= 1);
@@ -7155,30 +7513,29 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     }
 
     // C10
-    for (int h:C) {
+    for (int h: C) {
         IloExpr c10s1(env), c10s2(env);
-        for (int j:c_t) {
+        for (int j: c_t) {
             if (h != j) {
                 c10s1 += y[h][j];
             }
         }
-        for (int v:d) {
+        for (int v: d) {
             c10s2 += theta[h][v];
         }
         model.add(c10s1 + c10s2 == 1);
     }
 
     // C11
-    for (int i:c_s) {
-        for (int j:c_t) {
+    for (int i: c_s) {
+        for (int j: c_t) {
             if (i != j) {
                 IloExpr c11s1(env);
-                for (int h:C) {
+                for (int h: C) {
                     if (h != i && h != j) {
-                        for (int v:d) {
+                        for (int v: d) {
                             c11s1 += gamma[h][v][i][j];
                         }
-
                     }
                 }
                 model.add(c11s1 <= y[i][j]);
@@ -7187,15 +7544,15 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     }
 
     // C12
-    for (int h:C) {
-        for (int v:d) {
+    for (int h: C) {
+        for (int v: d) {
             IloExpr c12s1(env), c12s2(env);
-            for (int i:c_s) {
+            for (int i: c_s) {
                 if (i != h) {
                     c12s1 += omega[h][v][i];
                 }
             }
-            for (int j:c_t) {
+            for (int j: c_t) {
                 if (j != h) {
                     c12s2 += delta[h][v][j];
                 }
@@ -7206,10 +7563,10 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     }
 
     // C13
-    for (int i:c_s) {
-        for (int j:c_t) {
+    for (int i: c_s) {
+        for (int j: c_t) {
             if (i != j) {
-                for (int v:d) {
+                for (int v: d) {
                     model.add(x[v][i][j] <= theta[i][v] + theta[j][v]);
                 }
             }
@@ -7217,10 +7574,10 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     }
 
     // C14
-    for (int i:c_s) {
-        for (int j:c_t) {
+    for (int i: c_s) {
+        for (int j: c_t) {
             if (i != j) {
-                for (int v:d) {
+                for (int v: d) {
                     model.add(x[v][i][j] <= omega[j][v][i] + delta[i][v][j]);
                 }
             }
@@ -7228,15 +7585,15 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     }
 
     // C15
-    for (int i:C) {
-        for (int v:d) {
+    for (int i: C) {
+        for (int v: d) {
             IloExpr c15s1(env), c15s2(env);
-            for (int j:c_t) {
+            for (int j: c_t) {
                 if (i != j) {
                     c15s1 += x[v][i][j];
                 }
             }
-            for (int h:C) {
+            for (int h: C) {
                 if (h != i) {
                     c15s2 += omega[h][v][i];
                 }
@@ -7248,15 +7605,15 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     }
 
     // C16
-    for (int j:C) {
-        for (int v:d) {
+    for (int j: C) {
+        for (int v: d) {
             IloExpr c16s1(env), c16s2(env);
-            for (int i:c_s) {
+            for (int i: c_s) {
                 if (i != j) {
                     c16s1 += x[v][i][j];
                 }
             }
-            for (int h:C) {
+            for (int h: C) {
                 if (h != j) {
                     c16s2 += delta[h][v][j];
                 }
@@ -7268,11 +7625,11 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
     }
 
     // C18
-    for (int h:C) {
-        for (int v:d) {
+    for (int h: C) {
+        for (int v: d) {
             IloExpr c17(env);
-            for (int i:c_s) {
-                for (int j:c_t) {
+            for (int i: c_s) {
+                for (int j: c_t) {
                     if (i != j) {
                         c17 += gamma[h][v][i][j] * tau[i][j];
                     }
@@ -7280,12 +7637,12 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
             }
             model.add(c17 <= (dtl - sr) * theta[h][v]);
             IloExpr c18s1(env), c18s2(env);
-            for (int i:c_s) {
+            for (int i: c_s) {
                 if (i != h) {
                     c18s1 += omega[h][v][i] * tau_prime[i][h];
                 }
             }
-            for (int j:c_t) {
+            for (int j: c_t) {
                 if (j != h) {
                     c18s2 += delta[h][v][j] * tau_prime[h][j];
                 }
@@ -7296,9 +7653,9 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
 
     // Waiting time constraint
     auto M = 1e5;
-    for (int h:instance->c_prime) {
-        for (int v:d) {
-            for (int j:c_t) {
+    for (int h: instance->c_prime) {
+        for (int v: d) {
+            for (int j: c_t) {
                 if (h != j) {
                     IloExpr sum_d_launch(env), sum_d_rend(env), sum_truck(env);
                     // model.add(w[j] <= )
@@ -7306,4 +7663,304 @@ Result Solver::mFSTSPSolve(int n_thread, int e) {
             }
         }
     }
+}
+
+struct MultivisitTuple {
+    int start_node;
+    int end_node;
+    std::vector<int> visit_seq;
+    double trip_l;
+};
+
+Result Solver::StageBasedMVD(int n_thread, int e, int L) {
+    auto tau = instance->tau;
+    auto tau_prime = instance->tau_prime;
+    auto dtl = e;
+    auto n = instance->num_node;
+    std::vector<int> C;
+    for (int i = 0; i < n + 1; i++) {
+        if (i != 0 && i != n) {
+            C.push_back(i);
+        }
+    }
+
+    IloEnv env;
+    IloModel model(env);
+    IloCplex cplex(model);
+    cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);
+
+    auto O = 0;
+    auto D = n;
+    auto node_max_stage = n + 1;
+    auto arc_max_stage = node_max_stage - 1;
+
+    // get set D = {i, Y, j}: {i \in c_s, j \in c_t, Y subset of C', |Y| <= L}
+    std::vector<MultivisitTuple> mt;
+    auto ss = generateSubsets(instance->c_prime, L);
+    for (auto &set: ss) {
+        setPrint(set);
+        for (int i = 0; i < D; i++) {
+            for (int j = 1; j <= D; j++) {
+                if (i != j) {
+                    auto p = shortestPath(i, j, set, tau_prime);
+                    if (p.first > dtl - sr) {
+                        continue;
+                    } else {
+                        mt.push_back({i, j, p.second, p.first});
+                    }
+                }
+            }
+        }
+    }
+    std::cout << "mt size: " << mt.size() << std::endl;
+    for (auto &m: mt) {
+        std::cout << "Set print:" << std::endl;
+        std::cout << "Start and end vertex: " << m.start_node << ", " << m.end_node << std::endl;
+        std::cout << "Visit sequence: ";
+        setPrint(m.visit_seq);
+        std::cout << "Total distance: " << m.trip_l << std::endl;
+    }
+
+    // Khai bao bien
+    //
+    // X^i_k (binary variable) và nhận giá trị một tương ứng với đỉnh thứ k của
+    //đường đi của vehicle là i; k \in 1..n;
+    //
+    IloArray<IloBoolVarArray> X(env, node_max_stage + 1);
+    for (int k = 1; k <= node_max_stage; k++) {
+        X[k] = IloBoolVarArray(env, D + 1);
+        for (int i = 0; i <= D; i++) {
+            X[k][i] = IloBoolVar(env);
+            auto v_name = "X_" + std::to_string(k) + "_" + std::to_string(i);
+            //std::cout << v_name << std::endl;
+            X[k][i].setName(v_name.c_str());
+            if (k > 1 && i == 0) {
+                model.add(X[k][0] == 0);
+            }
+        }
+    }
+
+    model.add(X[1][0] == 1).setName("start depot is the first node");
+    model.add(X[1][D] == 0).setName("ending depot cannot be the first node");
+
+    for (int k = 1; k <= node_max_stage; k++) {
+        IloExpr sum(env);
+        for (int i = 0; i <= D; i++)
+            sum += X[k][i];
+        model.add(sum <= 1).setName(("C20_at_most_one_customer_at_stage_" + std::to_string(k)).c_str());
+    }
+
+    IloExpr arrival_depot(env);
+    for (int k = 1; k <= node_max_stage; k++) {
+        arrival_depot += X[k][D];
+    }
+    model.add(arrival_depot == 1).setName("C21_arrival_depot_once");
+
+    // x^k_(ij) (binary variable) và nhận giá trị một nếu Xk
+    // mô ta cạnh nối 2 đỉnh liên tiếp trên đường đi.
+    IloArray<IloArray<IloBoolVarArray> > x(env, arc_max_stage + 1);
+    for (int k = 1; k <= arc_max_stage; k++) {
+        x[k] = IloArray<IloBoolVarArray>(env, D);
+        for (int i = 0; i < D; i++) {
+            x[k][i] = IloBoolVarArray(env, D + 1);
+            for (int j = 1; j <= D; j++)
+                if (i != j) {
+                    x[k][i][j] = IloBoolVar(env);
+                    auto v_name = "x_" + std::to_string(k) + "_" + std::to_string(i) + "_" + std::to_string(j);
+                    x[k][i][j].setName(v_name.c_str());
+                }
+        }
+    }
+
+
+    //// phi^h equals to 1 if customer h is served by the drone
+    IloBoolVarArray phi(env, n);
+    for (int h: C) {
+        phi[h] = IloBoolVar(env);
+        auto v_name = "phi_" + std::to_string(h);
+        phi[h].setName(v_name.c_str());
+    }
+
+    for (int heavy: instance->heavy) {
+        if (heavy != D + 1) {
+            model.add(phi[heavy] == 0);
+        }
+    }
+
+    IloArray<IloArray<IloBoolVarArray> > Y(env, node_max_stage + 1), W(env, node_max_stage + 1);
+    for (int k = 1; k <= node_max_stage; k++) {
+        Y[k] = IloArray<IloBoolVarArray>(env, D + 1);
+        W[k] = IloArray<IloBoolVarArray>(env, D + 1);
+
+        for (int i = 0; i <= D; i++) {
+            Y[k][i] = IloBoolVarArray(env, C.size() + 1);
+            W[k][i] = IloBoolVarArray(env, C.size() + 1);
+            for (int h: C)
+                if (i != h) {
+                    Y[k][i][h] = IloBoolVar(env);
+                    Y[k][i][h].setName(("Y_" + std::to_string(k) + "_"
+                                        + std::to_string(i) + "_" + std::to_string(h)).c_str());
+
+                    W[k][i][h] = IloBoolVar(env);
+                    W[k][i][h].setName(("W_" + std::to_string(k) + "_"
+                                        + std::to_string(i) + "_" + std::to_string(h)).c_str());
+
+                    if (i == 0 && k > 1) {
+                        model.add(Y[k][i][h] == 0);
+                    }
+                    if (i == D && k == 1) {
+                        model.add(W[k][i][h] == 0);
+                    }
+                    if (tau_prime[i][h] > dtl - sr) {
+                        model.add(Y[k][i][h] == 0);
+                    }
+                    if (tau_prime[h][i] > dtl - sr) {
+                        model.add(W[k][i][h] == 0);
+                    }
+                }
+        }
+    }
+
+
+    //// C17 - $X^k_i \geq \sum_h X^k_{ih}$ (C17) - chỉ bay drone ở nơi mà xe ở đó
+    for (int k = 1; k <= node_max_stage; k++) {
+        for (int i = 0; i <= D; i++) {
+            IloExpr expr(env);
+            for (int h: C)
+                if (h != i)
+                    if (tau_prime[i][h] <= dtl - sr) {
+                        expr += Y[k][i][h];
+                    }
+            model.add(expr <= X[k][i]).setName(("C17_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
+        }
+    }
+
+    // $X^k_i \geq \sum_h Y^k_{ih}$ (C17p) : chỉ bay drone tới nơi mà xe ở đó
+    for (int k = 1; k <= node_max_stage; k++) {
+        for (int i = 0; i <= D; i++) {
+            IloExpr expr(env);
+            for (int h: C)
+                if (h != i)
+                    if (tau_prime[h][i] <= dtl - sr) {
+                        expr += W[k][i][h];
+                    }
+            model.add(expr <= X[k][i]).setName(("C17p_" + std::to_string(k) + "_" + std::to_string(i)).c_str());
+        }
+    }
+
+    // $\sum_{i} X^k_{ih}\tau^D_{ih} + \sum_{i} Y^{k'}_{ih}\tau^D_{hi} \leq D_d$
+    //- drone duration constraint cho mỗi $h$ (C19)
+    for (int h: C) {
+        IloExpr expr(env);
+
+        for (int k = 1; k <= node_max_stage; k++) {
+            for (int i = 0; i <= D; i++) {
+                if (i != h && i != D && tau_prime[i][h] <= dtl - sr)
+                    expr += Y[k][i][h] * tau_prime[i][h];
+
+                if (i != h && i != 0 && tau_prime[h][i] <= dtl - sr)
+                    expr += W[k][i][h] * tau_prime[h][i];
+            }
+        }
+
+        model.add(expr <= (dtl - sr) * phi[h]).setName(("C19_" + std::to_string(h)).c_str());
+    }
+    //exit(0);
+
+    //// aux var z_{k, k_p}: sortie launch from k and rendezvous at k_p.
+    IloArray<IloBoolVarArray> z(env, node_max_stage);
+    for (int k = 1; k <= node_max_stage - 1; k++) {
+        z[k] = IloBoolVarArray(env, node_max_stage + 1);
+        for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
+            {
+                z[k][k_p] = IloBoolVar(env);
+                auto v_name = "z_" + std::to_string(k) + "_" + std::to_string(k_p);
+                z[k][k_p].setName(v_name.c_str());
+            }
+        }
+    }
+
+    //// aux var Z_{k, k_p, h}: sortie launch from k and rendezvous at k_p.
+    IloArray<IloArray<IloBoolVarArray> > Z(env, node_max_stage);
+    for (int h: C) {
+        Z[h] = IloArray<IloBoolVarArray>(env, node_max_stage + 1);
+        for (int k = 1; k <= node_max_stage - 1; k++) {
+            Z[h][k] = IloBoolVarArray(env, node_max_stage + 1);
+            for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
+                {
+                    Z[h][k][k_p] = IloBoolVar(env);
+                    auto v_name = "Z_" + std::to_string(h) + "_" + std::to_string(k) + "_" + std::to_string(k_p);
+                    Z[h][k][k_p].setName(v_name.c_str());
+                }
+            }
+        }
+    }
+
+    // $Z_{kk'} = \sum_{h}Z^h_{kk'}$: mỗi cặp (k,k') chỉ phục vụ tối đa một khách hàng (C22)
+    for (int k = 1; k < node_max_stage; k++)
+        for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
+            IloExpr expr(env);
+            for (int h: C) {
+                expr += Z[h][k][k_p];
+            }
+            model.add(expr == z[k][k_p]).setName(("C22_" + std::to_string(k) + "_" + std::to_string(k_p)).c_str());
+        }
+
+
+    //C20:$\sum_{k'>k}Z_{kk'} = \sum_{i,h}Y^k_{ih}$ : với mỗi $k$,
+    //ràng buộc liên kết drone đi ra từ stage $k$ và đoạn mà oto di chuyển không có drone. (C20)
+
+    for (int h: C) {
+        for (int k = 1; k <= node_max_stage - 1; k++) {
+            IloExpr expr(env);
+            for (int k_p = k + 1; k_p <= node_max_stage; k_p++) {
+                {
+                    expr += Z[h][k][k_p];
+                }
+            }
+
+            for (int i = 0; i < D; i++) {
+                if (i != h && tau_prime[i][h] <= dtl - sr) {
+                    expr -= Y[k][i][h];
+                }
+            }
+            model.add(expr == 0).setName(("C20_" + std::to_string(k) + "_" + std::to_string(h)).c_str());
+        }
+    }
+
+    for (int h: C) {
+        for (int k_p = 2; k_p <= node_max_stage; k_p++) {
+            IloExpr expr(env);
+            for (int k = 1; k < k_p; k++) {
+                {
+                    expr += Z[h][k][k_p];
+                }
+            }
+
+            for (int i = 1; i <= D; i++) {
+                if (i != h && tau_prime[h][i] <= dtl - sr) {
+                    expr -= W[k_p][i][h];
+                }
+            }
+            model.add(expr == 0).setName(("C20p_" + std::to_string(k_p)
+                                          + "_" + std::to_string(h)).c_str());
+        }
+    }
+
+    // arrival\departure variables a and d.
+    IloNumVarArray a(env, node_max_stage + 1);
+    IloNumVarArray d(env, node_max_stage + 1);
+    for (int k = 1; k <= node_max_stage; k++) {
+        a[k] = IloNumVar(env);
+        auto v_name = "a_" + std::to_string(k);
+        a[k].setName(v_name.c_str());
+        d[k] = IloNumVar(env);
+        v_name = "d_" + std::to_string(k);
+        d[k].setName(v_name.c_str());
+        model.add(d[k] >= a[k]).setName(("C13_" + std::to_string(k)).c_str());
+    }
+
+    model.add(a[1] == 0).setName("arrival to depot at time 0");
+    model.add(d[1] == 0).setName("depart from depot at time 0");
+    return Result();
 }
