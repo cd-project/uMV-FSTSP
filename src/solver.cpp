@@ -1067,11 +1067,11 @@ Result Solver::mvdSolverWithLR(int n_thread, int e, bool use_tsp_as_warmstart) c
         for (int i:C) {
             if (i != h) {
                 for (int k = 1; k < K; k++) {
-                    for (int kp = k+1; kp <= K; kp++) {
+                    for (int kp = k+1; kp < K; kp++) {
                         model.add(Y[k][i][h] + W[kp][i][h] <= phi[h]);
-                        count_cons++;
                     }
                 }
+                // SLOW VARIANT.
             }
         }
     }

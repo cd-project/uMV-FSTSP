@@ -1,4 +1,0 @@
-Instance name: /home/cuong/CLionProjects/uMV-FSTSP/rand_generated_instances_3p_settings/test
-Write arg val: 1
-terminate called after throwing an instance of 'std::invalid_argument'
-  what():  stoi

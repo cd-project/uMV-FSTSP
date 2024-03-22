@@ -29,194 +29,253 @@ Printing tau_prime:
 26.4926 19.9852 19.8978 21.1698 15.665 12.1877 15.2078 15.8937 15.5943 0 5.85535 26.4926 
 27.7894 21.5573 16.054 18.7772 17.3276 12.7 16.7727 21.1883 20.44 5.85535 0 27.7894 
 0 0 0 0 0 0 0 0 0 0 0 0 
----------------------------------------------
-Calculate max stage gap for sortie.... 
-Stage gap calculation consumes too much memory. No constraint was added.
----------------------------------------------
-Warning:  Output names have been modified due to duplicate names or characters invalid in LP format.
 Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
-CPXPARAM_TimeLimit                               200
 CPXPARAM_MIP_Tolerances_Integrality              0
-Tried aggregator 2 times.
-MIP Presolve eliminated 1302 rows and 1730 columns.
-MIP Presolve modified 2037 coefficients.
-Aggregator did 42 substitutions.
-Reduced MIP has 1031 rows, 3004 columns, and 27856 nonzeros.
-Reduced MIP has 2983 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.03 sec. (57.07 ticks)
-Probing fixed 302 vars, tightened 0 bounds.
-Probing changed sense of 4 constraints.
-Probing time = 0.04 sec. (108.48 ticks)
-Cover probing fixed 0 vars, tightened 43 bounds.
-Tried aggregator 2 times.
-MIP Presolve eliminated 69 rows and 302 columns.
-MIP Presolve modified 176 coefficients.
-Aggregator did 7 substitutions.
-Reduced MIP has 955 rows, 2695 columns, and 22584 nonzeros.
-Reduced MIP has 2674 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.01 sec. (19.04 ticks)
-Probing time = 0.00 sec. (5.72 ticks)
-Tried aggregator 2 times.
+Tried aggregator 1 time.
+MIP Presolve eliminated 1 rows and 12 columns.
+MIP Presolve modified 20 coefficients.
+Reduced MIP has 122 rows, 120 columns, and 510 nonzeros.
+Reduced MIP has 110 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (0.27 ticks)
+Found incumbent of value 591.728900 after 0.00 sec. (0.75 ticks)
+Probing time = 0.00 sec. (0.26 ticks)
+Cover probing fixed 0 vars, tightened 10 bounds.
+Tried aggregator 1 time.
 Detecting symmetries...
-MIP Presolve eliminated 11 rows and 0 columns.
-MIP Presolve modified 6 coefficients.
-Aggregator did 2 substitutions.
-Reduced MIP has 942 rows, 2693 columns, and 22569 nonzeros.
-Reduced MIP has 2672 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.01 sec. (14.29 ticks)
-Probing time = 0.01 sec. (5.61 ticks)
-Clique table members: 10790.
+MIP Presolve eliminated 10 rows and 0 columns.
+MIP Presolve modified 180 coefficients.
+Reduced MIP has 112 rows, 120 columns, and 490 nonzeros.
+Reduced MIP has 110 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (0.35 ticks)
+Probing time = 0.00 sec. (0.26 ticks)
+Clique table members: 67.
 MIP emphasis: balance optimality and feasibility.
 MIP search method: dynamic search.
 Parallel mode: deterministic, using up to 20 threads.
-Root relaxation solution time = 0.09 sec. (161.95 ticks)
+Root relaxation solution time = 0.00 sec. (0.21 ticks)
 
         Nodes                                         Cuts/
    Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
 
-      0     0      153.3815   337                    153.3815       36         
-      0     0      173.1177   202                    Cuts: 49     1980         
-      0     0      183.4899   311                    Cuts: 48     3145         
-      0     0      188.1414   311                    Cuts: 16     4635         
-      0     0      192.1321   329                    Cuts: 12     5579         
-      0     0      195.3104   314                     Cuts: 7     6825         
+*     0+    0                          591.7289        0.0000           100.00%
+      0     0      199.3145    21      591.7289      199.3145       26   66.32%
+*     0+    0                          341.7162      199.3145            41.67%
+      0     0      283.4806    22      341.7162      Cuts: 43       49   17.04%
+*     0+    0                          299.7942      283.4806             5.44%
+      0     0      283.4806     6      299.7942      Cuts: 22       64    5.44%
+*     0+    0                          289.2017      283.4806             1.98%
+      0     0        cutoff            289.2017      289.2017       64    0.00%
+Elapsed time = 0.17 sec. (5.67 ticks, tree = 0.01 MB, solutions = 4)
+
+Clique cuts applied:  4
+Implied bound cuts applied:  1
+Mixed integer rounding cuts applied:  2
+Multi commodity flow cuts applied:  2
+Lift and project cuts applied:  2
+Gomory fractional cuts applied:  3
+
+Root node processing (before b&c):
+  Real time             =    0.17 sec. (5.68 ticks)
+Parallel b&c, 20 threads:
+  Real time             =    0.00 sec. (0.00 ticks)
+  Sync time (average)   =    0.00 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    0.17 sec. (5.68 ticks)
+
+TSP solution for this instance: 0 1 4 6 5 3 2 10 9 7 8 11 
+12
+Warmstart X[1][0] == 1
+Warmstart X[2][1] == 1
+Warmstart X[3][4] == 1
+Warmstart X[4][6] == 1
+Warmstart X[5][5] == 1
+Warmstart X[6][3] == 1
+Warmstart X[7][2] == 1
+Warmstart X[8][10] == 1
+Warmstart X[9][9] == 1
+Warmstart X[10][7] == 1
+Warmstart X[11][8] == 1
+---------------------------------------------
+Calculate max stage gap for sortie.... 
+Stage gap calculation consumes too much memory. No constraint was added.
+---------------------------------------------
+Num constraint added = 5940
+Warning:  Output names have been modified due to duplicate names or characters invalid in LP format.
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+CPXPARAM_TimeLimit                               200
+CPXPARAM_MIP_Tolerances_Integrality              0
+1 of 1 MIP starts provided solutions.
+MIP start 'm1' defined initial solution with objective 289.2017.
+Tried aggregator 2 times.
+MIP Presolve eliminated 6877 rows and 1730 columns.
+MIP Presolve modified 2458 coefficients.
+Aggregator did 42 substitutions.
+Reduced MIP has 1304 rows, 3004 columns, and 31620 nonzeros.
+Reduced MIP has 2983 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.04 sec. (118.16 ticks)
+Probing fixed 300 vars, tightened 0 bounds.
+Probing changed sense of 4 constraints.
+Probing time = 0.04 sec. (107.37 ticks)
+Cover probing fixed 0 vars, tightened 61 bounds.
+Tried aggregator 2 times.
+MIP Presolve eliminated 69 rows and 300 columns.
+MIP Presolve modified 336 coefficients.
+Aggregator did 13 substitutions.
+Reduced MIP has 1222 rows, 2691 columns, and 26155 nonzeros.
+Reduced MIP has 2670 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (37.75 ticks)
+Probing time = 0.00 sec. (5.67 ticks)
+Tried aggregator 1 time.
 Detecting symmetries...
-      0     0      195.9393   359                    Cuts: 10     7600         
-      0     0      196.8170   342                     Cuts: 9     7887         
-      0     0      196.8960   349                 ZeroHalf: 2     7971         
-      0     0      197.5807   347                     Cuts: 7     8207         
-      0     0      197.6424   349                     Cuts: 5     8316         
-*     0+    0                          339.4501      197.6424            41.78%
-*     0+    0                          302.5238      197.6424            34.67%
-*     0+    0                          298.0953      197.6424            33.70%
-      0     0  -1.00000e+75     0      298.0953      197.6424     8316   33.70%
+Reduced MIP has 1222 rows, 2691 columns, and 26155 nonzeros.
+Reduced MIP has 2670 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.01 sec. (17.13 ticks)
+Probing time = 0.00 sec. (5.65 ticks)
+Clique table members: 10867.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: deterministic, using up to 20 threads.
+Root relaxation solution time = 0.10 sec. (221.51 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                          289.2017       40.7810            85.90%
+      0     0      153.7129   342      289.2017      153.7129       33   46.85%
+      0     0      177.2532   309      289.2017      Cuts: 45      641   38.71%
+      0     0      188.9830   270      289.2017      Cuts: 35     2127   34.65%
+      0     0      189.7865   260      289.2017       Cuts: 6     2429   34.38%
+      0     0      190.2853   277      289.2017       Cuts: 7     2807   33.89%
+      0     0      199.4703   324      289.2017      Cuts: 16     4350   31.03%
 Detecting symmetries...
-      0     2      197.6424   349      298.0953      197.6424     8316   33.70%
-Elapsed time = 1.84 sec. (2893.28 ticks, tree = 0.02 MB, solutions = 3)
-*     1+    1                          287.4093      197.6725            31.22%
-      5     3      200.0221   333      287.4093      199.5723    12361   30.56%
-     24    14      221.0718   208      287.4093      203.0400    20464   29.36%
-    321   122      271.2190   106      287.4093      203.7546    60456   29.11%
-    579   280      281.0679   140      287.4093      204.7156   116084   28.77%
-    630   326      286.6750   104      287.4093      204.7156   159962   28.77%
-    891   407      240.7370   127      287.4093      204.7156   192681   28.77%
-   1252   625      225.3354   211      287.4093      204.7156   264492   28.77%
-   1538   735        cutoff            287.4093      205.4723   306845   28.51%
-   1605   934      264.6698   163      287.4093      205.9540   379430   28.34%
-   2881  1369      244.5539   197      287.4093      209.5623   556099   27.09%
-Elapsed time = 4.86 sec. (6045.35 ticks, tree = 3.33 MB, solutions = 4)
-   4018  2065      266.1753   159      287.4093      228.6129   756537   20.46%
-   5141  2847      269.3307   153      287.4093      232.1490   973253   19.23%
-   7085  3074      264.0834   200      287.4093      235.5156  1151485   18.06%
+      0     0      200.2340   291      289.2017       Cuts: 4     4497   30.76%
+      0     0      200.5045   338      289.2017   ZeroHalf: 1     4600   30.67%
+      0     0      200.6149   341      289.2017       Cuts: 4     4710   30.63%
+Detecting symmetries...
+      0     2      200.6149   336      289.2017      200.6149     4710   30.63%
+Elapsed time = 1.40 sec. (2370.42 ticks, tree = 0.02 MB, solutions = 1)
+      6     6      205.2285   252      289.2017      201.4950     7157   30.33%
+     46    32      226.7549   219      289.2017      207.8482    22209   28.13%
+    162   114        cutoff            289.2017      208.9726    73846   27.74%
+    199   145        cutoff            289.2017      208.9726   105405   27.74%
+    412   227      235.6502   187      289.2017      208.9726   154942   27.74%
+    654   316        cutoff            289.2017      208.9726   194350   27.74%
+    900   445      267.5518   109      289.2017      208.9726   232265   27.74%
+   1005   510      242.7297   248      289.2017      208.9726   258618   27.74%
+   1229   605      243.3136   201      289.2017      208.9726   297912   27.74%
+*  1873+ 1040                          281.5180      225.0696            20.05%
+   1984  1042      263.9531   128      281.5180      225.0696   461857   20.05%
+Elapsed time = 4.41 sec. (5493.16 ticks, tree = 3.05 MB, solutions = 2)
+   3408  1627      250.3410   164      281.5180      239.1452   663036   15.05%
+   4387  2089      258.4929   213      281.5180      243.9759   866874   13.34%
+   5653  2601        cutoff            281.5180      248.5556  1089375   11.71%
+   6944  2810      280.5072   142      281.5180      252.6873  1263153   10.24%
 
 Performing restart 1
 
 Repeating presolve.
-Tried aggregator 2 times.
-MIP Presolve eliminated 17 rows and 26 columns.
-MIP Presolve modified 7207 coefficients.
-Aggregator did 2 substitutions.
-Reduced MIP has 923 rows, 2665 columns, and 19006 nonzeros.
-Reduced MIP has 2644 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.02 sec. (29.82 ticks)
-Tried aggregator 2 times.
-MIP Presolve eliminated 3 rows and 2 columns.
-MIP Presolve modified 4 coefficients.
-Aggregator did 2 substitutions.
-Reduced MIP has 918 rows, 2661 columns, and 18983 nonzeros.
-Reduced MIP has 2640 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.01 sec. (12.75 ticks)
-Represolve time = 0.16 sec. (131.75 ticks)
-   7198     0      198.2126   374      287.4093      Cuts: 22  1254419   17.52%
-   7198     0      198.2490   393      287.4093  LiftProj: 25  1254639   17.52%
-   7198     0      198.9047   385      287.4093      Cuts: 41  1255180   17.52%
-   7198     0      199.3569   420      287.4093      Cuts: 28  1255721   17.52%
-   7198     0      199.4434   423      287.4093      Cuts: 22  1255972   17.52%
-   7198     2      199.4434   423      287.4093      237.0604  1255972   17.52%
-   7199     2      258.6534   160      287.4093      237.0604  1257903   17.52%
-   7202     3      199.4592   422      287.4093      237.0604  1258108   17.52%
-   7242     6      256.9538   106      287.4093      237.0604  1263101   17.52%
-   7339    15      280.0750   208      287.4093      237.0604  1277961   17.52%
-   8064    16      283.3277    78      287.4093      237.0604  1330588   17.52%
-*  8069    11      integral     0      281.5180      237.0604  1335670   15.79%
-   8107     8      200.5447   347      281.5180      237.0604  1349841   15.79%
-Elapsed time = 14.27 sec. (20606.39 ticks, tree = 0.02 MB, solutions = 5)
-   8188     8        cutoff            281.5180      237.0604  1370493   15.79%
-   8918   146        cutoff            281.5180      237.0604  1435735   15.79%
-   9476   219      245.1564   174      281.5180      237.0604  1487751   15.79%
-  11266   936      211.3133   328      281.5180      237.0604  1647312   15.79%
-* 11555  1128      integral     0      275.1733      237.0604  1771503   13.85%
-  11961   990      273.2730   169      275.1733      237.0604  1798206   13.85%
-* 13244   109      integral     0      274.6030      237.0604  1905205   13.67%
-  13366    22      255.6582   248      274.6030      237.0604  1935024   13.67%
-  13537    21      224.7423   228      274.6030      237.0604  1965416   13.67%
-  13926    35      263.4622   191      274.6030      237.0604  2015430   13.67%
-  13956    14      242.8173   234      274.6030      242.0125  2033299   11.87%
+Tried aggregator 1 time.
+MIP Presolve eliminated 10 rows and 53 columns.
+MIP Presolve modified 6850 coefficients.
+Reduced MIP has 1212 rows, 2638 columns, and 22481 nonzeros.
+Reduced MIP has 2617 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (28.63 ticks)
+Tried aggregator 1 time.
+MIP Presolve eliminated 4 rows and 4 columns.
+Reduced MIP has 1208 rows, 2634 columns, and 22405 nonzeros.
+Reduced MIP has 2613 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.01 sec. (16.83 ticks)
+Represolve time = 0.08 sec. (130.13 ticks)
+   7177     0      201.9974   344      281.5180      Cuts: 20  1360979    9.85%
+   7177     0      202.6604   326      281.5180      Cuts: 12  1362465    9.85%
+   7177     0      203.1299   330      281.5180       Cuts: 8  1363039    9.85%
+   7177     0      203.2702   300      281.5180       Cuts: 5  1363205    9.85%
+*  7177+    0                          281.5180      253.7873             9.85%
+   7177     0      203.2989   326      281.5180       Cuts: 3  1363346    9.85%
+   7177     0      203.3601   332      281.5180   ZeroHalf: 1  1363474    9.85%
+   7177     0      203.4252   355      281.5180   ZeroHalf: 1  1363589    9.85%
+   7177     2      203.4252   343      281.5180      253.7873  1363594    9.85%
+   7180     3        cutoff            281.5180      253.7873  1365771    9.85%
+   7191     5      259.8510   122      281.5180      253.7873  1367574    9.85%
+   7241    16        cutoff            281.5180      253.7873  1390995    9.85%
+*  7356    25      integral     0      274.6030      253.7873  1429814    7.58%
+   7439    17      255.1141   132      274.6030      253.7873  1452528    7.58%
+   7540    12      237.5409   242      274.6030      253.7873  1489044    7.58%
+Elapsed time = 15.23 sec. (19563.29 ticks, tree = 0.02 MB, solutions = 4)
+   7880    14        cutoff            274.6030      253.7873  1511585    7.58%
+   8492    27      207.0550   311      274.6030      253.7873  1598512    7.58%
+   8652    20        cutoff            274.6030      253.7873  1654040    7.58%
+   9111    37      237.8108   184      274.6030      253.7873  1693528    7.58%
+   9362    11        cutoff            274.6030      253.7873  1780319    7.58%
+   9429     4        cutoff            274.6030      253.7873  1802152    7.58%
+   9586    54        cutoff            274.6030      253.7873  1832908    7.58%
+   9629    11      252.7490   249      274.6030      253.7873  1875435    7.58%
+   9803    35      268.5265   207      274.6030      253.7873  1885244    7.58%
 
-GUB cover cuts applied:  2
-Clique cuts applied:  10
+GUB cover cuts applied:  3
 Cover cuts applied:  1
-Mixed integer rounding cuts applied:  2
-Zero-half cuts applied:  38
-Lift and project cuts applied:  8
-Gomory fractional cuts applied:  4
+Mixed integer rounding cuts applied:  5
+Zero-half cuts applied:  26
+Lift and project cuts applied:  6
+Gomory fractional cuts applied:  5
 
 Root node processing (before b&c):
-  Real time             =    1.75 sec. (2837.97 ticks)
+  Real time             =    1.37 sec. (2332.42 ticks)
 Parallel b&c, 20 threads:
-  Real time             =   20.10 sec. (27300.24 ticks)
-  Sync time (average)   =    8.53 sec.
+  Real time             =   20.05 sec. (26715.77 ticks)
+  Sync time (average)   =    8.87 sec.
   Wait time (average)   =    0.01 sec.
                           ------------
-Total (root+branch&cut) =   21.85 sec. (30138.21 ticks)
+Total (root+branch&cut) =   21.42 sec. (29048.19 ticks)
 Feasible solution found!
 Truck nodes:
 Stage 1 at customer 0 with arrival time is: 0
 Stage 1 at customer 0 with departure time is: 0
-Stage 2 at customer 3 with arrival time is: 47.2252
-Stage 2 at customer 3 with departure time is: 47.2252
-Stage 3 at customer 2 with arrival time is: 66.8885
-Stage 3 at customer 2 with departure time is: 66.8885
-Stage 4 at customer 10 with arrival time is: 110.782
-Stage 4 at customer 10 with departure time is: 110.782
-Stage 5 at customer 9 with arrival time is: 132.529
-Stage 5 at customer 9 with departure time is: 132.529
-Stage 6 at customer 7 with arrival time is: 178.814
-Stage 6 at customer 7 with departure time is: 178.814
-Stage 7 at customer 8 with arrival time is: 187.115
-Stage 7 at customer 8 with departure time is: 187.115
-Stage 8 at customer 6 with arrival time is: 230.001
-Stage 8 at customer 6 with departure time is: 230.001
-Stage 9 at customer 4 with arrival time is: 231.822
-Stage 9 at customer 4 with departure time is: 232.822
-Stage 10 at customer 1 with arrival time is: 249.163
-Stage 10 at customer 1 with departure time is: 250.163
+Stage 2 at customer 1 with arrival time is: 24.4397
+Stage 2 at customer 1 with departure time is: 25.4397
+Stage 3 at customer 4 with arrival time is: 41.781
+Stage 3 at customer 4 with departure time is: 42.781
+Stage 4 at customer 6 with arrival time is: 44.6022
+Stage 4 at customer 6 with departure time is: 44.6022
+Stage 5 at customer 8 with arrival time is: 87.4882
+Stage 5 at customer 8 with departure time is: 87.4882
+Stage 6 at customer 7 with arrival time is: 95.7893
+Stage 6 at customer 7 with departure time is: 95.7893
+Stage 7 at customer 9 with arrival time is: 142.074
+Stage 7 at customer 9 with departure time is: 142.074
+Stage 8 at customer 10 with arrival time is: 163.821
+Stage 8 at customer 10 with departure time is: 163.821
+Stage 9 at customer 2 with arrival time is: 207.715
+Stage 9 at customer 2 with departure time is: 207.715
+Stage 10 at customer 3 with arrival time is: 227.378
+Stage 10 at customer 3 with departure time is: 227.378
 Stage 11 at customer 11 with arrival time is: 274.603
 Stage 11 at customer 11 with departure time is: 274.603
 Truck arcs:
-Arc 1 connecting 0 and 3 with cost 47.2252 
-Arc 2 connecting 3 and 2 with cost 19.6633 
-Arc 3 connecting 2 and 10 with cost 43.8933 
-Arc 4 connecting 10 and 9 with cost 21.7476 
-Arc 5 connecting 9 and 7 with cost 46.2843 
-Arc 6 connecting 7 and 8 with cost 8.30111 
-Arc 7 connecting 8 and 6 with cost 42.886 
-Arc 8 connecting 6 and 4 with cost 1.82119 
-Arc 9 connecting 4 and 1 with cost 16.3413 
-Arc 10 connecting 1 and 11 with cost 24.4397 
+Arc 1 connecting 0 and 1 with cost 24.4397 
+Arc 2 connecting 1 and 4 with cost 16.3413 
+Arc 3 connecting 4 and 6 with cost 1.82119 
+Arc 4 connecting 6 and 8 with cost 42.886 
+Arc 5 connecting 8 and 7 with cost 8.30111 
+Arc 6 connecting 7 and 9 with cost 46.2843 
+Arc 7 connecting 9 and 10 with cost 21.7476 
+Arc 8 connecting 10 and 2 with cost 43.8933 
+Arc 9 connecting 2 and 3 with cost 19.6633 
+Arc 10 connecting 3 and 11 with cost 47.2252 
 Customer 5 served by drone.
-Drone fly from 4 at stage 9 to serve 5 and then fly back to 1 at stage 10. 
-Truck arcs during this sortie: 4--->1
-Truck travel time from stage 9 to 10 is: 16.3413
+Drone fly from 1 at stage 2 to serve 5 and then fly back to 4 at stage 3. 
+Truck arcs during this sortie: 1--->4
+Truck travel time from stage 2 to 3 is: 16.3413
 Total drone travel time: 13.9953
-Drone arrival time: 246.817
-Truck arrival time: 249.163
-Truck departure time = max(d/a, t/a) plus (sl/sr): 250.163
+Drone arrival time: 39.435
+Truck arrival time: 41.781
+Truck departure time = max(d/a, t/a) plus (sl/sr): 42.781
 Done!
 -------------------------Re-calculated objective-----------------------
 274.603
 ------------------------------------------------------------------------
-Solve time: 21.858
+Solve time: 21.422
 OBJECTIVE VALUE: 274.603, NUMBER OF SORTIES: 1.
 Number of revisit: 0
 In write mode
