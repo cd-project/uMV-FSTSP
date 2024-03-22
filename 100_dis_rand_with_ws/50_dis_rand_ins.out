@@ -1,0 +1,4 @@
+Instance name: /home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/50_dis_rand_ins
+Write arg val: 1
+terminate called after throwing an instance of 'std::invalid_argument'
+  what():  stoi

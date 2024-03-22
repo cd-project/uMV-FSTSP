@@ -1,0 +1,194 @@
+Instance name: /home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/v41
+Write arg val: 1
+
+drone speed: 1 miles/minute
+uav non-eligible customer: 4 7 11 
+Printing tau:
+0 9.0199 36.337 55.9138 60.4159 42.8973 24.4848 43.0864 49.9422 73.1934 88.2971 0 
+9.0199 0 27.3171 52.4652 51.396 33.8774 15.4649 46.5349 53.3908 64.1735 79.2772 9.0199 
+36.337 27.3171 0 26.2796 29.8347 22.1006 29.3097 72.7205 79.5764 37.8681 51.96 36.337 
+55.9138 52.4652 26.2796 0 56.1143 48.3802 55.5893 99.0001 105.856 64.1477 54.1542 55.9138 
+60.4159 51.396 29.8347 56.1143 0 17.5187 35.9312 42.8858 49.7417 12.7775 27.8811 60.4159 
+42.8973 33.8774 22.1006 48.3802 17.5187 0 18.4125 50.6199 57.4758 30.2961 45.3998 42.8973 
+24.4848 15.4649 29.3097 55.5893 35.9312 18.4125 0 43.4108 50.2667 48.7086 63.8123 24.4848 
+43.0864 46.5349 72.7205 99.0001 42.8858 50.6199 43.4108 0 6.85587 34.8524 61.5681 43.0864 
+49.9422 53.3908 79.5764 105.856 49.7417 57.4758 50.2667 6.85587 0 41.7083 68.424 49.9422 
+73.1934 64.1735 37.8681 64.1477 12.7775 30.2961 48.7086 34.8524 41.7083 0 26.7157 73.1934 
+88.2971 79.2772 51.96 54.1542 27.8811 45.3998 63.8123 61.5681 68.424 26.7157 0 88.2971 
+0 0 0 0 0 0 0 0 0 0 0 0 
+Printing tau_prime:
+0 2.56061 12.4333 17.372 16.0203 11.5489 6.49308 16.0367 17.6017 19.5308 23.9207 0 
+2.56061 0 10.034 15.4247 13.6627 9.04817 4.18358 15.1919 16.8858 17.2962 21.3962 2.56061 
+12.4333 10.034 0 6.99268 10.1662 6.11303 8.3833 19.3507 21.1917 14.0121 14.0918 12.4333 
+17.372 15.4247 6.99268 0 16.4297 13.0371 14.9612 26.3434 28.1841 19.9137 17.4563 17.372 
+16.0203 13.6627 10.1662 16.4297 0 5.07789 9.52871 12.3304 13.9123 4.00214 8.89938 16.0203 
+11.5489 9.04817 6.11303 13.0371 5.07789 0 5.24324 13.4232 15.2422 9.05634 12.3835 11.5489 
+6.49308 4.18358 8.3833 14.9612 9.52871 5.24324 0 12.4568 14.2722 13.1137 17.5924 6.49308 
+16.0367 15.1919 19.3507 26.3434 12.3304 13.4232 12.4568 0 1.8497 12.325 20.3565 16.0367 
+17.6017 16.8858 21.1917 28.1841 13.9123 15.2422 14.2722 1.8497 0 13.5412 21.6533 17.6017 
+19.5308 17.2962 14.0121 19.9137 4.00214 9.05634 13.1137 12.325 13.5412 0 8.1378 19.5308 
+23.9207 21.3962 14.0918 17.4563 8.89938 12.3835 17.5924 20.3565 21.6533 8.1378 0 23.9207 
+0 0 0 0 0 0 0 0 0 0 0 0 
+---------------------------------------------
+Calculate max stage gap for sortie.... 
+Stage gap of 4 with smallest length = 27.0597 violated endurance constraint!
+---------------------------------------------
+Warning:  Output names have been modified due to duplicate names or characters invalid in LP format.
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+CPXPARAM_TimeLimit                               200
+CPXPARAM_MIP_Tolerances_Integrality              0
+Tried aggregator 2 times.
+MIP Presolve eliminated 1183 rows and 2017 columns.
+MIP Presolve modified 1726 coefficients.
+Aggregator did 35 substitutions.
+Reduced MIP has 991 rows, 2724 columns, and 24592 nonzeros.
+Reduced MIP has 2703 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (39.36 ticks)
+Probing fixed 280 vars, tightened 0 bounds.
+Probing changed sense of 4 constraints.
+Probing time = 0.04 sec. (85.85 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 85 rows and 305 columns.
+MIP Presolve modified 177 coefficients.
+Aggregator did 7 substitutions.
+Reduced MIP has 899 rows, 2412 columns, and 19838 nonzeros.
+Reduced MIP has 2391 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.01 sec. (23.88 ticks)
+Probing time = 0.00 sec. (5.91 ticks)
+Tried aggregator 2 times.
+Detecting symmetries...
+MIP Presolve eliminated 11 rows and 0 columns.
+MIP Presolve modified 6 coefficients.
+Aggregator did 2 substitutions.
+Reduced MIP has 886 rows, 2410 columns, and 19823 nonzeros.
+Reduced MIP has 2389 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.01 sec. (12.70 ticks)
+Probing time = 0.01 sec. (5.97 ticks)
+Clique table members: 12008.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: deterministic, using up to 20 threads.
+Root relaxation solution time = 0.07 sec. (147.24 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0      145.3816   162                    145.3816       28         
+      0     0      172.4915   222                    Cuts: 29     1864         
+*     0+    0                          273.6853      172.4915            36.97%
+      0     0      173.6632   226      273.6853      Cuts: 37     3077   36.55%
+*     0+    0                          253.6716      173.6632            31.54%
+      0     0      175.8902   230      253.6716      Cuts: 19     4008   30.66%
+*     0+    0                          252.5401      175.8902            30.35%
+      0     0      176.8571   228      252.5401      Cuts: 34     4786   29.97%
+      0     0      179.2335   229      252.5401      Cuts: 20     5971   28.57%
+Detecting symmetries...
+      0     0      181.0052   260      252.5401      Cuts: 31     6710   28.33%
+      0     0      181.7926   281      252.5401      Cuts: 15     7045   28.01%
+      0     0      183.1797   232      252.5401       Cuts: 5     7412   27.47%
+      0     0      183.3465   228      252.5401      Cuts: 16     7739   27.40%
+*     0+    0                          240.0716      183.3465            23.63%
+      0     0      183.6887   243      240.0716      Cuts: 21     8123   23.49%
+      0     0      184.8308   223      240.0716      Cuts: 19     8888   23.01%
+      0     0      185.1563   254      240.0716      Cuts: 25     9638   22.87%
+      0     0      185.1989   240      240.0716       Cuts: 4     9827   22.86%
+      0     0      185.2458   259      240.0716       Cuts: 8    10591   22.84%
+      0     0      185.3177   266      240.0716       Cuts: 4    11046   22.81%
+      0     0      185.4228   281      240.0716       Cuts: 6    11520   22.58%
+      0     0      186.6390   248      240.0716  ZeroHalf: 10    12628   22.26%
+      0     0      188.8363   228      240.0716      Cuts: 17    13761   21.34%
+      0     0      190.6830   229      240.0716      Cuts: 12    14926   20.57%
+      0     0      191.3413   256      240.0716      Cuts: 28    15677   20.30%
+      0     0      192.3459   289      240.0716      Cuts: 12    16536   19.88%
+      0     0      192.4308   306      240.0716       Cuts: 7    17196   19.84%
+      0     0      192.4520   309      240.0716       Cuts: 4    17422   19.84%
+      0     0      192.9145   278      240.0716   ZeroHalf: 1    17931   19.64%
+      0     0      193.3071   265      240.0716       Cuts: 7    18228   19.48%
+      0     0      193.3725   269      240.0716       Cuts: 4    18339   19.45%
+      0     0      193.3766   278      240.0716       Cuts: 3    18374   19.45%
+Detecting symmetries...
+      0     2      193.3766   278      240.0716      193.3766    18374   19.45%
+Elapsed time = 2.29 sec. (3541.12 ticks, tree = 0.02 MB, solutions = 4)
+     49    10        cutoff            240.0716      196.0923    27497   18.32%
+    447    38      227.2561    62      240.0716      199.2830    57164   16.99%
+   1240    17      232.4730    77      240.0716      203.9606   118563   15.04%
+   1807    70      238.3924    45      240.0716      211.1032   161224   12.07%
+   2384    36        cutoff            240.0716      211.1032   221477   12.07%
+   2540    22        cutoff            240.0716      215.1532   233803   10.38%
+   3198    17      239.5518   109      240.0716      220.0253   279947    8.35%
+   3470     5      232.3807   124      240.0716      232.3807   310809    3.20%
+   3512    20      235.0245    88      240.0716      232.3807   313837    3.20%
+
+GUB cover cuts applied:  8
+Clique cuts applied:  18
+Cover cuts applied:  42
+Implied bound cuts applied:  131
+Flow cuts applied:  2
+Zero-half cuts applied:  46
+Lift and project cuts applied:  1
+Gomory fractional cuts applied:  1
+
+Root node processing (before b&c):
+  Real time             =    2.24 sec. (3444.97 ticks)
+Parallel b&c, 20 threads:
+  Real time             =    1.89 sec. (2306.55 ticks)
+  Sync time (average)   =    1.11 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    4.13 sec. (5751.52 ticks)
+Feasible solution found!
+Truck nodes:
+Stage 1 at customer 0 with arrival time is: 0
+Stage 1 at customer 0 with departure time is: 0
+Stage 2 at customer 1 with arrival time is: 9.0199
+Stage 2 at customer 1 with departure time is: 9.0199
+Stage 3 at customer 3 with arrival time is: 61.4851
+Stage 3 at customer 3 with departure time is: 61.4851
+Stage 4 at customer 2 with arrival time is: 87.7647
+Stage 4 at customer 2 with departure time is: 87.7647
+Stage 5 at customer 5 with arrival time is: 109.865
+Stage 5 at customer 5 with departure time is: 110.865
+Stage 6 at customer 4 with arrival time is: 128.384
+Stage 6 at customer 4 with departure time is: 130.384
+Stage 7 at customer 9 with arrival time is: 143.162
+Stage 7 at customer 9 with departure time is: 148.421
+Stage 8 at customer 7 with arrival time is: 183.274
+Stage 8 at customer 7 with departure time is: 183.274
+Stage 9 at customer 8 with arrival time is: 190.129
+Stage 9 at customer 8 with departure time is: 190.129
+Stage 10 at customer 11 with arrival time is: 240.072
+Stage 10 at customer 11 with departure time is: 240.072
+Truck arcs:
+Arc 1 connecting 0 and 1 with cost 9.0199 
+Arc 2 connecting 1 and 3 with cost 52.4652 
+Arc 3 connecting 3 and 2 with cost 26.2796 
+Arc 4 connecting 2 and 5 with cost 22.1006 
+Arc 5 connecting 5 and 4 with cost 17.5187 
+Arc 6 connecting 4 and 9 with cost 12.7775 
+Arc 7 connecting 9 and 7 with cost 34.8524 
+Arc 8 connecting 7 and 8 with cost 6.85587 
+Arc 9 connecting 8 and 11 with cost 49.9422 
+Customer 6 served by drone.
+Drone fly from 5 at stage 5 to serve 6 and then fly back to 4 at stage 6. 
+Truck arcs during this sortie: 5--->4
+Truck travel time from stage 5 to 6 is: 17.5187
+Total drone travel time: 14.772
+Drone arrival time: 125.637
+Truck arrival time: 128.384
+Truck departure time = max(d/a, t/a) plus (sl/sr): 130.384
+Customer 10 served by drone.
+Drone fly from 4 at stage 6 to serve 10 and then fly back to 9 at stage 7. 
+Truck arcs during this sortie: 4--->9
+Truck travel time from stage 6 to 7 is: 12.7775
+Total drone travel time: 17.0372
+Drone arrival time: 147.421
+Truck arrival time: 143.162
+Truck departure time = max(d/a, t/a) plus (sl/sr): 148.421
+Done!
+-------------------------Re-calculated objective-----------------------
+240.072
+------------------------------------------------------------------------
+Solve time: 4.135
+OBJECTIVE VALUE: 240.072, NUMBER OF SORTIES: 2.
+Number of revisit: 0
+In write mode

@@ -171,6 +171,7 @@ public:
     double recalculated_cost;
     double time_spent;
     double revisit_count;
+    bool used_stage_gap;
 
     Result() {
     }
@@ -179,7 +180,7 @@ public:
 
     Result(double c, double re_c, double time_spent, std::vector<Sortie> &st);
 
-    Result(double c, double re_c, double time_spent, double revisit_count);
+    Result(double c, double re_c, double time_spent, double revisit_count, bool used_stage_gap);
 };
 
 class Solver {
@@ -196,23 +197,13 @@ public:
 
     Result OriginalSolverCPLEX(int n_thread, int e);
 
-    Result mvdSolverCPLEX(int n_thread, int e);
-
-    Result mvdSolverCPLEXFewerVariables(int n_thread, int e);
-
     Result mvdSolverWithLR(int n_thread, int e, bool use_tsp_as_warmstart);
-
-    Result HeuristicFixCallback(int n_thread, int e);
-
-    Result SolverWithRandomTruckStageFixed(int n_thread, int e);
 
     Result Roberti2020(int n_thread, int e);
 
     Result Amico2021_3Index(int n_thread, int e);
 
     Result Amico2021_2Index(int n_thread, int e);
-
-    Result mvdSolverRevisitDepotLRLoop(int n_thread, int e, bool replaceOnDepot);
 
     Result mFSTSPSolve(int n_thread, int e);
 

@@ -47,15 +47,15 @@ int main(int argc, char**argv) {
 
     auto instance = std::make_shared<Instance>(folder_path, false, 0);
     auto solver = std::make_shared<Solver>(instance);
-    auto result = solver->mvdSolverWithLR(20, 20, false);
+    auto result = solver->mvdSolverWithLR(20, 20, true);
     if (write) {
         std::cout << "In write mode" << std::endl;
         auto i_name_split = SplitStringWithDelimiter(folder_path, "/");
         auto i_name = i_name_split[i_name_split.size()-1];
-        std::ofstream out("/home/cuong/CLionProjects/uMV-FSTSP/100_dis_rand_nows.csv", std::ios::app);
+        std::ofstream out("/home/cuong/CLionProjects/uMV-FSTSP/100_dis_rand_with_ws.csv", std::ios::app);
         if(!out.is_open()) {
             std::cout << "Error opening file!" << std::endl;
         }
-        out << i_name <<"," << result.cost << "," << result.recalculated_cost << "," << result.time_spent << "," << result.revisit_count << "\n";
+        out << i_name <<"," << result.cost << "," << result.recalculated_cost << "," << result.time_spent << "," << result.revisit_count << "," << result.used_stage_gap << "\n";
     }
 }
