@@ -9,6 +9,9 @@
 #include "instance.h"
 #include<ilcplex/ilocplex.h>
 #include <utility>
+#include<cassert>
+#include <map>
+#include <random>
 
 // On a new feasible solution callback.
 class BranchAndCutCallback : public IloCplex::UserCutCallbackI {
@@ -197,7 +200,7 @@ public:
 
     Result OriginalSolverCPLEX(int n_thread, int e);
 
-    Result mvdSolverWithLR(int n_thread, int e, bool use_tsp_as_warmstart);
+    [[nodiscard]] Result mvdSolverWithLR(int n_thread, int e, bool use_tsp_as_warmstart) const;
 
     Result Roberti2020(int n_thread, int e);
 
