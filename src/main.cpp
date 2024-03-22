@@ -39,7 +39,7 @@ int main(int argc, char**argv) {
         folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/" + std::string(argv[1]);
         write = true;
     } else {
-        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/v4";
+        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/v100";
     }
 
     std::cout << "Instance name: " << folder_path << std::endl;
@@ -47,7 +47,7 @@ int main(int argc, char**argv) {
 
     auto instance = std::make_shared<Instance>(folder_path, false, 0);
     auto solver = std::make_shared<Solver>(instance);
-    auto result = solver->OriginalSolverCPLEX(20, 20);
+    auto result = solver->StageBasedMVD(20, 20, 1, 1, 3);
     if (write) {
         std::cout << "In write mode" << std::endl;
         auto i_name_split = SplitStringWithDelimiter(folder_path, "/");

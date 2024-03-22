@@ -50,76 +50,19 @@ inline bool exist(const std::vector<int> &vec, int element) {
     // Use std::find to search for the element in the vector
     return std::find(vec.begin(), vec.end(), element) != vec.end();
 }
+bool areAllElementsDistinct(const std::vector<int>& vec) {
+    std::unordered_set<int> seen;
 
-inline std::vector<std::vector<int> > generateSubsets(const std::vector<int> &set, int L) {
-    std::vector<std::vector<int> > subsets;
-
-    // Helper function to generate subsets recursively
-    std::function<void(std::vector<int> &, int, int)> generate = [&
-            ](std::vector<int> &subset, int index, int remaining) {
-        // Base case: if subset is non-empty and has at most L elements, add it to subsets
-        if (subset.size() > 0 && subset.size() <= L) {
-            subsets.push_back(subset);
+    for (int num : vec) {
+        if (seen.count(num) > 0) {
+            // Duplicate found
+            return false;
         }
-
-        // Recursive case: generate subsets by including or excluding the current element
-        for (int i = index; i < set.size(); ++i) {
-            subset.push_back(set[i]); // Include current element
-            generate(subset, i + 1, remaining - 1);
-            subset.pop_back(); // Exclude current element
-        }
-    };
-
-    // Start recursion with an empty subset and the entire set
-    std::vector<int> emptySubset;
-    generate(emptySubset, 0, L);
-
-    return subsets;
-}
-
-void permute(std::vector<int> &nums, int l, int r, std::vector<std::vector<int> > &result) {
-    if (l == r) {
-        result.push_back(nums);
-    } else {
-        for (int i = l; i <= r; ++i) {
-            std::swap(nums[l], nums[i]);
-            permute(nums, l + 1, r, result);
-            std::swap(nums[l], nums[i]);
-        }
+        seen.insert(num);
     }
-}
 
-std::vector<std::vector<int> > generatePermutations(std::vector<int> &nums) {
-    std::vector<std::vector<int> > result;
-    permute(nums, 0, nums.size() - 1, result);
-    return result;
-}
-
-inline std::pair<double, std::vector<int> > shortestPath(int start, int end, std::vector<int> &middle,
-                                                         std::vector<std::vector<double> > &tau_prime) {
-    std::vector<int> best;
-    double bestDist = INFINITY;
-    std::vector<int> current(2 + middle.size());
-    auto permutations = generatePermutations(middle);
-    for (auto &p: permutations) {
-        double d = 0;
-        std::vector<int> perm;
-        perm.push_back(start);
-        for (int i: p) {
-            perm.push_back(i);
-        }
-        perm.push_back(end);
-        for (int i = 0; i < perm.size() - 1; i++) {
-            d += tau_prime[perm[i]][perm[i + 1]];
-            if (d > bestDist) continue;
-        }
-        if (d < bestDist) {
-            bestDist = d;
-            best = perm;
-        }
-    }
-    best.shrink_to_fit();
-    return {bestDist, best};
+    // No duplicates found
+    return true;
 }
 
 std::vector<std::pair<std::vector<int>, std::vector<int> > > generateSetsAndComplements(
@@ -157,7 +100,7 @@ void setPrint(std::vector<int> &set) {
     std::cout << std::endl;
 }
 
-void generateSets(const std::vector<int> &nodes, int k, std::vector<int> &currentSet,
+void genSetsHelper_SortieGap(const std::vector<int> &nodes, int k, std::vector<int> &currentSet,
                   std::vector<std::vector<int> > &result) {
     // Base case: if currentSet has k nodes, add it to result
     if (currentSet.size() == k) {
@@ -171,17 +114,17 @@ void generateSets(const std::vector<int> &nodes, int k, std::vector<int> &curren
         currentSet.push_back(nodes[i]);
 
         // Recur with the updated set
-        generateSets(nodes, k, currentSet, result);
+        genSetsHelper_SortieGap(nodes, k, currentSet, result);
 
         // Backtrack: remove the last node from the set
         currentSet.pop_back();
     }
 }
 
-std::vector<std::vector<int> > generateAllSubsets(const std::vector<int> &nodes, int k, int D) {
+std::vector<std::vector<int> > genSetForSortieGap(const std::vector<int> &nodes, int k, int D) {
     std::vector<std::vector<int> > result;
     std::vector<int> currentSet;
-    generateSets(nodes, k, currentSet, result);
+    genSetsHelper_SortieGap(nodes, k, currentSet, result);
     std::vector<std::vector<int> > result2;
     for (auto vec: result) {
         // perform test
@@ -212,7 +155,7 @@ inline double calculate_tour(std::vector<std::vector<double> > &tau, std::vector
 
 inline double smallest_tour_length(int stage_gap, std::vector<std::vector<double> > &tau, std::vector<int> &V) {
     int D = V.size() - 1;
-    auto sets = generateAllSubsets(V, stage_gap + 1, D);
+    auto sets = genSetForSortieGap(V, stage_gap + 1, D);
     double smallest = std::numeric_limits<double>::max();
     for (auto set: sets) {
         auto l = calculate_tour(tau, set);
@@ -456,10 +399,12 @@ IloNumArray Solver::RevisitTSP(std::vector<std::vector<double> > &tau) {
     return order;
 }
 
-Result Solver::mvdSolverWithLR(int n_thread, int e, bool use_tsp_as_warmstart) const {
+// Result Solver::StageBasedNoRevisit(int n_thread, int e) const {
+//
+// }
+Result Solver::mvdSolverWithLR(int n_thread, double dtl, double sl, double sr, bool use_tsp_as_warmstart) const {
     auto tau = instance->tau;
     auto tau_prime = instance->tau_prime;
-    auto dtl = e;
     auto n = instance->num_node;
     std::vector<int> C;
     std::vector<int> V;
@@ -1159,7 +1104,6 @@ Result Solver::mvdSolverWithLR(int n_thread, int e, bool use_tsp_as_warmstart) c
             for (int j = 1; j <= D; j++)
                 if (i != j) {
                     auto X_val = cplex.getValue(x[k][i][j]);
-                    //std::cout << "k = " << k << ", i = " << i << ":" << X_val << std::endl;
                     if (X_val == 1) {
                         std::cout << "Arc " << k << " connecting " << i << " and " << j
                                 << " with cost " << tau[i][j] << " " << std::endl;
@@ -1680,7 +1624,7 @@ Result Solver::OriginalSolverCPLEX(int n_thread, int e) {
         }
     }
     for (int h: C) {
-        if (cplex.getValue(y[h][h]) == 1) {
+        if (cplex.getValue(theta[h]) == 1) {
             std::cout << "customer " << h << " is served by drone" << std::endl;
             for (int i: c_s) {
                 if (h != i) {
@@ -2869,10 +2813,9 @@ Result Solver::Amico2021_2Index(int n_thread, int e) {
     return Result();
 }
 
-Result Solver::mFSTSPSolve(int n_thread, int e) {
+Result Solver::mFSTSPSolve(int n_thread, double dtl, double sl, double sr) const {
     auto tau = instance->tau;
     auto tau_prime = instance->tau_prime;
-    auto dtl = e;
     auto n = instance->num_node;
     std::vector<int> C;
     for (int i = 0; i < n + 1; i++) {
@@ -3296,10 +3239,78 @@ struct MultivisitTuple {
     double trip_l;
 };
 
-Result Solver::StageBasedMVD(int n_thread, int e, int L) {
+inline void generateCombinationsHelper(const std::vector<int>& C, int L, int start, std::vector<int>& current, std::vector<std::vector<int>>& result) {
+    // Base case: If current combination is of size L, add it to the result
+    if (current.size() == L) {
+        result.push_back(current);
+        return;
+    }
+
+    // Recursive case: Generate combinations starting from each index in C
+    for (int i = start; i < C.size(); ++i) {
+        current.push_back(C[i]);
+        generateCombinationsHelper(C, L, i + 1, current, result);
+        current.pop_back();
+    }
+}
+
+inline std::vector<std::vector<int>> generateCombinations(const std::vector<int>& C, int L) {
+    std::vector<std::vector<int>> result;
+    std::vector<int> current;
+    generateCombinationsHelper(C, L, 0, current, result);
+    return result;
+}
+
+inline std::vector<std::vector<int>> generatePermutations(const std::vector<int>& nums) {
+    std::vector<std::vector<int>> result;
+
+    // Sort the input vector to ensure all permutations are unique
+    std::vector<int> sortedNums = nums;
+    std::sort(sortedNums.begin(), sortedNums.end());
+
+    // Generate permutations using std::next_permutation
+    do {
+        result.push_back(sortedNums);
+    } while (std::next_permutation(sortedNums.begin(), sortedNums.end()));
+
+    return result;
+}
+
+inline std::vector<MultivisitTuple> shortest_L_visit_sorties(int start, int rendezvous, int L, const std::vector<int>& C, std::vector<std::vector<double>> &tau_prime, double &dtl, double &sr) {
+    auto combination_of_L_from_C = generateCombinations(C, L);
+    std::vector<MultivisitTuple> result;
+    for (auto &combo:combination_of_L_from_C) {
+        double shortest = std::numeric_limits<double>::max();
+        bool got = false;
+        MultivisitTuple mt;
+        auto permutations = generatePermutations(combo);
+        for (auto &per:permutations) {
+            std::vector<int> temp;
+            temp.push_back(start);
+            for (int &elem:per) {
+                temp.push_back(elem);
+            }
+            temp.push_back(rendezvous);
+            if (areAllElementsDistinct(temp)) {
+                if (double l = calculate_tour(tau_prime, temp); l < shortest && l <= dtl-sr) {
+                    shortest = l;
+                    mt.visit_seq = temp;
+                    mt.trip_l = l;
+                    got = true;
+                }
+            }
+        }
+        if (got) {
+            mt.start_node = start;
+            mt.end_node = rendezvous;
+            result.push_back(mt);
+        }
+    }
+    return result;
+}
+Result Solver::StageBasedMVD(int n_thread, double dtl, double sl, double sr, int L) const {
     auto tau = instance->tau;
     auto tau_prime = instance->tau_prime;
-    auto dtl = e;
     auto n = instance->num_node;
     std::vector<int> C;
     for (int i = 0; i < n + 1; i++) {
@@ -3318,32 +3329,35 @@ Result Solver::StageBasedMVD(int n_thread, int e, int L) {
     auto node_max_stage = n + 1;
     auto K_arc = node_max_stage - 1;
 
+    std::vector<MultivisitTuple> all_most_L_sorties;
     // get set D = {i, Y, j}: {i \in c_s, j \in c_t, Y subset of C', |Y| <= L}
-    std::vector<MultivisitTuple> mt;
-    auto ss = generateSubsets(instance->c_prime, L);
-    for (auto &set: ss) {
-        setPrint(set);
+    for (int n_customer = 1; n_customer <= L; n_customer++) {
         for (int i = 0; i < D; i++) {
             for (int j = 1; j <= D; j++) {
                 if (i != j) {
-                    auto p = shortestPath(i, j, set, tau_prime);
-                    if (p.first > dtl - sr) {
-                        continue;
-                    } else {
-                        mt.push_back({i, j, p.second, p.first});
+                    auto mt = shortest_L_visit_sorties(i, j, n_customer, instance->c_prime, tau_prime, dtl, sr);
+                    for (auto &m:mt) {
+                        all_most_L_sorties.push_back(m);
                     }
                 }
             }
         }
     }
-    std::cout << "mt size: " << mt.size() << std::endl;
-    for (auto &m: mt) {
-        std::cout << "Set print:" << std::endl;
-        std::cout << "Start and end vertex: " << m.start_node << ", " << m.end_node << std::endl;
-        std::cout << "Visit sequence: ";
-        setPrint(m.visit_seq);
-        std::cout << "Total distance: " << m.trip_l << std::endl;
-    }
+
+    all_most_L_sorties.shrink_to_fit();
+    // for (auto &mt: all_most_L_sorties) {
+    //     if (mt.visit_seq.size() == 5) {
+    //         std::cout << "-------------------------------------------";
+    //         std::cout << "Set print:" << std::endl;
+    //         std::cout << "Start and end vertex: " << mt.start_node << ", " << mt.end_node << std::endl;
+    //         std::cout << "Visit sequence: ";
+    //         setPrint(mt.visit_seq);
+    //         std::cout << "Total distance: " << mt.trip_l << std::endl;
+    //         std::cout << "-------------------------------------------";
+    //     }
+    // }
+    std::cout << "Number of possible sorties: " << all_most_L_sorties.size();
+
 
     // Khai bao bien
     //
@@ -3406,7 +3420,7 @@ Result Solver::StageBasedMVD(int n_thread, int e, int L) {
     }
 
     for (int heavy: instance->heavy) {
-        if (heavy != D + 1) {
+        if (heavy != D) {
             model.add(phi[heavy] == 0);
         }
     }

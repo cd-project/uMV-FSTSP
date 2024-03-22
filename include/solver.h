@@ -12,6 +12,7 @@
 #include<cassert>
 #include <map>
 #include <random>
+#include <unordered_set>
 
 // On a new feasible solution callback.
 class BranchAndCutCallback : public IloCplex::UserCutCallbackI {
@@ -194,13 +195,10 @@ public:
         instance = inst;
     }
 
-    double sl = {1};
-    double sr = {1};
-    double dtl = {20};
 
     Result OriginalSolverCPLEX(int n_thread, int e);
 
-    [[nodiscard]] Result mvdSolverWithLR(int n_thread, int e, bool use_tsp_as_warmstart) const;
+    [[nodiscard]] Result mvdSolverWithLR(int n_thread, double e, double sl, double sr, bool use_tsp_as_warmstart) const;
 
     Result Roberti2020(int n_thread, int e);
 
@@ -208,9 +206,9 @@ public:
 
     Result Amico2021_2Index(int n_thread, int e);
 
-    Result mFSTSPSolve(int n_thread, int e);
+    [[nodiscard]] Result mFSTSPSolve(int n_thread, double e, double sl, double sr) const;
 
-    Result StageBasedMVD(int n_thread, int e, int L);
+    [[nodiscard]] Result StageBasedMVD(int n_thread, double dtl, double sl, double sr, int L) const;
 
     static IloNumArray TSP_MTZ(std::vector<std::vector<double> > &tau);
 

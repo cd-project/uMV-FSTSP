@@ -362,7 +362,7 @@ GenInstance::GenInstance(int n_customer, double dtl, int v, bool gen_node, doubl
                     tau[i][j] = manhattanDistance(
                         get<1>(Nodes[i]), get<2>(Nodes[i]), get<1>(Nodes[j]), get<2>(Nodes[j]))/3;
                     tau_prime[i][j] = euclideanDistance(
-                        get<1>(Nodes[i]), get<2>(Nodes[i]), get<1>(Nodes[j]), get<2>(Nodes[j]))/8;
+                        get<1>(Nodes[i]), get<2>(Nodes[i]), get<1>(Nodes[j]), get<2>(Nodes[j]))/15;
                 }
             }
         }
