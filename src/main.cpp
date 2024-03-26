@@ -36,10 +36,10 @@ int main(int argc, char**argv) {
 
     bool write = false;
     if (argc == 2) {
-        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/" + std::string(argv[1]);
+        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/" + std::string(argv[1]);
         write = true;
     } else {
-        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/v100";
+        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/50_dis_rand_ins/v16";
     }
 
     std::cout << "Instance name: " << folder_path << std::endl;
@@ -47,12 +47,12 @@ int main(int argc, char**argv) {
 
     auto instance = std::make_shared<Instance>(folder_path, false, 0);
     auto solver = std::make_shared<Solver>(instance);
-    auto result = solver->StageBasedMVD(20, 20, 1, 1, 3);
+    auto result = solver->OriginalSolverCPLEX(20, 20);
     if (write) {
         std::cout << "In write mode" << std::endl;
         auto i_name_split = SplitStringWithDelimiter(folder_path, "/");
         auto i_name = i_name_split[i_name_split.size()-1];
-        std::ofstream out("/home/cuong/CLionProjects/uMV-FSTSP/100_og.csv", std::ios::app);
+        std::ofstream out("/home/cuong/CLionProjects/uMV-FSTSP/og_murray.csv", std::ios::app);
         if(!out.is_open()) {
             std::cout << "Error opening file!" << std::endl;
         }

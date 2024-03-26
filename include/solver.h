@@ -186,6 +186,16 @@ public:
 
     Result(double c, double re_c, double time_spent, double revisit_count, bool used_stage_gap);
 };
+// Hash function for pairs of integers
+struct PairHash {
+    template <typename T1, typename T2>
+    std::size_t operator()(const std::pair<T1, T2>& pair) const {
+        // Combine hashes of the pair's components
+        std::hash<T1> hash1;
+        std::hash<T2> hash2;
+        return hash1(pair.first) ^ hash2(pair.second);
+    }
+};
 
 class Solver {
 public:
@@ -199,6 +209,7 @@ public:
     Result OriginalSolverCPLEX(int n_thread, int e);
 
     [[nodiscard]] Result mvdSolverWithLR(int n_thread, double e, double sl, double sr, bool use_tsp_as_warmstart) const;
+    [[nodiscard]] Result StageBasedSingleVisit(int n_thread, double e, double sl, double sr, bool use_tsp_as_warmstart) const;
 
     Result Roberti2020(int n_thread, int e);
 
@@ -208,7 +219,7 @@ public:
 
     [[nodiscard]] Result mFSTSPSolve(int n_thread, double e, double sl, double sr) const;
 
-    [[nodiscard]] Result StageBasedMVD(int n_thread, double dtl, double sl, double sr, int L) const;
+    [[nodiscard]] Result RV_FSTSP_MVD(int n_thread, double dtl, double sl, double sr, int L, bool use_tsp_as_warmstart) const;
 
     static IloNumArray TSP_MTZ(std::vector<std::vector<double> > &tau);
 

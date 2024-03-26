@@ -1,0 +1,102 @@
+Instance name: /home/cuong/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123443v2
+Write arg val: 1
+
+drone speed: 0.2 miles/minute
+uav non-eligible customer: 4 8 
+Printing tau:
+0 7.3617 13.235 11.9489 14.048 9.28995 9.2816 9.57935 4.27959 6.76674 3.51531 0 
+7.3617 0 8.59672 16.5872 14.8463 1.92825 1.9199 7.49765 3.32128 11.405 7.04299 7.3617 
+13.235 8.59672 0 25.184 23.443 8.42508 9.39342 16.0944 11.7546 20.0018 15.6397 13.235 
+11.9489 16.5872 25.184 0 20.0769 16.7589 15.7905 15.6083 13.4294 5.1822 10.0243 11.9489 
+14.048 14.8463 23.443 20.0769 0 15.0179 14.0496 7.34864 11.6884 17.2947 10.5327 14.048 
+9.28995 1.92825 8.42508 16.7589 15.0179 0 0.968346 7.66929 5.01036 12.5367 7.21463 9.28995 
+9.2816 1.9199 9.39342 15.7905 14.0496 0.968346 0 6.70095 5.00201 12.5283 6.24629 9.2816 
+9.57935 7.49765 16.0944 15.6083 7.34864 7.66929 6.70095 0 5.29976 12.8261 6.06403 9.57935 
+4.27959 3.32128 11.7546 13.4294 11.6884 5.01036 5.00201 5.29976 0 8.24716 3.8851 4.27959 
+6.76674 11.405 20.0018 5.1822 17.2947 12.5367 12.5283 12.8261 8.24716 0 6.76206 6.76674 
+3.51531 7.04299 15.6397 10.0243 10.5327 7.21463 6.24629 6.06403 3.8851 6.76206 0 3.51531 
+0 0 0 0 0 0 0 0 0 0 0 0 
+Printing tau_prime:
+0 10.2543 16.5737 15.7729 20.465 12.3288 11.8384 11.7816 5.33678 8.84513 5.0194 0 
+10.2543 0 10.5868 25.1232 19.1891 2.28145 2.44971 9.21448 5.20038 18.3566 9.45738 10.2543 
+16.5737 10.5868 0 32.2862 29.7194 11.276 12.2886 19.8012 13.8643 25.3886 18.4894 16.5737 
+15.7729 25.1232 32.2862 0 23.7497 26.7584 25.9207 21.2864 19.9518 6.93179 15.9071 15.7729 
+20.465 19.1891 29.7194 23.7497 0 18.5658 17.4845 10.136 17.9521 20.7816 15.4483 20.465 
+12.3288 2.28145 11.276 26.7584 18.5658 0 1.14125 9.04478 7.08965 20.1104 10.8907 12.3288 
+11.8384 2.44971 12.2886 25.9207 17.4845 1.14125 0 7.90494 6.51871 19.3468 10.0185 11.8384 
+11.7816 9.21448 19.8012 21.2864 10.136 9.04478 7.90494 0 8.07267 15.8016 7.16659 11.7816 
+5.33678 5.20038 13.8643 19.9518 17.9521 7.08965 6.51871 8.07267 0 13.1583 4.66638 5.33678 
+8.84513 18.3566 25.3886 6.93179 20.7816 20.1104 19.3468 15.8016 13.1583 0 9.48339 8.84513 
+5.0194 9.45738 18.4894 15.9071 15.4483 10.8907 10.0185 7.16659 4.66638 9.48339 0 5.0194 
+0 0 0 0 0 0 0 0 0 0 0 0 
+Printing number of nodes: 11
+
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+CPXPARAM_ClockType                               0
+CPXPARAM_Emphasis_MIP                            2
+CPXPARAM_MIP_Tolerances_Integrality              0
+Tried aggregator 2 times.
+MIP Presolve eliminated 1371 rows and 768 columns.
+MIP Presolve modified 1931 coefficients.
+Aggregator did 3 substitutions.
+Reduced MIP has 4900 rows, 944 columns, and 136544 nonzeros.
+Reduced MIP has 937 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.12 sec. (360.41 ticks)
+Found incumbent of value 114.136809 after 0.18 sec. (479.14 ticks)
+Probing fixed 292 vars, tightened 0 bounds.
+Probing changed sense of 24 constraints.
+Probing time = 0.03 sec. (35.56 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 524 rows and 317 columns.
+MIP Presolve modified 223 coefficients.
+Aggregator did 1 substitutions.
+Reduced MIP has 4373 rows, 626 columns, and 118717 nonzeros.
+Reduced MIP has 619 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.07 sec. (191.04 ticks)
+Probing fixed 8 vars, tightened 0 bounds.
+Probing changed sense of 1 constraints.
+Probing time = 0.02 sec. (23.10 ticks)
+Tried aggregator 1 time.
+Detecting symmetries...
+MIP Presolve eliminated 10 rows and 9 columns.
+MIP Presolve modified 43 coefficients.
+Reduced MIP has 4363 rows, 617 columns, and 118642 nonzeros.
+Reduced MIP has 610 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.06 sec. (151.46 ticks)
+Probing fixed 1 vars, tightened 0 bounds.
+Probing time = 0.01 sec. (14.84 ticks)
+Clique table members: 66517.
+MIP emphasis: optimality.
+MIP search method: dynamic search.
+Parallel mode: deterministic, using up to 20 threads.
+Root relaxation solution time = 0.04 sec. (65.24 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                          114.1368      -10.0000           108.76%
+*     0     0      integral     0       72.1465       72.1465      494    0.00%
+Elapsed time = 0.44 sec. (1014.18 ticks, tree = 0.00 MB, solutions = 2)
+
+Root node processing (before b&c):
+  Real time             =    0.44 sec. (1014.61 ticks)
+Parallel b&c, 20 threads:
+  Real time             =    0.00 sec. (0.00 ticks)
+  Sync time (average)   =    0.00 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    0.44 sec. (1014.61 ticks)
+Truck arcs:
+0 8
+1 2
+2 5
+3 9
+4 10
+5 6
+6 7
+7 4
+8 1
+9 11
+10 3
+72.1465
+In write mode
