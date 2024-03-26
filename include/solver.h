@@ -209,8 +209,7 @@ public:
     Result OriginalSolverCPLEX(int n_thread, int e);
 
     [[nodiscard]] Result mvdSolverWithLR(int n_thread, double e, double sl, double sr, bool use_tsp_as_warmstart) const;
-    [[nodiscard]] Result StageBasedSingleVisit(int n_thread, double e, double sl, double sr, bool use_tsp_as_warmstart) const;
-
+    [[nodiscard]] Result stage_based_fstsp(int n_thread, double e, double sl, double sr, bool use_tsp_as_warmstart) const;
     Result Roberti2020(int n_thread, int e);
 
     Result Amico2021_3Index(int n_thread, int e);

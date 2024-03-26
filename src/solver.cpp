@@ -2,6 +2,7 @@
 // Created by cuong on 18/01/2024.
 //
 #include "../include/solver.h"
+#include "../include/solver.h"
 
 #include <chrono>
 #include <functional>
@@ -3830,7 +3831,7 @@ Result Solver::RV_FSTSP_MVD(int n_thread, double dtl, double sl, double sr, int 
     cplex.solve();
     return Result{cplex.getObjValue(), 0, 1000.0, 0, used_stage_gap};
 }
-Result Solver::StageBasedSingleVisit(int n_thread, double dtl, double sl, double sr, bool use_tsp_as_warmstart) const {
+Result Solver::stage_based_fstsp(int n_thread, double dtl, double sl, double sr, bool use_tsp_as_warmstart) const {
     auto tau = instance->tau;
     auto tau_prime = instance->tau_prime;
     auto n = instance->num_node;
@@ -3866,61 +3867,86 @@ Result Solver::StageBasedSingleVisit(int n_thread, double dtl, double sl, double
         X[k] = IloBoolVarArray(env, D + 1);
         for (int i = 0; i <= D; i++) {
             X[k][i] = IloBoolVar(env);
-            model.add(X[k][i]);
-            auto v_name = "X_" + std::to_string(k) + "_" + std::to_string(i);
+            auto v = "X_" + std::to_string(k) + "_" + std::to_string(i);
             //std::cout << v_name << std::endl;
-            X[k][i].setName(v_name.c_str());
-
+            X[k][i].setName(v.c_str());
         }
         if (k > 1) {
-            model.add(X[k][0] == 0);
+            model.add(X[k][O] == 0);
         }
     }
-    model.add(X[1][0] == 1);
 
     IloArray<IloBoolVarArray> x(env, D);
     for (int i = 0; i < D; i++) {
         x[i] = IloBoolVarArray(env, D+1);
         for (int j = 1; j <= D; j++) {
             if (i != j) {
+                auto v_name = "x_" + std::to_string(i) + "_" + std::to_string(j);
                 x[i][j] = IloBoolVar(env);
+                x[i][j].setName(v_name.c_str());
             }
         }
     }
-    // model.add(x[D][0] == 0);
 
     IloArray<IloBoolVarArray> Y(env, K);
     for (int k = 1; k < K; k++) {
         Y[k] = IloBoolVarArray(env, D);
         for (int h:C) {
             Y[k][h] = IloBoolVar(env);
+            auto v_name = "Y_" + std::to_string(k) + std::to_string(h);
+            Y[k][h].setName(v_name.c_str());
+            if (exist(instance->heavy, h)) {
+                model.add(Y[k][h] == 0);
+            }
         }
     }
     IloArray<IloBoolVarArray> W(env, K+1);
-    for (int k = 2; k <= K; k++) {
-        W[k] = IloBoolVarArray(env, D);
+    for (int kp = 2; kp <= K; kp++) {
+        W[kp] = IloBoolVarArray(env, D);
         for (int h:C) {
-            W[k][h] = IloBoolVar(env);
+            W[kp][h] = IloBoolVar(env);
+            auto v_name = "Y_" + std::to_string(kp) + std::to_string(h);
+            W[kp][h].setName(v_name.c_str());
+            if (exist(instance->heavy, h)) {
+                model.add(W[kp][h] == 0);
+            }
         }
     }
     IloArray<IloBoolVarArray> A(env, D);
     for (int i = 0; i < D; i++) {
         A[i] = IloBoolVarArray(env, D);
         for (int h:C) {
-            A[i][h] = IloBoolVar(env);
+            if (i != h) {
+                A[i][h] = IloBoolVar(env);
+                auto v_name = "A_" + std::to_string(i) + std::to_string(h);
+                A[i][h].setName(v_name.c_str());
+                if (exist(instance->heavy, h)) {
+                    model.add(A[i][h] == 0);
+                }
+            }
+
         }
     }
     IloArray<IloBoolVarArray> B(env, D+1);
-    for (int i = 1; i <= D; i++) {
-        B[i] = IloBoolVarArray(env, D);
+    for (int j = 1; j <= D; j++) {
+        B[j] = IloBoolVarArray(env, D);
         for (int h:C) {
-            B[i][h] = IloBoolVar(env);
+            if (j != h) {
+                B[j][h] = IloBoolVar(env);
+                auto v_name = "B_" + std::to_string(j) + std::to_string(h);
+                B[j][h].setName(v_name.c_str());
+                if (exist(instance->heavy, h)) {
+                    model.add(B[j][h] == 0);
+                }
+            }
         }
     }
 
     IloBoolVarArray phi(env, D);
     for (int h:C) {
         phi[h] = IloBoolVar(env);
+        auto v_name = "phi_" + std::to_string(h);
+        phi[h].setName(v_name.c_str());
         if (exist(instance->heavy, h)) {
             model.add(phi[h] == 0);
         }
@@ -3929,36 +3955,62 @@ Result Solver::StageBasedSingleVisit(int n_thread, double dtl, double sl, double
     for (int k = 1; k < K; k++) {
         z[k] = IloBoolVarArray(env, K+1);
         for (int kp = k+1; kp <= K; kp++) {
+            auto v_name = "z_" + std::to_string(k) + std::to_string(kp);
+            z[k][kp].setName(v_name.c_str());
             z[k][kp] = IloBoolVar(env);
         }
     }
 
     IloNumVarArray b(env, D+1);
     IloNumVarArray e(env, D+1);
-
     for (int i = 0; i <= D; i++) {
+        auto v_name = "b_" + std::to_string(i);
         b[i] = IloNumVar(env, 0, IloInfinity, ILOFLOAT);
+        b[i].setName(v_name.c_str());
         e[i] = IloNumVar(env, 0, IloInfinity, ILOFLOAT);
-        model.add(b[i] <= e[i]);
+        v_name = "e_" + std::to_string(i);
+        e[i].setName(v_name.c_str());
     }
-    model.add(b[0] == 0);
-    model.add(e[0] == 0);
 
-    // C1
+    // Constraint 1
+    for (int k = 1; k <= K; k++) {
+        IloExpr only_serve_one_at_stage(env);
+        for (int i = 0; i <= D; i++) {
+            only_serve_one_at_stage += X[k][i];
+        }
+        std::string cname = "only_serve_one_at_stage " + std::to_string(k);
+        model.add(only_serve_one_at_stage == 1).setName(cname.c_str());
+    }
+
+    // Constraint 2
+    model.add(X[1][O] == 1).setName("start_at_O");
+
+    // Constraint 3
+    IloExpr c3(env);
+    for (int k = 2; k <= K; k++) {
+        c3 += X[k][D];
+    }
+    model.add(c3 == 1).setName("back_to_D");
+
+    // Constraint 4
     for (int h:C) {
-        IloExpr sumA(env), sumB(env);
+        IloExpr sum_A(env), sum_B(env);
         for (int i:c_s) {
-            sumA += A[i][h];
+            if (i != h) {
+                sum_A += A[i][h];
+            }
         }
         for (int j:c_t) {
-            sumB += B[j][h];
+            if (j != h) {
+                sum_B += B[j][h];
+            }
         }
-        model.add(sumA == sumB);
-        model.add(sumA == phi[h]);
+        model.add(sum_A == phi[h]);
+        model.add(sum_B == phi[h]);
     }
 
-    // C2
-    for (int h:C) {
+    // Constraint 5
+    for (int h:instance->c_prime) {
         for (int i:C) {
             if (i != h) {
                 model.add(A[i][h] + B[i][h] <= phi[h]);
@@ -3966,90 +4018,91 @@ Result Solver::StageBasedSingleVisit(int n_thread, double dtl, double sl, double
         }
     }
 
-    // C3
-    for (int h:C) {
-        IloExpr sumY(env), sumW(env);
+    // Constraint 6
+    for (int h:instance->c_prime) {
+        IloExpr sum_Y(env), sum_W(env);
         for (int k = 1; k < K; k++) {
-            sumY += Y[k][h];
+            sum_Y += Y[k][h];
         }
-        for (int k = 2; k <= K; k++) {
-            sumW += W[k][h];
+        for (int kp = 2; kp <= K; kp++) {
+            sum_W += W[kp][h];
         }
-        model.add(sumW == sumY);
-        model.add(sumW == phi[h]);
-
+        model.add(sum_Y == phi[h]);
+        model.add(sum_W == phi[h]);
     }
 
-    // C4
-    for (int h:C) {
+    // Constraint 7
+    for (int h:instance->c_prime) {
         for (int k = 2; k < K; k++) {
             model.add(Y[k][h] + W[k][h] <= phi[h]);
         }
     }
 
-    // C5
+    // Constraint 8
     for (int i:c_s) {
-        IloExpr start_i(env);
-        for (int h:instance->c_prime) {
-            start_i += A[i][h];
-        }
+        IloExpr lhs(env), rhs(env);
         for (int k = 1; k < K; k++) {
-            model.add(X[k][i] >= start_i);
+            lhs += X[k][i];
         }
-    }
-
-    // C6
-    for (int i:c_t) {
-        IloExpr end_i(env);
         for (int h:instance->c_prime) {
-            end_i += B[i][h];
+            rhs += A[i][h];
         }
-        for (int k = 2; k <= K; k++) {
-            model.add(X[k][i] >= end_i);
-        }
+        model.add(lhs >= rhs);
     }
 
-    // C7
+    // Constraint 9
+    for (int j:c_t) {
+        IloExpr lhs(env), rhs(env);
+        for (int kp = 2; kp <= K; kp++) {
+            lhs += X[kp][j];
+        }
+        for (int h:instance->c_prime) {
+            rhs += B[j][h];
+        }
+        model.add(lhs >= rhs);
+    }
+
+    // Constraint 10
     for (int k = 1; k < K; k++) {
-        IloExpr sumX(env), sumY(env);
+        IloExpr lhs(env), rhs(env);
         for (int i:c_s) {
-            sumX += X[k][i];
+            lhs += X[k][i];
         }
         for (int h:instance->c_prime) {
-            sumY += Y[k][h];
+            rhs += Y[k][h];
         }
-        model.add(sumX >= sumY);
+        model.add(lhs >= rhs);
     }
 
-    // C8
-    for (int k = 2; k <= K; k++) {
-        IloExpr sumX(env), sumW(env);
-        for (int i:c_t) {
-            sumX += X[k][i];
+    // Constraint 11
+    for (int kp = 2; kp <= K; kp++) {
+        IloExpr lhs(env), rhs(env);
+        for (int j:c_t) {
+            lhs += X[kp][j];
         }
         for (int h:instance->c_prime) {
-            sumW += W[k][h];
+            rhs += W[kp][h];
         }
-        model.add(sumX >= sumW);
+        model.add(lhs >= rhs);
     }
 
-    // C9
+    // Constraint 12
     for (int h:instance->c_prime) {
-        IloExpr sum_d_start(env), sum_d_end(env);
+        IloExpr s1(env), s2(env);
         for (int i:c_s) {
             if (i != h) {
-                sum_d_start += A[i][h] * tau_prime[i][h];
+                s1 += A[i][h] * tau_prime[i][h];
             }
         }
         for (int j:c_t) {
             if (j != h) {
-                sum_d_start += B[j][h] * tau_prime[h][j];
+                s2 += B[j][h] * tau_prime[h][j];
             }
         }
-        model.add(sum_d_start + sum_d_end <= (dtl - sr) * phi[h]);
+        model.add(s1 + s2 <= (dtl - sr) * phi[h]);
     }
 
-    // C10
+    // Constraint 13
     for (int k = 1; k < K; k++) {
         IloExpr lhs(env), rhs(env);
         for (int kp = k+1; kp <= K; kp++) {
@@ -4059,37 +4112,69 @@ Result Solver::StageBasedSingleVisit(int n_thread, double dtl, double sl, double
             rhs += Y[k][h];
         }
         model.add(lhs == rhs);
-        model.add(lhs <= 1);
         model.add(rhs <= 1);
     }
+
+    // Constraint 14
     for (int kp = 2; kp <= K; kp++) {
         IloExpr lhs(env), rhs(env);
-        for (int k = 1; k <= kp -1; k++) {
+        for (int k = 1; k < kp; k++) {
             lhs += z[k][kp];
         }
         for (int h:instance->c_prime) {
             rhs += W[kp][h];
         }
         model.add(lhs == rhs);
-        model.add(lhs <= 1);
         model.add(rhs <= 1);
     }
-    for (int h:C) {
-        IloExpr sumX(env);
-        for (int k = 2; k < K; k++) {
-            sumX += X[k][h];
+
+    // Constraint 15
+    for (int l = 1; l < K; l++) {
+        IloExpr sum(env);
+        for (int k = 1; k <= l; k++) {
+            for (int kp = k+1; kp <= K; kp++) {
+                if (k <= l && l < kp) {
+                    sum += z[k][kp];
+                }
+            }
         }
-        model.add(sumX + phi[h] == 1);
+        model.add(sum <= 1);
     }
 
-    for (int k = 1; k <= K; k++) {
-        IloExpr sumX(env);
-        for (int i = 0; i <= D; i++) {
-            sumX += X[k][i];
+    // Constraint 16
+    for (int l = 2; l <= K; l++) {
+        IloExpr sum(env);
+        for (int k = 1; k < l; k++) {
+            for (int kp = l; kp <= K; kp++) {
+                if (k < l && l <= kp) {
+                    sum += z[k][kp];
+                }
+            }
         }
-        model.add(sumX <= 1);
+        model.add(sum <= 1);
     }
-    for (int i = 0; i < D; i++) {
+
+    // Constraint 17
+    for (int h:C) {
+        IloExpr sum_X(env);
+        for (int k = 2; k < K; k++) {
+            sum_X += X[k][h];
+        }
+        model.add(sum_X + phi[h] == 1);
+    }
+
+    // Constraint 18
+    // Tighter
+    for (int k = 1; k <= K; k++) {
+        IloExpr sum_X(env);
+        for (int i = 0; i <= D; i++) {
+            sum_X += X[k][i];
+        }
+        model.add(sum_X <= 1);
+    }
+
+    // Constraint 19
+    for (int i:c_s) {
         IloExpr lhs(env), rhs(env);
         for (int k = 1; k < K; k++) {
             lhs += X[k][i];
@@ -4101,7 +4186,9 @@ Result Solver::StageBasedSingleVisit(int n_thread, double dtl, double sl, double
         }
         model.add(lhs == rhs);
     }
-    for (int i = 1; i <= D; i++) {
+
+    // Constraint 20
+    for (int i:c_t) {
         IloExpr lhs(env), rhs(env);
         for (int k = 2; k <= K; k++) {
             lhs += X[k][i];
@@ -4113,71 +4200,149 @@ Result Solver::StageBasedSingleVisit(int n_thread, double dtl, double sl, double
         }
         model.add(lhs == rhs);
     }
-    double M = 0;
-    for (int i:c_s) {
-        for (int j:c_t) {
-            if (i < j) {
-                M += tau_prime[i][j];
-            }
-        }
-    }
+
+    // Constraint 21
     for (int k = 1; k < K; k++) {
         for (int i:c_s) {
             for (int j:c_t) {
                 if (i != j) {
-                    model.add(X[k+1][j] + M * (1 - x[i][j]) >= X[k][i]);
+                    model.add(X[k+1][j] + 1 - x[i][j] >= X[k][i]);
                 }
             }
         }
     }
 
-    for (int j:c_t) {
-        for (int i:c_s) {
-            if (i != j) {
-                model.add(b[j] + M*(1 - x[i][j]) >= e[i] + tau[i][j] * x[i][j]);
-            }
-        }
-    }
-    for (int j:c_t) {
-        for (int i:c_s) {
-            if (i != j) {
-                model.add(b[j] + M*(1 - x[i][j]) >= e[i] + tau[i][j] * x[i][j]);
-            }
-        }
+    // Constraint 23
+    model.add(b[O] == 0);
+    model.add(e[O] == 0);
+
+    // Constraint 24
+    model.add(IloMinimize(env, e[D]));
+
+    // Constraint 25
+    for (int i = 1; i <= D; i++) {
+        model.add(b[i] <= e[i]);
     }
 
-    for (int j:instance->c_prime) {
-        for (int i:c_s) {
-            if (i != j) {
-                model.add(b[j] + M * (1 - A[i][j]) >= e[i] + tau_prime[i][j] * A[i][j]);
-            }
-        }
-    }
-
-    for (int i:instance->c_prime) {
+    auto M = 1e5;
+    // Constraint 26
+    for (int i:c_s) {
         for (int j:c_t) {
             if (i != j) {
-                model.add(e[j] >= e[i] + tau_prime[i][j] * B[j][i] + sr - M * (1 - B[j][i]));
+                model.add(b[j] + M * (1 - x[i][j]) >= e[i] + tau[i][j] * x[i][j]);
             }
         }
     }
+
+    // Constraint 27
+    for (int i:c_s) {
+        for (int h:instance->c_prime) {
+            if (i != h) {
+                if (i == 0) {
+                    model.add(b[h] + M * (1 - A[i][h]) >= e[i] + tau_prime[i][h] * A[i][h]);
+                } else {
+                    model.add(b[h] + M * (1 - A[i][h]) >= e[i] + tau_prime[i][h] * A[i][h] + sl);
+                }
+            }
+        }
+    }
+
+    // Constraint 28
+    for (int j:c_t) {
+        for (int h:instance->c_prime) {
+            if (j != h) {
+                model.add(e[j] + M * (1 - B[j][h]) >= e[h] + tau_prime[h][j] * B[j][h] + sr);
+            }
+        }
+    }
+
+    // Constraint 29
     for (int i:c_s) {
         for (int j:c_t) {
             if (i != j) {
                 IloExpr sum1(env), sum2(env);
                 for (int h:instance->c_prime) {
-                    if (i != h && j != h) {
-                        sum1 += tau_prime[i][h] * A[i][h] + tau_prime[h][j] * B[j][h];
-                        sum2 += A[i][h] + B[j][h];
-                    }
+                    sum1 += tau_prime[i][h] * A[i][h] + tau_prime[h][j] * B[j][h];
+                    sum2 += A[i][h] + B[j][h];
                 }
                 model.add(b[j] <= e[i] + sum1 + M * (2 - sum2));
             }
-
         }
     }
-    model.add(IloMinimize(env, e[D]));
-    cplex.solve();
-    return Result{cplex.getObjValue(), 0, 1000.0, 0, true};
 
+    IloExpr lb_truck(env), lb_drone(env);
+    for (int i:c_s) {
+        for (int j:c_t) {
+            if (i != j) {
+                lb_truck += x[i][j] * tau[i][j];
+            }
+        }
+    }
+
+    for (int i = 0; i <= D; i++) {
+        for (int h:instance->c_prime) {
+            if (i != h) {
+                if (i < D) {
+                    lb_drone += A[i][h] * tau_prime[i][h];
+                }
+                if (i > 0) {
+                    lb_drone += B[i][h] * tau_prime[h][i];
+                }
+            }
+        }
+    }
+
+    model.add(e[D] >= lb_truck);
+    model.add(e[D] >= lb_drone);
+    cplex.solve();
+    std::cout << "Total travel time: " << cplex.getObjValue() << std::endl;
+    std::cout << "Truck stages:" << std::endl;
+    for (int k = 1; k <= K; k++) {
+        for (int i = 0; i <= D; i++) {
+            if (cplex.getValue(X[k][i]) == 1) {
+                std::cout << "Stage " << k << " at " << i << std::endl;
+            }
+        }
+    }
+    std::cout << "Truck arcs:" << std::endl;
+    for (int i:c_s) {
+        for (int j:c_t) {
+            if (i != j) {
+                if (cplex.getValue(x[i][j]) == 1) {
+                    std::cout << i << " " << j << std::endl;
+                }
+            }
+        }
+    }
+    std::cout << "Drone served customers:" << std::endl;
+    for (int h:instance->c_prime) {
+        if (abs(cplex.getValue(phi[h]) - 1) < 1e-5) {
+            std::cout << "Customer " << h << " served by drone." << std::endl;
+            for (int i:c_s) {
+                if (cplex.getValue(A[i][h]) == 1) {
+                    for (int k = 1; k < K; k++) {
+                        if (cplex.getValue(Y[k][h]) == 1) {
+                            std::cout << "Launch at stage " << k << " at node " << i << std::endl;
+                        }
+                    }
+                }
+            }
+            for (int j:c_t) {
+                if (cplex.getValue(B[j][h]) == 1) {
+                    for (int k = 2; k <= K; k++) {
+                        if (cplex.getValue(W[k][h]) == 1) {
+                            std::cout << "Rendezvous at stage " << k << " at node " << j << std::endl;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    std::cout << "Timing: " << std::endl;
+    for (int i = 0; i <= D; i++) {
+        std::cout << "Arrival at " << i << " is: " << cplex.getValue(b[i]) << std::endl;
+        std::cout << "Departure at " << i << " is: " << cplex.getValue(e[i]) << std::endl;
+    }
+    cplex.exportModel("model.lp");
+    return Result{cplex.getObjValue(), 0, 1000.0, 0, true};
 }

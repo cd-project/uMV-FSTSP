@@ -47,7 +47,8 @@ int main(int argc, char**argv) {
 
     auto instance = std::make_shared<Instance>(folder_path, false, 0);
     auto solver = std::make_shared<Solver>(instance);
-    auto result = solver->OriginalSolverCPLEX(20, 20);
+    // , 1, 1, true
+    auto result = solver->stage_based_fstsp(20, 20, 1, 1, true);
     if (write) {
         std::cout << "In write mode" << std::endl;
         auto i_name_split = SplitStringWithDelimiter(folder_path, "/");
