@@ -420,7 +420,7 @@ Result Solver::mvdSolverWithLR(int n_thread, double dtl, double sl, double sr, b
     IloModel model(env);
     IloCplex cplex(model);
     cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);
-    cplex.setParam(IloCplex::Param::TimeLimit, 200.0);
+    // cplex.setParam(IloCplex::Param::TimeLimit, 200.0);
     auto O = 0;
     auto D = n;
     int K = n+1;
@@ -436,7 +436,6 @@ Result Solver::mvdSolverWithLR(int n_thread, double dtl, double sl, double sr, b
             X[k][i] = IloBoolVar(env);
             model.add(X[k][i]);
             auto v_name = "X_" + std::to_string(k) + "_" + std::to_string(i);
-            //std::cout << v_name << std::endl;
             X[k][i].setName(v_name.c_str());
 
         }
@@ -3896,17 +3895,17 @@ Result Solver::stage_based_fstsp(int n_thread, double dtl, double sl, double sr,
             auto v_name = "Y_" + std::to_string(k) + std::to_string(h);
             Y[k][h].setName(v_name.c_str());
             if (exist(instance->heavy, h)) {
-                std::cout << "Added Y" << k << " " << h << " == 0" << std::endl;
                 model.add(Y[k][h] == 0);
             }
         }
     }
+
     IloArray<IloBoolVarArray> W(env, K+1);
     for (int kp = 2; kp <= K; kp++) {
         W[kp] = IloBoolVarArray(env, D);
         for (int h:C) {
             W[kp][h] = IloBoolVar(env);
-            auto v_name = "Y_" + std::to_string(kp) + std::to_string(h);
+            auto v_name = "W_" + std::to_string(kp) + std::to_string(h);
             W[kp][h].setName(v_name.c_str());
             if (exist(instance->heavy, h)) {
                 model.add(W[kp][h] == 0);
@@ -3971,16 +3970,6 @@ Result Solver::stage_based_fstsp(int n_thread, double dtl, double sl, double sr,
         e[i] = IloNumVar(env, 0, IloInfinity, ILOFLOAT);
         v_name = "e_" + std::to_string(i);
         e[i].setName(v_name.c_str());
-    }
-
-    // Constraint 1
-    for (int k = 1; k <= K; k++) {
-        IloExpr only_serve_one_at_stage(env);
-        for (int i = 0; i <= D; i++) {
-            only_serve_one_at_stage += X[k][i];
-        }
-        std::string cname = "only_serve_one_at_stage " + std::to_string(k);
-        model.add(only_serve_one_at_stage <= 1).setName(cname.c_str());
     }
 
     // Constraint 2
@@ -4154,7 +4143,6 @@ Result Solver::stage_based_fstsp(int n_thread, double dtl, double sl, double sr,
         }
         model.add(sum <= 1);
     }
-
     // Constraint 17
     for (int h:C) {
         IloExpr sum_X(env);
@@ -4174,33 +4162,29 @@ Result Solver::stage_based_fstsp(int n_thread, double dtl, double sl, double sr,
         model.add(sum_X <= 1);
     }
 
-    // Constraint 19
-    for (int i:c_s) {
-        for (int k = 1; k < K; k++) {
-            IloExpr rhs(env);
-            for (int j:c_t) {
-                if (i != j) {
-                    rhs += x[i][j];
-                }
+    // Constraint 19/20 rewrite
+    // Leaving i
+    for (int i:C) {
+        IloExpr sum_leave(env), sum_enter(env);
+        IloExpr lhs(env);
+        for (int j:c_t) {
+            if (i != j) {
+                sum_leave += x[i][j];
             }
-            // model.add(X[k][i] == rhs);
         }
-
+        for (int j:c_s) {
+            if (i != j) {
+                sum_enter += x[j][i];
+            }
+        }
+        for (int k = 2; k < K; k++) {
+            lhs += X[k][i];
+        }
+        model.add(sum_leave == sum_enter);
+        model.add(sum_leave == lhs);
+        model.add(sum_leave <= 1);
     }
 
-    // Constraint 20
-    for (int i:c_t) {
-        for (int k = 2; k <= K; k++) {
-            IloExpr rhs(env);
-            for (int j:c_s) {
-                if (i != j) {
-                    rhs += x[j][i];
-                }
-            }
-            // model.add(X[k][i] == rhs);
-        }
-    }
-    model.add(phi[5] == 1);
     // Constraint 21
     for (int k = 1; k < K; k++) {
         for (int i:c_s) {
@@ -4291,7 +4275,6 @@ Result Solver::stage_based_fstsp(int n_thread, double dtl, double sl, double sr,
             }
         }
     }
-
     model.add(e[D] >= lb_truck);
     model.add(e[D] >= lb_drone);
     cplex.solve();
@@ -4309,7 +4292,7 @@ Result Solver::stage_based_fstsp(int n_thread, double dtl, double sl, double sr,
         for (int j:c_t) {
             if (i != j) {
                 if (abs(cplex.getValue(x[i][j]) - 1) < 1e-5) {
-                    std::cout << i << " " << j << std::endl;
+                    std::cout << "Truck moves from " <<  i << " to " << j << ", cost = " << tau[i][j] << std::endl;
                 }
             }
         }
