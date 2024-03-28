@@ -39,7 +39,7 @@ int main(int argc, char**argv) {
         folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/" + std::string(argv[1]);
         write = true;
     } else {
-        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123437v5";
+        folder_path ="/home/cuong/CLionProjects/uMV-FSTSP/Murray_Chu_2015_test_data/FSTSP/FSTSP_10_customer_problems/20140810T123437v2";
     }
 
     std::cout << "Instance name: " << folder_path << std::endl;

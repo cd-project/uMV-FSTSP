@@ -1257,9 +1257,6 @@ Result Solver::OriginalSolverCPLEX(int n_thread, int e) {
     IloEnv env;
     IloModel model(env);
     IloCplex cplex(model);
-    cplex.setParam(IloCplex::Param::Emphasis::MIP, CPX_MIPEMPHASIS_OPTIMALITY);
-    cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);
-    cplex.setParam(IloCplex::Param::ClockType, 0);
 
     // y: (i, j) in A, truck route
     IloArray<IloBoolVarArray> y(env, n + 1);
@@ -3865,8 +3862,8 @@ Result Solver::stage_based_fstsp(int n_thread, double dtl, double sl, double sr,
         IloEnv env;
         IloModel model(env);
         IloCplex cplex(model);
-        cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);
-
+        // cplex.setParam(IloCplex::Param::MIP::Tolerances::Integrality, 0);
+        // cplex.setParam(IloCplex::Param::Conflict::Display, 2);
         auto O = 0;
         auto D = n;
         auto K = n + 1;
@@ -3878,6 +3875,9 @@ Result Solver::stage_based_fstsp(int n_thread, double dtl, double sl, double sr,
                 X[k][i] = IloBoolVar(env);
                 auto v = "X_" + std::to_string(k) + "_" + std::to_string(i);
                 X[k][i].setName(v.c_str());
+                if (k == K && i != D) {
+                    model.add(X[k][i] == 0);
+                }
             }
             if (k > 1) {
                 std::string cname = "X_k_" + std::to_string(k) + "_O == 0";
@@ -3994,6 +3994,14 @@ Result Solver::stage_based_fstsp(int n_thread, double dtl, double sl, double sr,
             e[i] = IloNumVar(env, 0, IloInfinity, ILOFLOAT);
             v_name = "e_" + std::to_string(i);
             e[i].setName(v_name.c_str());
+        }
+
+        for (int k = 1; k < K; k++) {
+            IloExpr expr(env);
+            for (int i:c_s) {
+                expr += X[k][i] - X[k + 1][i];
+                model.add(expr >= 0).setName(("k_before_k+1_" + std::to_string(k)).c_str());
+            }
         }
 
         // Constraint 2
@@ -4327,18 +4335,67 @@ Result Solver::stage_based_fstsp(int n_thread, double dtl, double sl, double sr,
                 }
             }
         }
+        //drone di
+        for (int k = 1; k < K; k++)
+            for (int h : instance->c_prime) {
+                for (int i = 0; i < D; i++)
+                    if (i != h) {
+                        model.add(Y[k][h] + 1 >= X[k][i] + A[i][h]);
+                    }
+
+            }
+
+        for (int i = 0; i < D; i++) {
+            for (int h : instance->c_prime) {
+                if (i != h) {
+                    for (int k = 1; k < K; k++) {
+                        model.add(A[i][h] + 1 >= X[k][i] + Y[k][h]);
+                    }
+                }
+            }
+        }
+
+        //drone den
+        for (int k = 2; k <= K; k++) {
+            for (int h : instance->c_prime) {
+                for (int i = 1; i <= D; i++) {
+                    if (i != h) {
+                        model.add(W[k][h] + 1 >= X[k][i] + B[i][h]);
+                    }
+                }
+            }
+        }
+
+        for (int i = 1; i <= D; i++) {
+            for (int h : instance->c_prime) {
+                for (int k = 2; k <= K; k++)
+                    if (i != h) {
+                        model.add(B[i][h] + 1 >= X[k][i] + W[k][h]);
+                    }
+            }
+        }
+        model.add(phi[4] == 1);
         model.add(e[D] >= lb_truck).setName("e[D]>=truck_tour");
         model.add(e[D] >= lb_drone).setName("e[D]>=drone_tour");
         cplex.exportModel("model.lp");
         cplex.solve();
+
         std::cout << "Total travel time: " << cplex.getObjValue() << std::endl;
         std::cout << "Truck stages:" << std::endl;
         for (int k = 1; k <= K; k++) {
             for (int i = 0; i <= D; i++) {
-                if (cplex.getValue(X[k][i]) == 1) {
-                    std::cout << "Stage " << k << " at " << i << std::endl;
+                if (cplex.getValue(X[k][i]) > 0) {
+                    std::cout << "Stage " << k << " at " << i << ", value = " << cplex.getValue(X[k][i]) << std::endl;
                 }
             }
+        }
+        std::cout << "phi[4] value: " << cplex.getValue(phi[4]) << std::endl;
+        for (int h:C) {
+            std::cout << "Stage value for customer h = " << h << std::endl;
+            for (int k = 2; k < K; k++) {
+                std::cout << "X[" << k << "][" << h << "] == " << cplex.getValue(X[k][h]) << std::endl;
+            }
+            std::cout << "Final: phi[" << h << "] == " << cplex.getValue(phi[h]) << std::endl;
         }
         std::cout << "Truck arcs:" << std::endl;
         for (int i:c_s) {
@@ -4379,6 +4436,7 @@ Result Solver::stage_based_fstsp(int n_thread, double dtl, double sl, double sr,
             std::cout << "Arrival at " << i << " is: " << cplex.getValue(b[i]) << std::endl;
             std::cout << "Departure at " << i << " is: " << cplex.getValue(e[i]) << std::endl;
         }
+
         return Result{cplex.getObjValue(), 0, 1000.0, 0, true};
     } catch (IloException &e) {
         std::cout << "Exception: " << e.getMessage() << std::endl;
